@@ -1,29 +1,199 @@
 ﻿using System.Data;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Drawing.Printing;
+using FastReport;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using webapikits.Model;
 using Image = System.Drawing.Image;
-using QuickReport;
+using FastReport.Export.PdfSimple;
+using System.Diagnostics; // Add this namespace
 
 
 namespace webapikits.Controllers
 {
+
+
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class KowsarController : ControllerBase
     {
-
         public readonly IConfiguration _configuration;
-        DataBaseClass db = new DataBaseClass();
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
-        JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
+        Dictionary<string, string> jsonDict = new();
+
+        DataBaseClass db;
+        DataTable DataTable = new ();
+        Response response = new();
+        FileManager fileManager = new();
+        JsonClass jsonClass = new ();
+
+
+
+        public KowsarController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            db = new (_configuration);
+        }
+
+
+
+
+        [HttpGet]
+        [Route("DbSetupvalue")]
+        public string DbSetupvalue(string Where)
+        {
+
+            string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
+
+
+
+            DataTable dataTable = db.ExecQuery(query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+
+
+        }
+
+
+
+        [HttpGet]
+        [Route("ToDoPrint")]
+        public IActionResult ToDoPrint()
+        {
+
+
+
+
+            /*
+
+            string base64Image = printRequest.Image;
+            string code = printRequest.Code;
+            string printerName = printRequest.PrinterName;
+            int printCount = printRequest.PrintCount;
+
+            byte[] imageBytes = Convert.FromBase64String(base64Image);
+            string imagePath = $"FactorImage/{code}.jpg";
+
+            // Save the image to a file
+            System.IO.File.WriteAllBytes(imagePath, imageBytes);
+
+            */
+
+
+
+            string query = " select * from AppPrinter ";
+
+            DataTable Table_print = db.ExecQuery(query);
+
+            List<Printer> Printers = new();
+
+
+            if (Table_print.Rows.Count > 0)
+                {
+                    for (int i = 0; i < Table_print.Rows.Count; i++)
+                    {
+                        Printer printer = new();
+
+                        printer.AppPrinterCode = Convert.ToString(Table_print.Rows[i]["AppPrinterCode"]);
+                        printer.PrinterName = Convert.ToString(Table_print.Rows[i]["PrinterName"]);
+                        printer.PrinterExplain = Convert.ToString(Table_print.Rows[i]["PrinterExplain"]);
+                        printer.GoodGroups = Convert.ToString(Table_print.Rows[i]["GoodGroups"]);
+                        printer.WhereClause = Convert.ToString(Table_print.Rows[i]["WhereClause"]);
+                        printer.PrintCount = Convert.ToString(Table_print.Rows[i]["PrintCount"]);
+                        printer.PrinterActive = Convert.ToString(Table_print.Rows[i]["PrinterActive"]);
+                        printer.FilePath = Convert.ToString(Table_print.Rows[i]["FilePath"]);
+                        printer.AppType = Convert.ToString(Table_print.Rows[i]["AppType"]);
+                        
+
+                        Printers.Add(printer);
+
+                    }
+            }
+
+
+            foreach (Printer printer in Printers)
+            {
+
+                string s1 = printer.AppPrinterCode;
+                string s2 = printer.PrinterName;
+                string s3 = printer.PrinterExplain;
+                string s4 = printer.GoodGroups;
+                string s5 = printer.WhereClause;
+                string s6 = printer.PrintCount;
+                string s7 = printer.PrinterActive;
+                string s8 = printer.FilePath;
+                string s9 = printer.AppType;
+
+
+
+                Report report = new ();
+
+                report.Load(printer.FilePath);
+
+
+                query = "select top 2 GoodCode, GoodName, GoodExplain1 from good ";
+                DataTable dataTable = db.ExecQuery(query);
+
+                List<Good> goods = new ();
+
+
+                if (dataTable.Rows.Count > 0)
+                    {
+                        for (int i = 0; i < dataTable.Rows.Count; i++)
+                        {
+                            Good g = new ();
+
+
+
+                            g.GoodCode = Convert.ToString(dataTable.Rows[i]["GoodCode"]);
+                            g.GoodName = Convert.ToString(dataTable.Rows[i]["GoodName"]);
+                            g.GoodExplain1 = Convert.ToString(dataTable.Rows[i]["GoodExplain1"]);
+                            goods.Add(g);
+
+
+                        }
+                    }
+
+
+                report.RegisterData(goods, "GoodRef");
+
+
+
+                if (report.Prepare())
+                {
+                    // Export the report to PDF
+                    PDFSimpleExport pdfExport = new ();
+                    PdfPrinter pdfPrinter = new();
+                    MemoryStream ms = new();
+
+
+                    pdfExport.ShowProgress = false;
+                    pdfExport.Subject = "Subject Report";
+                    pdfExport.Title = "Report Title";
+
+                    report.Export(pdfExport, ms);
+                    report.Dispose();
+                    pdfExport.Dispose();
+                    ms.Position = 0;
+
+
+                    fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
+                    pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+
+
+
+
+                }
+
+
+            }
+
+            return Ok("Ok");
+            
+        }
 
 
 
@@ -31,25 +201,12 @@ namespace webapikits.Controllers
         [Route("Check")]
         public string Check()
         {
-
-
-            PrintDocument pd = new PrintDocument();
-            pd.PrintPage += (sender, e) =>
-            {
-                // Configure print settings
-                PrinterSettings settings = new PrinterSettings();
-                settings.PrinterName = "Name of the printer";
-                e.Graphics.DrawString("1231231\n1231231\n1231231\n", new Font("Arial", 12), Brushes.Black, 10, 10);
-            };
-
-
-            pd.Print();
-
+            
             string query = "select top 2 GoodCode,GoodName,GoodExplain1 from good ";
 
-
-
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
+            // Log the result to the console
+            Debug.WriteLine("Check action result: " );
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -60,7 +217,10 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
+
+
+
+    [HttpGet]
         [Route("kowsarVersion")]
         public string kowsarVersion()
         {
@@ -69,7 +229,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "VerNo");
 
@@ -91,7 +251,8 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
+
 
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
@@ -107,6 +268,27 @@ namespace webapikits.Controllers
             string IncludeZero
             )
         {
+            if (string.IsNullOrEmpty(GoodCode))
+            {
+                GoodCode = "0";
+            }
+            if (string.IsNullOrEmpty(GoodType))
+            {
+                GoodType = "0";
+            }
+            if (string.IsNullOrEmpty(Type))
+            {
+                Type = "0";
+            }
+            if (string.IsNullOrEmpty(AppType))
+            {
+                AppType = "0";
+            }
+            if (string.IsNullOrEmpty(IncludeZero))
+            {
+                IncludeZero = "0";
+            }
+            
 
             string query;
             if (AppType == "1") {
@@ -118,7 +300,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
 
@@ -140,7 +322,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Values", "");
 
         }
@@ -148,17 +330,16 @@ namespace webapikits.Controllers
 
 
 
-        
-                
+
         [HttpGet]
         [Route("GetSellBroker")]
         public string GetSellBroker()
         {
 
-            string query= "select brokerCode,BrokerNameWithoutType from vwSellBroker";
+            string query= "Select brokerCode,BrokerNameWithoutType,CentralRef,Active From vwSellBroker";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
 
@@ -182,7 +363,7 @@ namespace webapikits.Controllers
 
             string sq = $"Exec dbo.spApp_GetImage {ObjectRef}, {IX}, '{ClassName}'";
 
-            byte[] imageBytes = GetImageData(sq,_configuration);
+            byte[] imageBytes = GetImageData(sq);
 
 
             if (imageBytes != null)
@@ -225,7 +406,6 @@ namespace webapikits.Controllers
 
                                 jsonDict.Add("response", JsonConvert.SerializeObject(response));
                                 jsonDict.Add("Text", encodedImage);
-                                //jsonDict.Add("SellBrokers", jsonClass.ConvertDataTableToJson(dataTable));
 
                                 return JsonConvert.SerializeObject(jsonDict);
                             }
@@ -240,7 +420,6 @@ namespace webapikits.Controllers
 
                 jsonDict.Add("response", JsonConvert.SerializeObject(response));
                 jsonDict.Add("Text", "no_photo");
-                //jsonDict.Add("SellBrokers", jsonClass.ConvertDataTableToJson(dataTable));
 
                 return JsonConvert.SerializeObject(jsonDict);
             }
@@ -258,7 +437,7 @@ namespace webapikits.Controllers
 
             string sq = "Exec dbo.spApp_GetKsrImage "+ KsrImageCode;
 
-            byte[] imageBytes = GetImageData(sq,_configuration);
+            byte[] imageBytes = GetImageData(sq);
 
 
             if (imageBytes != null)
@@ -301,7 +480,6 @@ namespace webapikits.Controllers
 
                                 jsonDict.Add("response", JsonConvert.SerializeObject(response));
                                 jsonDict.Add("Text", encodedImage);
-                                //jsonDict.Add("SellBrokers", jsonClass.ConvertDataTableToJson(dataTable));
 
                                 return JsonConvert.SerializeObject(jsonDict);
                             }
@@ -316,7 +494,80 @@ namespace webapikits.Controllers
 
                 jsonDict.Add("response", JsonConvert.SerializeObject(response));
                 jsonDict.Add("Text", "no_photo");
-                //jsonDict.Add("SellBrokers", jsonClass.ConvertDataTableToJson(dataTable));
+
+                return JsonConvert.SerializeObject(jsonDict);
+            }
+        }
+
+
+
+
+
+
+        [HttpGet]
+        [Route("GetImageCustom")]
+        public string GetImageCustom(string ClassName, string ObjectRef, string Scale)
+        {
+
+
+            int sScale = 500;
+
+            string sq = $"set nocount on  select IMG from ksrimage where ClassName ='{ClassName}' and ObjectRef={ObjectRef} ";
+
+            byte[] imageBytes = GetImageData(sq);
+
+
+            if (imageBytes != null)
+            {
+                using (MemoryStream ms = new MemoryStream(imageBytes))
+                {
+                    using (Image image = Image.FromStream(ms))
+                    {
+                        int cropWidth = image.Width;
+                        int cropHeight = image.Height;
+
+                        if (cropWidth > cropHeight)
+                        {
+                            float ratio = (float)cropWidth / cropHeight;
+                            cropWidth = sScale;
+                            cropHeight = (int)(cropWidth / ratio);
+                        }
+                        else
+                        {
+                            float ratio = (float)cropHeight / cropWidth;
+                            cropHeight = sScale;
+                            cropWidth = (int)(cropHeight / ratio);
+                        }
+
+                        using (Image resizedImage = new Bitmap(cropWidth, cropHeight))
+                        {
+                            using (Graphics graphics = Graphics.FromImage(resizedImage))
+                            {
+                                graphics.DrawImage(image, 0, 0, cropWidth, cropHeight);
+                            }
+
+                            using (MemoryStream outputMs = new MemoryStream())
+                            {
+                                resizedImage.Save(outputMs, ImageFormat.Jpeg);
+                                byte[] resizedImageBytes = outputMs.ToArray();
+
+                                string encodedImage = Convert.ToBase64String(resizedImageBytes);
+
+                                jsonDict.Add("Text", encodedImage);
+
+                                return JsonConvert.SerializeObject(jsonDict);
+                            }
+                        }
+                    }
+                }
+            }
+            else
+            {
+                response.StatusCode = "200";
+                response.Errormessage = "";
+
+                jsonDict.Add("response", JsonConvert.SerializeObject(response));
+                jsonDict.Add("Text", "no_photo");
 
                 return JsonConvert.SerializeObject(jsonDict);
             }
@@ -328,19 +579,23 @@ namespace webapikits.Controllers
 
 
 
-
-
-        public byte[] GetImageData(String query, IConfiguration _configuration)
+        public byte[] GetImageData(String query)
         {
             byte[] imageData = null;
-
-            DataTable dataTable = db.ImageExecQuery(query, _configuration);
-            if (DataTable.Rows.Count > 0)
+            Console.WriteLine(query);
+            DataTable dataTableImg = db.ImageExecQuery(query);
+            if (dataTableImg.Rows.Count > 0)
             {
-                if (!Convert.IsDBNull(DataTable.Rows[0][0]))
+                if (!Convert.IsDBNull(dataTableImg.Rows[0][0]))
                 {
-                    imageData = (byte[])DataTable.Rows[0]["IMG"];
+                    imageData = (byte[])dataTableImg.Rows[0]["IMG"];
                 }
+                else {
+                    Console.WriteLine("IsDBNull");
+                }
+            }
+            else {
+                Console.WriteLine("Rows.Count > 0");
             }
 
             return imageData;

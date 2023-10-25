@@ -1,22 +1,21 @@
-﻿using System.Collections.Generic;
-using System.Data;
-using System.Reflection;
-using Microsoft.AspNetCore.Http;
+﻿using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using webapikits.Model;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-
 namespace webapikits.Controllers
 {
+
+
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class CompanyController : ControllerBase
     {
 
         public readonly IConfiguration _configuration;
-        DataBaseClass db = new DataBaseClass();
+        DataBaseClass db;
         DataTable DataTable = new DataTable();
         string Query = "";
         Response response = new();
@@ -24,6 +23,13 @@ namespace webapikits.Controllers
         Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
 
+
+        public CompanyController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            db = new DataBaseClass(_configuration);
+
+        }
 
 
 
@@ -33,7 +39,7 @@ namespace webapikits.Controllers
         [Route("VersionInfo")]
         public string VersionInfo()
         {
-            response.StatusCode = "200";
+            response.StatusCode = "2000";
             response.Errormessage = "";
 
             jsonDict.Add("response", JsonConvert.SerializeObject(response));
@@ -46,7 +52,7 @@ namespace webapikits.Controllers
         [Route("check_server")]
         public string check_server()
         {
-            response.StatusCode = "200";
+            response.StatusCode = "2000";
             response.Errormessage = "";
 
             jsonDict.Add("response", JsonConvert.SerializeObject(response));
@@ -64,7 +70,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_BasketGet] '"+ Mobile + "'";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
@@ -81,7 +87,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_BasketPreFactors] '"+ Mobile + "',"+ Code + ","+ ReservedRows ;
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "PreFactors", "");
 
 
@@ -96,7 +102,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_BasketToPreFactor] '"+ Mobile + "', -2000 , '"+Explain+"'";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -112,7 +118,7 @@ namespace webapikits.Controllers
             string query = "Exec dbo.spApp_BasketSummary '"+ Mobile + "'";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 
@@ -128,7 +134,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
 
@@ -155,7 +161,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
 
@@ -178,7 +184,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "Result");
 
 
@@ -193,7 +199,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_GetGoodGroups_Default] ";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
 
@@ -209,7 +215,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_GetGoodGroups_DefaultImage]  ";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
 
@@ -303,7 +309,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 
@@ -333,7 +339,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
 
@@ -365,12 +371,15 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_XUserCreate] '"+UName + "','"+ UPass + "','"+ NewPass+"','"+ FName + "','"+ LName + "','"+ mobile + "','"+ company + "','"+address + "','"+PostalCode + "','"+ email + "',-2000,"+ Flag  ;
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "users", "");
 
 
         }
 
+
+
+ 
 
 
 
@@ -442,33 +451,12 @@ namespace webapikits.Controllers
 
             string sq = $"Exec [dbo].[spApp_BasketInsert] '{DeviceCode}', {GoodRef}, {FacAmount}, {Price}, '{UnitRef}', '{Ratio}', '{Explain}', '{Source}', {UserId}, '{Mobile}'";
 
-            DataTable dataTable = db.ExecQuery(sq, _configuration);
+            DataTable dataTable = db.ExecQuery(sq);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 
         }
 
-        /*
-
-        public function PFRCDEWS()
-        { 		//spApp_InsertReceive
-		$UserId = -2000;
-            if (isset($_REQUEST['Mobile'])) { $Mobile = $_REQUEST['Mobile']; } else {$Mobile = ""; };
-            if (isset($_REQUEST['Price'])) { $Price = $_REQUEST['Price']; } else {$Price = "0"; };
-            if (isset($_REQUEST['Rahgiri'])) { $Rahgiri = $_REQUEST['Rahgiri']; } else {$Rahgiri = ""; };
-            if (isset($_REQUEST['BankKart'])) { $BankKart = $_REQUEST['BankKart']; } else {$BankKart = ""; };
-            if (isset($_REQUEST['KartOwner'])) { $KartOwner = $_REQUEST['KartOwner']; } else {$KartOwner = ""; };
-            if (isset($_REQUEST['PreFactorCode'])) { $PreFactorCode = $_REQUEST['PreFactorCode']; } else {$PreFactorCode = "0"; };
-		
-		$sq = "Exec [dbo].[spApp_InsertReceive] '$Mobile',$Price,'$Rahgiri','$BankKart','$KartOwner',$PreFactorCode,$UserId";
-
-            MainClass::LogFile("dargah_InsertReceive",$sq);
-		$this->response = database::custom_sqlSRV($sq, true);
-		$Last = json_encode($this->response, JSON_UNESCAPED_UNICODE);
-            echo "{\"users\":".$Last."}";
-
-        }
-        */
 
         [HttpPost]
         [Route("PFRCDEWS")]
@@ -514,7 +502,6 @@ namespace webapikits.Controllers
 
             string sq = $"Exec [dbo].[spApp_InsertReceive] '{Mobile}', {Price}, '{Rahgiri}', '{BankKart}', '{KartOwner}', {PreFactorCode}, {UserId}";
 
-           // var response = database.custom_sqlSRV(sq, true);
             string last = JsonConvert.SerializeObject(response, Formatting.None);
             return Content("{\"users\":" + last + "}", "application/json");
         }
@@ -524,43 +511,14 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
-
-
-        /*
-         
-         	public function Banner(){
-		$directoryToScan = "\xampp\htdocs\login\SlideImage";
-
-		define('WEBSITE', "/login");
-	
-		$array = array();
-		$num_files = count(glob("/xampp/htdocs/login/SlideImage/*.jpg"));
-		$totalFiles = (string)$num_files;
-		foreach (glob("/xampp/htdocs/login/SlideImage/*.jpg") as $filename) {
-			$object_url = str_replace("/xampp/htdocs/login", '', $filename) ;
-			$object_name = str_replace("/xampp/htdocs/login/SlideImage/", '', $filename) ;
-			$object_name = str_replace(".jpg", '', $object_name) ;			
-			$turl = WEBSITE.$object_url;
-			$url = str_replace("\/", "\\", $turl);
-			if(substr($object_name,0,5)!="image"){
-					array_push($array, array('GoodName'=>$object_name,'GoodImageUrl'=>$url));
-			}
-		}
-		$Last =  json_encode($array, JSON_UNESCAPED_UNICODE);
-		echo "{\"Goods\":".$Last."}";
-	}			
-	
-
-         
-         
-         
-         */
-
-
-
+        [HttpGet("Banner")]
+    public IActionResult GetBanner()
+    {
+            //TODO banner list 
+        return Ok(response);
     }
+
+
+
+}
 }

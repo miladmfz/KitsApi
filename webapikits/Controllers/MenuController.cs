@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using System.Data;
-using webapikits.Model;
+﻿using Microsoft.AspNetCore.Mvc;
 
 namespace webapikits.Controllers
 {
@@ -11,7 +7,7 @@ namespace webapikits.Controllers
     public class MenuController : ControllerBase
     {
 
-
+        /*
 
 
         public readonly IConfiguration _configuration;
@@ -146,7 +142,7 @@ namespace webapikits.Controllers
 		echo "{\"Groups\":".$Last."}";
 	   
              
-             */
+             
 
             string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
 
@@ -182,7 +178,7 @@ namespace webapikits.Controllers
 		echo $Last;
 	   
              
-             */
+            
 
             string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
 
@@ -215,7 +211,7 @@ namespace webapikits.Controllers
 		echo $Last;
 	   
              
-             */
+            
 
             string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
 
@@ -247,7 +243,7 @@ namespace webapikits.Controllers
 	
 	   
              
-             */
+           
 
             string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
 
@@ -308,7 +304,7 @@ namespace webapikits.Controllers
 			
 	   
              
-             */
+             
 
             string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
 
@@ -324,7 +320,7 @@ namespace webapikits.Controllers
 
 
 
-
+        */
 
     }
 }

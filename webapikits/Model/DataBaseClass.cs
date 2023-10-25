@@ -1,44 +1,46 @@
 ﻿using System.Data;
-using System.Data.SqlClient;
-
+using System.Data.SqlClient; 
 
 namespace webapikits.Model
 {
     public class DataBaseClass
     {
+        private readonly IConfiguration _configuration;
 
-
-
-
-
-        public DataTable ExecQuery(String query, IConfiguration _configuration)
+        public DataBaseClass(IConfiguration configuration)
         {
-
-            SqlConnection con = new SqlConnection("Data Source=.\\SQL2019;Database=Kowsardb;User Id=sa;Password=1; Integrated Security=true");
-            SqlDataAdapter ad = new SqlDataAdapter(query, con);
-            DataTable dataTable = new DataTable();
-            DataTable dt = dataTable;
-            ad.Fill(dt);
-
-
-            return dt;
+            _configuration = configuration;
         }
 
-        public DataTable ImageExecQuery(String query, IConfiguration _configuration)
+        public DataTable ExecQuery(String query)
         {
 
-            SqlConnection con = new SqlConnection("Data Source=.\\SQL2019;Database=kowsarImage;User Id=sa;Password=1; Integrated Security=true");
-            SqlDataAdapter ad = new SqlDataAdapter(query, con);
-            DataTable dataTable = new DataTable();
-            DataTable dt = dataTable;
-            ad.Fill(dt);
+            Logger logger = new Logger();
+            logger.LogFile(_configuration,"LOG", query); ;
 
-
-            return dt;
+            string connectionString = _configuration.GetConnectionString("DefaultConnection"); // استفاده از IConfiguration برای خواندن connection string
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                return dataTable;
+            }
         }
 
 
-
-
+        public DataTable ImageExecQuery(String query)
+        {
+            Logger logger = new Logger();
+            logger.LogFile(_configuration, "LOG", query); ;
+            string connectionString = _configuration.GetConnectionString("ImageConnection"); // استفاده از IConfiguration برای خواندن connection string
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                return dataTable;
+            }
+        }
     }
 }

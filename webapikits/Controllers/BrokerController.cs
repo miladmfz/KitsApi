@@ -1,6 +1,5 @@
 ﻿using System.Data;
 using System.Globalization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using webapikits.Model;
@@ -14,26 +13,22 @@ namespace webapikits.Controllers
 
 
         public readonly IConfiguration _configuration;
-        DataBaseClass db = new DataBaseClass();
+        DataBaseClass db;
         DataTable DataTable = new DataTable();
         string Query = "";
         Response response = new();
         JsonClass jsonClass = new JsonClass();
         Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-
-
-
-
-
-
-
-
         public BrokerController(IConfiguration configuration)
         {
             _configuration = configuration;
+            db = new DataBaseClass(_configuration);
 
         }
+
+
+
 
 
 
@@ -56,16 +51,48 @@ namespace webapikits.Controllers
                 string formattedDate = dateObj.ToString("yyyy/MM/dd HH:mm:ss");
 
                 Query = "INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('" + longitude + "', '" + latitude + "', " + brokerRef + ", '" + formattedDate + "'); SELECT SCOPE_IDENTITY();";
-                DataTable = db.ExecQuery(Query, _configuration);
+                DataTable = db.ExecQuery(Query);
 
             }
 
 
             Query = "select top 1 * from GpsLocation order by 1 desc  ";
-            DataTable dataTable = db.ExecQuery(Query, _configuration);
+            DataTable dataTable = db.ExecQuery(Query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Locations", "");
+
+
+        }
+
+
+        [HttpGet]
+        [Route("GetColumnList")]
+        public string GetColumnList(
+            string Type,
+            string AppType,
+            string IncludeZero
+            )
+        {
+
+            if (string.IsNullOrEmpty(Type))
+            {
+                Type = "0";
+            }
+            if (string.IsNullOrEmpty(AppType))
+            {
+                AppType = "0";
+            }
+            if (string.IsNullOrEmpty(IncludeZero))
+            {
+                IncludeZero = "0";
+            }
+
+            string query = "Exec [spApp_GetColumn]  0  ,'', " + Type + "," + AppType + "," + IncludeZero;
+
+
+            DataTable dataTable = db.ExecQuery(query);
+            return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
 
         }
@@ -81,12 +108,16 @@ namespace webapikits.Controllers
                 BrokerRef = "0";
             }
 
-            string query = "exec spApp_GetBrokerStack"+ BrokerRef;
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            string query = "exec spApp_GetBrokerStack " + BrokerRef;
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
 
         }
+
+
+
+
 
 
         [HttpGet]
@@ -113,73 +144,73 @@ namespace webapikits.Controllers
             {
                 query += "@BrokerRef = " + BrokerRef + " ";
             }
-            
+
             if (!string.IsNullOrEmpty(CityCode))
             {
                 query += "@CityCode = " + CityCode + " ";
             }
-                        
+
             if (!string.IsNullOrEmpty(KodeMelli))
             {
                 query += "@KodeMelli = '" + KodeMelli + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(FName))
             {
                 query += "@FName = '" + FName + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(LName))
             {
                 query += "@LName = '" + LName + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(Address))
             {
                 query += "@Address = '" + Address + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(Phone))
             {
                 query += "@Phone = '" + Phone + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(Mobile))
             {
                 query += "@Mobile = '" + Mobile + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(Fax))
             {
                 query += "@Fax = '" + Fax + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(EMail))
             {
                 query += "@EMail = '" + EMail + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(PostCode))
             {
                 query += "@PostCode = '" + PostCode + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(ZipCode))
             {
                 query += "@ZipCode = '" + ZipCode + "' ";
             }
-                        
+
             if (!string.IsNullOrEmpty(UserId))
             {
                 query += "@UserId = '" + UserId + "' ";
             }
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");
-          
+
         }
 
 
@@ -189,10 +220,10 @@ namespace webapikits.Controllers
         public string getImageInfo(string code)
         {
 
-            
-            string query = "Exec spApp_GetInfo 1, 'KsrImage', "+ code + " , @RowCount=200, @CountFlag=1 ";
 
-            DataTable dataTable = db.ImageExecQuery(query, _configuration);
+            string query = "Exec spApp_GetInfo 1, 'KsrImage', " + code + " , @RowCount=200, @CountFlag=1 ";
+
+            DataTable dataTable = db.ImageExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "");
 
@@ -206,7 +237,7 @@ namespace webapikits.Controllers
 
             string query = "select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
@@ -215,14 +246,30 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
-        [Route("MaxRepLogCode")]
-        public string MaxRepLogCode(string code)
+        [Route("GetMaxRepLog")]
+        public string GetMaxRepLog()
         {
 
 
             string query = "Select top 1 * from RepLogData order by 1 desc";
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
+
+
+        }
+
+
+        [HttpGet]
+        [Route("MaxRepLogCode")]
+        public string MaxRepLogCode()
+        {
+
+
+            string query = "Select top 1 * from RepLogData order by 1 desc";
+
+            DataTable dataTable = db.ExecQuery(query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
@@ -235,80 +282,58 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("repinfo")]
-        public string repinfo(string table,
+        public string repinfo(
             string code,
+            string table,
             string reptype,
-            string Reprow,
-            string Where
+            string Reprow
             )
         {
 
 
-            if (string.IsNullOrEmpty(table))
-            {
-                table ="" ;
-            }
-
-            if (!string.IsNullOrEmpty(code))
-            {
-                code="0";
-            }
-
-            if (!string.IsNullOrEmpty(reptype))
-            {
-                reptype = "0";
-            }
-
-            if (!string.IsNullOrEmpty(Reprow))
-            {
-                Reprow = "100";
-            }
-
-            if (!string.IsNullOrEmpty(Where))
-            {
-                Where = "''";
-            }
 
 
 
 
+            string query = "Exec spApp_GetInfo " + reptype + ", " + table + ", " + code + ", @RowCount=" + Reprow + ", @CountFlag=1";
 
-            string query = "Exec spApp_GetInfo "+ reptype + ", "+ table + ", "+ code + ", @RowCount="+ Reprow + ", @CountFlag=1 , @WhereCluase= '"+ Where + "'";
-            
-            
+
             DataTable dataTable;
             if (table.Equals("KsrImage"))
             {
-                dataTable = db.ImageExecQuery(query, _configuration);
+                dataTable = db.ImageExecQuery(query);
             }
-            else {
-                dataTable = db.ExecQuery(query, _configuration);
+            else
+            {
+                dataTable = db.ExecQuery(query);
             }
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "");
+            return jsonClass.JsonResult_Str1(dataTable, "Text", "");
 
 
         }
 
 
         [HttpGet]
-        [Route("PFQASWED")]
-        public string PFQASWED(string PFHDQASW, string PFDTQASW)
+        [Route("BrokerOrder")]
+        public string BrokerOrder(string HeaderDetail, string RowDetail)
         {
             int UserId = -1000;
-            int Stk = 1;
-            string HJson = PFHDQASW;
+            string factordate = "";
+            string Stk = _configuration.GetConnectionString("BrokerOrder_Stack");
+            string HJson = HeaderDetail;
             var hobj = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(HJson);
             int factorcode = 0;
-            string factordate = "";
-            string Explain = "BazaryabApp";
+
+            string Explain = _configuration.GetConnectionString("BrokerOrder_Explain");
             int Customer = 0;
             int Broker = 0;
             int MobFCode = 0;
             string MobFDate = "";
             int ExistFlag = 0;
-            string ClassName = "PreFactor";
+            string ClassName = _configuration.GetConnectionString("BrokerOrder_ClassName");
             int CountRows = 0;
+
 
             var NotAmount = new List<Dictionary<string, object>>();
             int z = 0;
@@ -323,16 +348,16 @@ namespace webapikits.Controllers
                 if (hobj[0].ContainsKey("rwCount")) { CountRows = Convert.ToInt32(hobj[0]["rwCount"]); }
 
                 string sq = "IF Exists(Select 1 From DbSetup Where KeyValue = 'App_FactorTypeInKowsar' And DataValue='1') Select ClassName = 'Factor' Else Select ClassName = 'PreFactor' ";
-                var ClassResult = db.ExecQuery(sq, _configuration);
+                var ClassResult = db.ExecQuery(sq);
                 if (ClassResult != null)
                 {
                     ClassName = ClassResult.Rows[0]["ClassName"].ToString();
                 }
 
                 sq = $"Exec [dbo].[spPreFactor_Insert] '{ClassName}', {Stk}, {UserId}, 0, '', {Customer}, '{Explain}', {Broker}, {MobFCode}, '{MobFDate}'";
-                
 
-                var result = db.ExecQuery(sq, _configuration);
+
+                var result = db.ExecQuery(sq);
                 if (result != null)
                 {
                     factorcode = Convert.ToInt32(result.Rows[0]["PreFactorCode"]);
@@ -343,7 +368,7 @@ namespace webapikits.Controllers
 
             if (ExistFlag == 0)
             {
-                string DJson = PFDTQASW;
+                string DJson = RowDetail;
                 var dobj = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(DJson);
                 if (dobj != null)
                 {
@@ -356,7 +381,7 @@ namespace webapikits.Controllers
 
                         string sq = $"Exec [dbo].[spPreFactor_InsertRow] '{ClassName}', {factorcode}, {Code}, {Amount}, 0, {UserId}, '', 1, 0, {Price}";
 
-                        var res = db.ExecQuery(sq, _configuration);
+                        var res = db.ExecQuery(sq);
                         if (res != null)
                         {
                             if (Convert.ToInt32(res.Rows[0]["RowCode"]) == -1)
@@ -376,18 +401,18 @@ namespace webapikits.Controllers
                     string sq1 = $"Select Sum(FacAmount) rcount From {ClassName}Rows Where {ClassName}Ref = {factorcode}";
 
 
-                    var res1 = db.ExecQuery(sq1, _configuration);
+                    var res1 = db.ExecQuery(sq1);
                     int rcount = Convert.ToInt32(res1.Rows[0]["rcount"]);
 
                     if (CountRows == rcount)
                     {
                         NotAmount.Add(new Dictionary<string, object>
-                {
-                    { "GoodCode", "0" },
-                    { "PreFactorCode", factorcode },
-                    { "PreFactorDate", factordate },
-                    { "ExistFlag", ExistFlag }
-                });
+                        {
+                            { "GoodCode", "0" },
+                            { "PreFactorCode", factorcode },
+                            { "PreFactorDate", factordate },
+                            { "ExistFlag", ExistFlag }
+                        });
                     }
                     else
                     {
@@ -395,30 +420,34 @@ namespace webapikits.Controllers
                         string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
 
 
-                        db.ExecQuery(temp1, _configuration);
-                        db.ExecQuery(temp2, _configuration);
+                        db.ExecQuery(temp1);
+                        db.ExecQuery(temp2);
                     }
                 }
                 else
                 {
                     string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
                     string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
-                    db.ExecQuery(temp1, _configuration);
-                    db.ExecQuery(temp2, _configuration);
+                    db.ExecQuery(temp1);
+                    db.ExecQuery(temp2);
                 }
             }
             else
             {
                 NotAmount.Add(new Dictionary<string, object>
-        {
-            { "GoodCode", "0" },
-            { "PreFactorCode", factorcode },
-            { "PreFactorDate", factordate },
-            { "ExistFlag", ExistFlag }
-        });
+                {
+                    { "GoodCode", "0" },
+                    { "PreFactorCode", factorcode },
+                    { "PreFactorDate", factordate },
+                    { "ExistFlag", ExistFlag }
+                });
             }
 
-            return JsonConvert.SerializeObject(NotAmount, Formatting.None, new JsonSerializerSettings { StringEscapeHandling = StringEscapeHandling.Default });
+
+
+
+
+            return "\""+JsonConvert.SerializeObject(NotAmount, Formatting.None, new JsonSerializerSettings { StringEscapeHandling = StringEscapeHandling.Default })+ "\"";
         }
 
 
@@ -441,5 +470,17 @@ namespace webapikits.Controllers
         public String BrokerRef { get; set; }
         public String GpsDate { get; set; }
     }
+
+    public class PrintRequest
+    {
+        public string Image { get; set; }
+        public string Code { get; set; }
+        public string PrinterName { get; set; }
+        public int PrintCount { get; set; }
+    }
+
+
+
+
 
 }

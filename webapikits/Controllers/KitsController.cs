@@ -1,20 +1,20 @@
 ﻿using System.Data;
-using System.Net;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using webapikits.Model;
+using Newtonsoft.Json;
+using System.Text;
+using SmsIrRestful;
 
 namespace webapikits.Controllers
 {
+
+
     [Route("api/[controller]")]
     [ApiController]
     public class KitsController : ControllerBase
     {
         public readonly IConfiguration _configuration;
-        DataBaseClass db = new DataBaseClass();
+        DataBaseClass db;
         DataTable DataTable = new DataTable();
         string Query = "";
         Response response = new();
@@ -22,20 +22,154 @@ namespace webapikits.Controllers
         Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
 
+        public KitsController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            db = new DataBaseClass(_configuration);
+
+        }
+
+
+
+        
+
+public class ApiCredentials
+    {
+        public string UserApiKey { get; set; }
+        public string SecretKey { get; set; }
+    }
+
+    ApiCredentials credentials = new ApiCredentials
+    {
+        UserApiKey = "ce2ee6d2a00e4451f540e6d2",
+        SecretKey = "Kowsar321@!"
+    };
+
+    
+
+
+    [HttpPost]
+    [Route("SendSms")]
+    public async Task<string> SendSms(string RandomCode, string NumberPhone)
+    {
+            
+        try
+        {
+            string url = "https://RestfulSms.com/api/Token";
+            var credentials = new { UserApiKey = "ce2ee6d2a00e4451f540e6d2", SecretKey = "Kowsar321@!" };
+            string json = JsonConvert.SerializeObject(credentials);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            using (var httpClient = new HttpClient())
+            {
+                var response = await httpClient.PostAsync(url, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                        var resultJson = await response.Content.ReadAsStringAsync();
+                        var resultObject = JsonConvert.DeserializeObject<TokenResultObject>(resultJson);
+
+                        if (resultObject.IsSuccessful)
+                        {
+                            VerificationCode(RandomCode, NumberPhone, resultObject.TokenKey);
+                            DataTable tb = new();
+                            return jsonClass.JsonResult_Str(tb, "Text", "done");
+                        }
+                        else
+                        {
+                            Console.WriteLine("API Request was successful, but Token not available.");
+                        }
+                    }
+                else
+                {
+                    Console.WriteLine("Request failed with status code: " + response.StatusCode);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+
+        return ""; // You may want to return an error message or handle this differently.
+    }
 
 
 
 
-        [HttpGet]
+    [HttpPost]
+    [Route("VerificationCode")]
+    public async Task<string> VerificationCode(string RandomCode, string NumberPhone, string Token_Str)
+    {
+        try
+        {
+            string url = "https://RestfulSms.com/api/VerificationCode";
+
+            // Define the request body
+            var requestBody = new
+            {
+                Code = RandomCode,
+                MobileNumber = NumberPhone
+            };
+
+            string json = JsonConvert.SerializeObject(requestBody);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            // Define the headers
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.DefaultRequestHeaders.Add("x-sms-ir-secure-token", Token_Str);
+
+                var response = await httpClient.PostAsync(url, content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var resultJson = await response.Content.ReadAsStringAsync();
+                    Console.WriteLine("Response: " + resultJson);
+
+                    // Handle the response as needed
+                    // You can deserialize the JSON response if it contains useful data.
+                    return resultJson;
+                }
+                else
+                {
+                    Console.WriteLine("API Request failed with status code: " + response.StatusCode);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error: " + ex.Message);
+        }
+
+        return "Error"; // You may want to return an error message or handle this differently.
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [HttpGet]
         [Route("kowsar_info")]
         public string kowsar_info(string Where)
         {
 
-            string query = "select top 1 DataValue from dbsetup where KeyValue = '"+ Where+"'";
+            string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
@@ -44,23 +178,165 @@ namespace webapikits.Controllers
         
 
 
+
         [HttpGet]
-        [Route("ActivationCode")]
-        public string ActivationCode(string ActivationCode)
+        [Route("KowsarQuery")]
+        public string KowsarQuery(string str)
         {
+            string query = str;
+            DataTable dataTable = db.ExecQuery(query);
+            return jsonClass.JsonResult_Str(dataTable, "Data", "");
+        }
 
-            string query = "select * from AppBrokerCustomer Where ActivationCode = '"+ ActivationCode + "'";
+        
 
 
+        [HttpGet]
+        [Route("Activation")]
+        public string Activation(string ActivationCode)
+        {
+            Console.WriteLine("In yek matn dar konsol ast.");
+            string query = "select * from AppBrokerCustomer Where ActivationCode = '" + ActivationCode + "'";
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");
 
         }
 
 
+        [HttpGet]
+        [Route("GetDb")]
+        public IActionResult GetDb(string Code)
+        {
 
-        
+            
+            string query = "select * from AppBrokerCustomer Where ActivationCode = '" + Code + "'";
+            
+            DataTable dataTable = db.ExecQuery(query);
+            
+            Console.WriteLine(dataTable.Rows[0]["SQLiteURL"] + "");
+            string filePath = dataTable.Rows[0]["SQLiteURL"] + "";
+            Console.WriteLine(filePath);
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                Console.WriteLine("5");
+                Console.WriteLine("File not found");
+                return NotFound("File not found");
+            }
+
+            Console.WriteLine("6");
+            // خواندن فایل به عنوان آرایه بایت
+            byte[] fileBytes = System.IO.File.ReadAllBytes(@filePath);
+
+            // تعیین نوع محتوای فایل (مثلاً برای PDF)
+            string contentType = "application/x-sqlite3"; // یا هر نوع مورد نظر
+            Console.WriteLine("7");
+            // ارسال فایل به مشتری
+            return File(fileBytes, contentType, Path.GetFileName(filePath));
+
+        }
+
+        [HttpGet]
+        [Route("OcrKowsar")]
+        public IActionResult OcrKowsar()
+        {
+
+            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\OcrKowsar.apk";
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found");
+            }
+                byte[] fileBytes = System.IO.File.ReadAllBytes(@filePath);
+                        string contentType = "application/apk"; // یا هر نوع مورد نظر
+            return File(fileBytes, contentType, Path.GetFileName(filePath));
+
+        }
+        [HttpGet]
+        [Route("BrokerKowsar")]
+        public IActionResult BrokerKowsar()
+        {
+
+            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\BrokerKowsar.apk";
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found");
+            }
+            byte[] fileBytes = System.IO.File.ReadAllBytes(@filePath);
+            string contentType = "application/apk"; // یا هر نوع مورد نظر
+            return File(fileBytes, contentType, Path.GetFileName(filePath));
+
+        }
+
+        [HttpGet]
+        [Route("OrderKowsar")]
+        public IActionResult OrderKowsar()
+        {
+
+            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\OrderKowsar.apk";
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found");
+            }
+            byte[] fileBytes = System.IO.File.ReadAllBytes(@filePath);
+            string contentType = "application/apk"; // یا هر نوع مورد نظر
+            return File(fileBytes, contentType, Path.GetFileName(filePath));
+
+        }
+
+        [HttpGet]
+        [Route("KowsarCompany")]
+        public IActionResult KowsarCompany()
+        {
+
+            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\KowsarCompany.apk";
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found");
+            }
+            byte[] fileBytes = System.IO.File.ReadAllBytes(@filePath);
+            string contentType = "application/apk"; // یا هر نوع مورد نظر
+            return File(fileBytes, contentType, Path.GetFileName(filePath));
+
+        }
+
+
+
+
+        [HttpGet]
+        [Route("DownloadFile1")]
+        public IActionResult DownloadFile1()
+        {
+            string filePath = "E:\\KowsarAcc\\WebApiLocation\\database\\111111\\KowsarDb.sqlite";
+            try
+            {
+                if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+                {
+                    return NotFound("File not found");
+                }
+
+                // خواندن فایل به عنوان آرایه بایت
+                byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
+
+                // تعیین نوع محتوای فایل (مثلاً برای PDF)
+                string contentType = "application/pdf"; // مثال: برای PDF
+
+                // ارسال فایل به مشتری
+                return File(fileBytes, contentType, Path.GetFileName(filePath));
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Internal server error: {ex.Message}");
+            }
+        }
+
+
+
+
         [HttpGet]
         [Route("ErrorLog")]
         public string ErrorLog(
@@ -78,7 +354,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
         }
@@ -104,115 +380,20 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
 
         }
-        /*
-        //TODO
 
-        public string Verification(string Code, string MobileNumber)
+        public class PrintRequest
         {
-
-
-            VerificationCode1(Code, MobileNumber);
-            jsonDict.Add("response", JsonConvert.SerializeObject(response));
-            jsonDict.Add("Text", "done");
-            // jsonDict.Add("Activations", jsonClass.ConvertDataTableToJson(dataTable));
-
-            return JsonConvert.SerializeObject(jsonDict);
+            public string Image { get; set; }
+            public string Code { get; set; }
+            public string PrinterName { get; set; }
+            public int PrintCount { get; set; }
         }
-
-        private string VerificationCode1(string Code, string MobileNumber)
-        {
-            string token = GetToken();
-
-            if (!string.IsNullOrEmpty(token))
-            {
-                var postData = new
-                {
-                    Code = Code,
-                    MobileNumber = MobileNumber
-                };
-
-                string url = GetAPIVerificationCodeUrl();
-                string verificationCode = Execute(postData, url, token);
-                dynamic obj = JsonConvert.DeserializeObject(verificationCode);
-
-                if (obj != null && obj.GetType() == typeof(JObject))
-                {
-                    Dictionary<string, object> dict = obj.ToObject<Dictionary<string, object>>();
-
-                    if (dict != null && dict.ContainsKey("Message"))
-                    {
-                        return dict["Message"].ToString();
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        private string GetToken()
-        {
-            var postData = new
-            {
-                UserApiKey = "1e605332b72c1590d5c57b3",
-                SecretKey = "Kowsar321@!"
-            };
-
-            string postString = JsonConvert.SerializeObject(postData);
-
-            using (var client = new WebClient())
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                string result = client.UploadString(GetApiTokenUrl(), postString);
-
-                dynamic response = JsonConvert.DeserializeObject(result);
-
-                if (response != null && response.GetType() == typeof(JObject))
-                {
-                    Dictionary<string, object> dict = response.ToObject<Dictionary<string, object>>();
-
-                    if (dict != null && dict.ContainsKey("IsSuccessful") && (bool)dict["IsSuccessful"])
-                    {
-                        return dict.ContainsKey("TokenKey") ? dict["TokenKey"].ToString() : null;
-                    }
-                }
-            }
-
-            return null;
-        }
-
-        protected string GetAPIVerificationCodeUrl()
-        {
-            return "http://RestfulSms.com/api/VerificationCode";
-        }
-
-        protected string GetApiTokenUrl()
-        {
-            return "http://RestfulSms.com/api/Token";
-        }
-
-        private string Execute(object postData, string url, string token)
-        {
-            string postString = JsonConvert.SerializeObject(postData);
-
-            using (var client = new WebClient())
-            {
-                client.Headers[HttpRequestHeader.ContentType] = "application/json";
-                client.Headers["x-sms-ir-secure-token"] = token;
-                string result = client.UploadString(url, postString);
-                return result;
-            }
-        }
-
-
-        */
-
-
 
 
 

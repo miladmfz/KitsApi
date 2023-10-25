@@ -1,8 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System.Data;
-using System.Data.SqlClient;
 
 namespace webapikits.Model
 {
@@ -34,7 +31,7 @@ namespace webapikits.Model
 
 
 
-        public string JsonResult_Str(DataTable dataTable,String keyresponse,string textValue)
+        public string JsonResult_Str1(DataTable dataTable, String keyresponse, string textValue)
         {
             Response response = new();
             JsonClass jsonClass = new JsonClass();
@@ -42,15 +39,13 @@ namespace webapikits.Model
 
             if (dataTable.Rows.Count > 0)
             {
-                response.StatusCode = "200";
-                response.Errormessage = "";
 
-                jsonDict.Add("response", JsonConvert.SerializeObject(response));
-                if (textValue.Length>0)
+                if (textValue.Length > 0)
                 {
                     jsonDict.Add(keyresponse, Convert.ToString(dataTable.Rows[0][textValue]));
                 }
-                else {
+                else
+                {
                     jsonDict.Add(keyresponse, jsonClass.ConvertDataTableToJson(dataTable));
                 }
 
@@ -59,7 +54,7 @@ namespace webapikits.Model
             else
             {
 
-                response.StatusCode = "100";
+                response.StatusCode = "1000";
                 response.Errormessage = "No Data Found";
                 jsonDict.Add("response", JsonConvert.SerializeObject(response));
                 return JsonConvert.SerializeObject(jsonDict);
@@ -71,7 +66,93 @@ namespace webapikits.Model
 
         }
 
-        
+
+
+        public string JsonResult_Str(DataTable dataTable, string keyResponse, string textValue)
+        {
+            Response response = new Response();
+            JsonClass jsonClass = new JsonClass();
+
+            if (dataTable.Rows.Count > 0)
+            {
+                response.StatusCode = "2000";
+                response.Errormessage = "";
+                /*
+                // Construct the custom JSON string
+                string json = "{" +
+                    "\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}," +
+                    "\"" + keyResponse + "\":";
+                */
+                string json = "{\"" + keyResponse + "\":";
+                if (textValue.Length > 0)
+                {
+                    json += "\"" + Convert.ToString(dataTable.Rows[0][textValue]) + "\"";
+                }
+                else
+                {
+                    json += jsonClass.ConvertDataTableToJson(dataTable);
+                }
+
+                json += "}";
+
+                return json;
+            }
+            else
+            {
+                response.StatusCode = "1000";
+                response.Errormessage = "No Data Found";
+
+                // Construct the custom JSON string for the error case
+                string json = "{\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}}";
+
+                return json;
+            }
+        }
+
+        public string JsonResult_StrRepInfo(DataTable dataTable, string keyResponse, string textValue)
+        {
+            Response response = new Response();
+            JsonClass jsonClass = new JsonClass();
+
+            if (dataTable.Rows.Count > 0)
+            {
+                response.StatusCode = "2000";
+                response.Errormessage = "";
+                /*
+                // Construct the custom JSON string
+                string json = "{" +
+                    "\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}," +
+                    "\"" + keyResponse + "\":";
+                */
+                string json = "{\"" + keyResponse + "\":";
+                if (textValue.Length > 0)
+                {
+                    json +=  Convert.ToString(dataTable.Rows[0][textValue]);
+                }
+                else
+                {
+                    json +=  jsonClass.ConvertDataTableToJson(dataTable) ;
+                }
+
+                json += "}";
+
+                return json;
+            }
+            else
+            {
+                response.StatusCode = "1000";
+                response.Errormessage = "No Data Found";
+
+                // Construct the custom JSON string for the error case
+                string json = "{\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}}";
+
+                return json;
+            }
+        }
+
+
+
+
 
 
         public string JsonResultWithout_Str(DataTable dataTable)

@@ -1,11 +1,8 @@
 ﻿using System.Data;
-using System.IO.Compression;
-using System.Net;
-using System.Reflection.PortableExecutable;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using webapikits.Model;
+using System.Data.SqlClient;
 
 namespace webapikits.Controllers
 {
@@ -17,12 +14,24 @@ namespace webapikits.Controllers
 
 
         public readonly IConfiguration _configuration;
-        DataBaseClass db = new DataBaseClass();
+        DataBaseClass db;
         DataTable DataTable = new DataTable();
         string Query = "";
         Response response = new();
         JsonClass jsonClass = new JsonClass();
         Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+        FileManager fileManager = new();
+        private string connectionString;
+        public OcrController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+            db = new DataBaseClass(_configuration);
+            connectionString = _configuration.GetConnectionString("DefaultConnection");
+
+        }
+
+
 
 
 
@@ -31,14 +40,14 @@ namespace webapikits.Controllers
         public string ExitDelivery(string Where)
         {
 
-            string query = " update AppOCRFactor set HasSignature=0,AppIsDelivered=0 where AppOCRFactorCode= "+ Where;
+            string query = " update AppOCRFactor set HasSignature=0,AppIsDelivered=0 where AppOCRFactorCode= " + Where;
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Goods","");
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
-        
+
 
 
         [HttpGet]
@@ -46,11 +55,11 @@ namespace webapikits.Controllers
         public string TestJob(string Where)
         {
 
-            string query = "select JobCode,Title,Explain from job where Explain='"+ Where + "'";
+            string query = "select JobCode,Title,Explain from job where Explain='" + Where + "'";
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Jobs", "");
 
@@ -64,11 +73,11 @@ namespace webapikits.Controllers
         public string TestJobPerson(string Where)
         {
 
-            string query = "select j.JobCode,jp.JobPersonCode,j.Title,c.Name,c.FName from  JobPerson jp  join job j on j.JobCode=jp.JobRef  join Central c on c.CentralCode=jp.CentralRef  where j.Title='"+Where + "'";
+            string query = "select j.JobCode,jp.JobPersonCode,j.Title,c.Name,c.FName from  JobPerson jp  join job j on j.JobCode=jp.JobRef  join Central c on c.CentralCode=jp.CentralRef  where j.Title='" + Where + "'";
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "JobPersons", "");
 
@@ -84,11 +93,11 @@ namespace webapikits.Controllers
         public string GetOcrFactorDetail(string OCRFactorCode)
         {
 
-            string query = "[dbo].[spApp_ocrGetFactorDetail] "+OCRFactorCode;
+            string query = "[dbo].[spApp_ocrGetFactorDetail] " + OCRFactorCode;
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "AppOcrFactors", "");
 
@@ -105,11 +114,11 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec dbo.spApp_ocrSetControlled "+ AppOCRCode + " ,"+ State + " ,"+ JobPersonRef;
+            string query = "Exec dbo.spApp_ocrSetControlled " + AppOCRCode + " ," + State + " ," + JobPersonRef;
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -127,11 +136,11 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec dbo.spApp_ocrSetShortage "+ OCRFactorRowCode + ", "+Shortage;
+            string query = "Exec dbo.spApp_ocrSetShortage " + OCRFactorRowCode + ", " + Shortage;
 
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -150,10 +159,10 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec dbo.spApp_ocrSetDelivery "+AppOCRCode+", "+State+",'"+Deliverer+"'";
+            string query = "Exec dbo.spApp_ocrSetDelivery " + AppOCRCode + ", " + State + ",'" + Deliverer + "'";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -169,16 +178,16 @@ namespace webapikits.Controllers
         public string GetCustomerPath()
         {
 
-            string query = "Select Distinct IsNull(NVarchar5 , '') CustomerPath From PropertyValue Where ClassName= 'TCustomer'";
+            string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_CustomerPath") + " , '') " + _configuration.GetConnectionString("Ocr_CustomerPath_Lible") + " From PropertyValue Where ClassName= 'TCustomer'";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
         }
 
-        
+
 
 
 
@@ -187,15 +196,15 @@ namespace webapikits.Controllers
         public string GetStackCategory()
         {
 
-            string query = "Select Distinct IsNull(GoodExplain4 , '') GoodExplain4 From good";
+            string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + " , '') " + _configuration.GetConnectionString("Ocr_StackCategory") + " From good";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
-        
+
 
         [HttpGet]
         [Route("GetOcrGoodDetail")]
@@ -203,15 +212,15 @@ namespace webapikits.Controllers
         {
             int Stackref = 10110;
 
-            string query = "select cast(s.Amount as Int) TotalAvailable ,size,CoverType,cast(PageNo as Int) PageNo from vwGood with(nolock) Join GoodStack s with(nolock) on GoodCode = GoodRef where StackRef = "+Stackref+" And Goodcode="+GoodCode;
+            string query = "select cast(s.Amount as Int) TotalAvailable ,size,CoverType,cast(PageNo as Int) PageNo from vwGood with(nolock) Join GoodStack s with(nolock) on GoodCode = GoodRef where StackRef = " + Stackref + " And Goodcode=" + GoodCode;
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
-                
+
 
 
 
@@ -230,7 +239,7 @@ namespace webapikits.Controllers
         {
 
 
-            if (Row.Length<1) {
+            if (Row.Length < 1) {
                 Row = "10";
             }
             string order = "";
@@ -244,7 +253,7 @@ namespace webapikits.Controllers
                 }
                 else
                 {
-                    where = " And Exists(Select 1 From FactorRows r Join Good g on GoodRef = GoodCode Join AppOCRFactorRow cr on cr.AppFactorRowRef = r.FactorRowCode And cr.AppOCRFactorRef = o.AppOCRFactorCode Where r.FactorRef = FactorCode And IsNull(GoodExplain4, '''') = ''" + Stack + "'' And IsNull(cr.AppRowIsControled, 0) = 0) ";
+                    where = " And Exists(Select 1 From FactorRows r Join Good g on GoodRef = GoodCode Join AppOCRFactorRow cr on cr.AppFactorRowRef = r.FactorRowCode And cr.AppOCRFactorRef = o.AppOCRFactorCode Where r.FactorRef = FactorCode And IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + ", '''') = ''" + Stack + "'' And IsNull(cr.AppRowIsControled, 0) = 0) ";
                 }
             }
             if (State == "4")
@@ -261,8 +270,10 @@ namespace webapikits.Controllers
                 where = where + " ";
             }
             else
+
+
             {
-                where = where + " And IsNull(f.Ersall, '''') = N''" + path + "'' ";
+                where = where + " And IsNull(" + _configuration.GetConnectionString("Ocr_Ersall") + ", '''') = N''" + path + "'' ";
             }
 
             if (HasShortage == "1")
@@ -277,7 +288,7 @@ namespace webapikits.Controllers
             string sq = $"Exec dbo.spApp_ocrFactorList {State}, '{SearchTarget}', '{where}', {Row}, {PageNo} {order}";
 
 
-            DataTable dataTable = db.ExecQuery(sq, _configuration);
+            DataTable dataTable = db.ExecQuery(sq);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
         }
@@ -311,7 +322,7 @@ namespace webapikits.Controllers
                 }
                 else
                 {
-                    where = " And Exists(Select 1 From FactorRows r Join Good g on GoodRef = GoodCode Join AppOCRFactorRow cr on cr.AppFactorRowRef = r.FactorRowCode And cr.AppOCRFactorRef = o.AppOCRFactorCode Where r.FactorRef = FactorCode And IsNull(GoodExplain4, '''') = ''" + Stack + "'' And IsNull(cr.AppRowIsControled, 0) = 0) ";
+                    where = " And Exists(Select 1 From FactorRows r Join Good g on GoodRef = GoodCode Join AppOCRFactorRow cr on cr.AppFactorRowRef = r.FactorRowCode And cr.AppOCRFactorRef = o.AppOCRFactorCode Where r.FactorRef = FactorCode And IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + ", '''') = ''" + Stack + "'' And IsNull(cr.AppRowIsControled, 0) = 0) ";
                 }
             }
 
@@ -321,7 +332,7 @@ namespace webapikits.Controllers
             }
             else
             {
-                where = where + " And IsNull(f.Ersall, '''') = N''" + path + "'' ";
+                where = where + " And IsNull(" + _configuration.GetConnectionString("Ocr_Ersall") + ", '''') = N''" + path + "'' ";
             }
 
             if (HasShortage == "1")
@@ -334,9 +345,9 @@ namespace webapikits.Controllers
             }
 
             string sq = $"Exec dbo.spApp_ocrFactorListTotal {State}, '{SearchTarget}', '{where}', {Row}, {PageNo}";
- 
 
-            DataTable dataTable = db.ExecQuery(sq, _configuration);
+
+            DataTable dataTable = db.ExecQuery(sq);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -362,16 +373,16 @@ namespace webapikits.Controllers
         {
 
 
-            string query = "Exec dbo.spApp_ocrSetPackDetail " + OcrFactorCode + ",'" + Reader+"','"+Controler+"','"+Packer +" - "+AppDeliverDate+"','"+PackDeliverDate+"',"+PackCount;
+            string query = "Exec dbo.spApp_ocrSetPackDetail " + OcrFactorCode + ",'" + Reader + "','" + Controler + "','" + Packer + " - " + AppDeliverDate + "','" + PackDeliverDate + "'," + PackCount;
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
 
-        
+
 
 
 
@@ -384,10 +395,10 @@ namespace webapikits.Controllers
         {
 
 
-            string query = "Exec dbo.spApp_ocrGetFactor '"+ barcode + "',1,"+ Step + ",'"+ orderby + "'";
+            string query = "Exec dbo.spApp_ocrGetFactor '" + barcode + "',1," + Step + ",'" + orderby + "'";
 
 
-            DataTable dataTable = db.ExecQuery(query, _configuration);
+            DataTable dataTable = db.ExecQuery(query);
 
 
 
@@ -405,78 +416,71 @@ namespace webapikits.Controllers
 
 
 
-        [HttpPost]
-        [Route("SaveOcrImage")]
-        public void SaveOcrImage(string barcode, string image)
+
+        public void SaveOcrImage(string barcode, string zipPath)
         {
+            string query = $"Exec dbo.spApp_ocrGetFactor '{barcode}', 0 ";
 
-            /*
-            
-            byte[] decodedImage = Convert.FromBase64String(image);
-            string imagePath = HttpContext.Current.Server.MapPath("~/images/" + barcode + ".jpg");
-            File.WriteAllBytes(imagePath, decodedImage);
+            DataTable dataTable = ExecQuery(query);
 
-            string zipPath = HttpContext.Current.Server.MapPath("~/images/" + barcode + ".zip");
-            using (ZipArchive zip = ZipFile.Open(zipPath, ZipArchiveMode.Create))
+            string dbname = Convert.ToString(dataTable.Rows[0]["dbname"]);
+            string FactorRef = Convert.ToString(dataTable.Rows[0]["FactorRef"]);
+            string TcPrintRef = Convert.ToString(dataTable.Rows[0]["TcPrintRef"]);
+
+            byte[] fileContent = fileManager.GetFile(zipPath);
+
+            string query1 = $"Insert Into {dbname}.dbo.AttachedFiles(Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate, TcPrintRef) " +
+                $"Select 'App_ocr', 'Factor', {FactorRef}, '{barcode}.jpg', @FContent, 'zip', -1000, GetDate(), -1000, GetDate(), {TcPrintRef} ";
+
+            ExecNonQueryWithBinaryParam(query1, fileContent);
+
+            string query3 = $"set nocount on Update AppOCRFactor Set HasSignature = 1 Where AppTcPrintRef = {TcPrintRef} ";
+
+            ExecNonQuery(query3);
+
+            Console.WriteLine("\"done\"");
+        }
+
+        private DataTable ExecQuery(string query)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                zip.CreateEntryFromFile(imagePath, barcode + ".jpg");
-            }
-
-
-
-                SqlCommand command = new SqlCommand("Exec dbo.[spApp_ocrGetFactor] @Barcode, 0", connection);
-                command.Parameters.AddWithValue("@Barcode", barcode);
-
-                SqlDataReader reader = command.ExecuteReader();
-
-                if (reader.Read())
+                connection.Open();
+                using (SqlCommand cmd = new SqlCommand(query, connection))
                 {
-                    string ocrDB = reader["dbname"].ToString();
-                    int factorRef = Convert.ToInt32(reader["FactorRef"]);
-                    int tcPrintRef = Convert.ToInt32(reader["TcPrintRef"]);
-                    byte[] content = File.ReadAllBytes(zipPath);
-
-                    SqlCommand insertCommand = new SqlCommand($@"Insert Into {ocrDB}.dbo.AttachedFiles (Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate, TcPrintRef)
-                                                    Values ('App_ocr', 'Factor', {factorRef}, '{barcode}.jpg', @Content, 'zip', -1000, GetDate(), -1000, GetDate(), {tcPrintRef})", connection);
-                    insertCommand.Parameters.AddWithValue("@Content", content);
-                    insertCommand.ExecuteNonQuery();
-
-                    SqlCommand updateCommand = new SqlCommand($@"Update AppOCRFactor Set HasSignature = 1 Where AppTcPrintRef = {tcPrintRef}", connection);
-                    updateCommand.ExecuteNonQuery();
-
-                    Console.WriteLine("{\"Text\":\"done\"}");
-                    return true;
+                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+                    {
+                        DataTable dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+                        return dataTable;
+                    }
                 }
-            
+            }
+        }
 
-            // If no matching record was found
-            Console.WriteLine("{\"Text\":\"not found\"}");
-            return false;
+        private void ExecNonQueryWithBinaryParam(string query, byte[] binaryData)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.Parameters.Add("@FContent", SqlDbType.VarBinary, -1).Value = binaryData;
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
 
-            ////////
-            		        $stmt = self::$db->prepare("Exec dbo.[spApp_ocrGetFactor] '$barcode', 0 ");
-                $stmt->execute();
-
-                //$result = $fetchAll == true?$stmt->fetchAll(PDO::FETCH_ASSOC):$stmt->fetch(PDO::FETCH_ASSOC);
-                $result =$stmt->fetch(PDO::FETCH_ASSOC);
-
-                if ($result) {
-					$ocrDB = $result['dbname'];
-					$FactorRef = $result['FactorRef'];
-					$TcPrintRef = $result['TcPrintRef'];
-					$cn = file_get_contents($zipPath);
-					$stmt = self::$db->prepare("Insert Into $ocrDB.dbo.AttachedFiles(Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate, TcPrintRef)
-						Select 'App_ocr', 'Factor', $FactorRef, '$barcode.jpg', :FContent, 'zip', -1000, GetDate(), -1000, GetDate(), $TcPrintRef ");
-					$stmt->bindParam(':FContent', $cn, PDO::PARAM_LOB, 0, PDO::SQLSRV_ENCODING_BINARY);
-					$stmt->execute();
-					$stmt = self::$db->prepare("set nocount on Update AppOCRFactor Set HasSignature = 1 Where AppTcPrintRef= $TcPrintRef");
-                    $stmt->execute();
-					echo "{\"Text\":\"done\"}";
-					
-					return true;
-				}
-            */
-
+        private void ExecNonQuery(string query)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                using (SqlCommand cmd = new SqlCommand(query, connection))
+                {
+                    cmd.ExecuteNonQuery();
+                }
+            }
         }
 
 
@@ -486,5 +490,17 @@ namespace webapikits.Controllers
 
 
 
+
+
     }
+
+
+
+
 }
+
+
+
+
+
+

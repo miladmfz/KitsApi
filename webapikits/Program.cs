@@ -20,7 +20,15 @@ internal class Program
         {
             c.SwaggerDoc("v1", new OpenApiInfo { Title = "Your API", Version = "v1" });
         });
-
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(builder =>
+            {
+                builder.WithOrigins("http://localhost:4200") // Replace with your actual client origin.
+                       .AllowAnyHeader()
+                       .AllowAnyMethod();
+            });
+        });
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -33,6 +41,9 @@ internal class Program
             });
         }
 
+
+        app.UseCors();
+
         app.UseRouting();
 
         app.UseAuthorization();
@@ -44,4 +55,5 @@ internal class Program
 
         app.Run();
     }
+
 }
