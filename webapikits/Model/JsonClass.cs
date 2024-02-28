@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Data;
+using System.Drawing;
 
 namespace webapikits.Model
 {
@@ -29,9 +30,105 @@ namespace webapikits.Model
             return json;
         }
 
+        public string ConvertImageToBase64(DataTable dataTable)
+        {
+            if (dataTable.Rows.Count > 0)
+            {
+                byte[] imageData = (byte[])dataTable.Rows[0]["IMG"];
+                string base64String = Convert.ToBase64String(imageData);
+
+                Console.WriteLine(base64String); // Dar inja Console Log ra ejra kon
+
+                // Daryaft-e ContentType
+                string contentType = "image/jpeg"; // Moshakhas konande noe tasvir ra inja
+
+                var responseObj = new
+                {
+                    Text = base64String,
+                    ContentType = contentType
+                };
+
+                return JsonConvert.SerializeObject(responseObj);
+            }
+            else
+            {
+                string contentType = "image/jpeg";
+                var responseObj = new
+                {
+                    Text = "Nophoto",
+                    ContentType = contentType
+                };
+                return JsonConvert.SerializeObject(responseObj);
+            }
+        }
 
 
-        public string JsonResult_Str1(DataTable dataTable, String keyresponse, string textValue)
+        public string ConvertAndScaleImageToBase64(int targetSize, DataTable dataTable)
+    {
+
+        if (dataTable.Rows.Count > 0)
+        {
+            byte[] imageData = (byte[])dataTable.Rows[0]["IMG"];
+            string base64String;
+
+            using (MemoryStream ms = new MemoryStream(imageData))
+            {
+                Image image = Image.FromStream(ms);
+
+                // Check image size and scale if necessary
+                if (Math.Max(image.Width, image.Height) > targetSize)
+                {
+                    double scaleFactor = (double)targetSize / Math.Max(image.Width, image.Height);
+
+                    int newWidth = (int)(image.Width * scaleFactor);
+                    int newHeight = (int)(image.Height * scaleFactor);
+
+                    Image scaledImage = new Bitmap(newWidth, newHeight);
+                    using (Graphics g = Graphics.FromImage(scaledImage))
+                    {
+                        g.DrawImage(image, 0, 0, newWidth, newHeight);
+                    }
+
+                    using (MemoryStream scaledMs = new MemoryStream())
+                    {
+                        scaledImage.Save(scaledMs, System.Drawing.Imaging.ImageFormat.Jpeg);
+                        base64String = Convert.ToBase64String(scaledMs.ToArray());
+                    }
+                }
+                else
+                {
+                    base64String = Convert.ToBase64String(imageData);
+                }
+            }
+
+            // Return the Base64 string and ContentType
+            string contentType = "image/jpeg";
+            var responseObj = new
+            {
+                Text = base64String,
+                ContentType = contentType
+            };
+
+            return JsonConvert.SerializeObject(responseObj);
+        }
+        else
+        {
+            // Return placeholder for no photo
+            string contentType = "image/jpeg";
+            var responseObj = new
+            {
+                Text = "Nophoto",
+                ContentType = contentType
+            };
+            return JsonConvert.SerializeObject(responseObj);
+        }
+    }
+
+
+
+
+
+    public string JsonResult_Str1(DataTable dataTable, String keyresponse, string textValue)
         {
             Response response = new();
             JsonClass jsonClass = new JsonClass();

@@ -50,8 +50,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
-
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
 
@@ -86,7 +85,7 @@ namespace webapikits.Controllers
 
             string query = " select * from AppPrinter ";
 
-            DataTable Table_print = db.ExecQuery(query);
+            DataTable Table_print = db.ExecQuery(Request.Path, query);
 
             List<Printer> Printers = new();
 
@@ -135,8 +134,7 @@ namespace webapikits.Controllers
 
 
                 query = "select top 2 GoodCode, GoodName, GoodExplain1 from good ";
-                DataTable dataTable = db.ExecQuery(query);
-
+                DataTable dataTable = db.ExecQuery(Request.Path, query);
                 List<Good> goods = new ();
 
 
@@ -204,7 +202,7 @@ namespace webapikits.Controllers
             
             string query = "select top 2 GoodCode,GoodName,GoodExplain1 from good ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             // Log the result to the console
             Debug.WriteLine("Check action result: " );
 
@@ -229,8 +227,8 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
-
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            
             return jsonClass.JsonResult_Str(dataTable, "Text", "VerNo");
 
 
@@ -251,8 +249,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
-
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
@@ -300,7 +297,8 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
 
@@ -322,7 +320,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Values", "");
 
         }
@@ -339,8 +337,7 @@ namespace webapikits.Controllers
             string query= "Select brokerCode,BrokerNameWithoutType,CentralRef,Active From vwSellBroker";
 
 
-            DataTable dataTable = db.ExecQuery(query);
-
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
 
         }
@@ -363,7 +360,7 @@ namespace webapikits.Controllers
 
             string sq = $"Exec dbo.spApp_GetImage {ObjectRef}, {IX}, '{ClassName}'";
 
-            byte[] imageBytes = GetImageData(sq);
+            byte[] imageBytes = db.GetImageData(sq);
 
 
             if (imageBytes != null)
@@ -437,7 +434,7 @@ namespace webapikits.Controllers
 
             string sq = "Exec dbo.spApp_GetKsrImage "+ KsrImageCode;
 
-            byte[] imageBytes = GetImageData(sq);
+            byte[] imageBytes = db.GetImageData(sq);
 
 
             if (imageBytes != null)
@@ -514,7 +511,7 @@ namespace webapikits.Controllers
 
             string sq = $"set nocount on  select IMG from ksrimage where ClassName ='{ClassName}' and ObjectRef={ObjectRef} ";
 
-            byte[] imageBytes = GetImageData(sq);
+            byte[] imageBytes = db.GetImageData(sq);
 
 
             if (imageBytes != null)
@@ -579,27 +576,6 @@ namespace webapikits.Controllers
 
 
 
-        public byte[] GetImageData(String query)
-        {
-            byte[] imageData = null;
-            Console.WriteLine(query);
-            DataTable dataTableImg = db.ImageExecQuery(query);
-            if (dataTableImg.Rows.Count > 0)
-            {
-                if (!Convert.IsDBNull(dataTableImg.Rows[0][0]))
-                {
-                    imageData = (byte[])dataTableImg.Rows[0]["IMG"];
-                }
-                else {
-                    Console.WriteLine("IsDBNull");
-                }
-            }
-            else {
-                Console.WriteLine("Rows.Count > 0");
-            }
-
-            return imageData;
-        }
 
 
 

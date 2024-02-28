@@ -70,7 +70,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_BasketGet] '"+ Mobile + "'";
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
@@ -87,7 +87,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_BasketPreFactors] '"+ Mobile + "',"+ Code + ","+ ReservedRows ;
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "PreFactors", "");
 
 
@@ -102,7 +102,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_BasketToPreFactor] '"+ Mobile + "', -2000 , '"+Explain+"'";
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -118,7 +118,7 @@ namespace webapikits.Controllers
             string query = "Exec dbo.spApp_BasketSummary '"+ Mobile + "'";
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 
@@ -134,7 +134,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
 
@@ -161,7 +161,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
 
@@ -184,7 +184,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "Result");
 
 
@@ -199,7 +199,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_GetGoodGroups_Default] ";
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
 
@@ -215,7 +215,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_GetGoodGroups_DefaultImage]  ";
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
 
@@ -309,7 +309,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 
@@ -339,7 +339,8 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
 
@@ -371,7 +372,7 @@ namespace webapikits.Controllers
             string query = "Exec [dbo].[spApp_XUserCreate] '"+UName + "','"+ UPass + "','"+ NewPass+"','"+ FName + "','"+ LName + "','"+ mobile + "','"+ company + "','"+address + "','"+PostalCode + "','"+ email + "',-2000,"+ Flag  ;
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "users", "");
 
 
@@ -451,7 +452,7 @@ namespace webapikits.Controllers
 
             string sq = $"Exec [dbo].[spApp_BasketInsert] '{DeviceCode}', {GoodRef}, {FacAmount}, {Price}, '{UnitRef}', '{Ratio}', '{Explain}', '{Source}', {UserId}, '{Mobile}'";
 
-            DataTable dataTable = db.ExecQuery(sq);
+            DataTable dataTable = db.ExecQuery(Request.Path, sq);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 

@@ -52,8 +52,10 @@ public class ApiCredentials
     [Route("SendSms")]
     public async Task<string> SendSms(string RandomCode, string NumberPhone)
     {
-            
-        try
+            string query = " "+ RandomCode + " " + NumberPhone;
+            Logger logger = new Logger();
+            logger.LogFile(_configuration, "LOG", query); ;
+            try
         {
             string url = "https://RestfulSms.com/api/Token";
             var credentials = new { UserApiKey = "ce2ee6d2a00e4451f540e6d2", SecretKey = "Kowsar321@!" };
@@ -169,7 +171,8 @@ public class ApiCredentials
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+           
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
@@ -184,7 +187,7 @@ public class ApiCredentials
         public string KowsarQuery(string str)
         {
             string query = str;
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Data", "");
         }
 
@@ -198,7 +201,7 @@ public class ApiCredentials
             Console.WriteLine("In yek matn dar konsol ast.");
             string query = "select * from AppBrokerCustomer Where ActivationCode = '" + ActivationCode + "'";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");
 
         }
@@ -211,9 +214,9 @@ public class ApiCredentials
 
             
             string query = "select * from AppBrokerCustomer Where ActivationCode = '" + Code + "'";
-            
-            DataTable dataTable = db.ExecQuery(query);
-            
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
             Console.WriteLine(dataTable.Rows[0]["SQLiteURL"] + "");
             string filePath = dataTable.Rows[0]["SQLiteURL"] + "";
             Console.WriteLine(filePath);
@@ -305,6 +308,24 @@ public class ApiCredentials
         }
 
 
+        [HttpGet]
+        [Route("setup")]
+        public IActionResult setup()
+        {
+
+            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\setup.rar";
+
+            if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
+            {
+                return NotFound("File not found");
+            }
+            byte[] fileBytes = System.IO.File.ReadAllBytes(@filePath);
+            string contentType = "application/rar"; // یا هر نوع مورد نظر
+            return File(fileBytes, contentType, Path.GetFileName(filePath));
+
+        }
+
+
 
 
         [HttpGet]
@@ -354,7 +375,7 @@ public class ApiCredentials
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
         }
@@ -364,8 +385,8 @@ public class ApiCredentials
         
         
         [HttpGet]
-        [Route("Log_report")]
-        public string Log_report(
+        [Route("LogReport")]
+        public string LogReport(
             string Device_Id,
             string Address_Ip,
             string Server_Name,
@@ -380,7 +401,7 @@ public class ApiCredentials
 
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 

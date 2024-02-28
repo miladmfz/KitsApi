@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using webapikits.Model;
 
+
+
 namespace webapikits.Controllers
 {
     [Route("api/[controller]")]
@@ -27,43 +29,6 @@ namespace webapikits.Controllers
 
         }
 
-
-
-
-
-
-        [HttpGet]
-        [Route("UpdateLocation")]
-        public string UpdateLocation([FromBody] string GpsLocations)
-        {
-
-
-            var locations = JsonConvert.DeserializeObject<List<GpsLocation>>(GpsLocations);
-
-            foreach (var lc in locations)
-            {
-                string longitude = lc.Longitude;
-                string latitude = lc.Latitude;
-                string brokerRef = lc.BrokerRef;
-                string gpsDate = lc.GpsDate.Replace("\\", "");
-
-                DateTime dateObj = DateTime.ParseExact(gpsDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
-                string formattedDate = dateObj.ToString("yyyy/MM/dd HH:mm:ss");
-
-                Query = "INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('" + longitude + "', '" + latitude + "', " + brokerRef + ", '" + formattedDate + "'); SELECT SCOPE_IDENTITY();";
-                DataTable = db.ExecQuery(Query);
-
-            }
-
-
-            Query = "select top 1 * from GpsLocation order by 1 desc  ";
-            DataTable dataTable = db.ExecQuery(Query);
-
-
-            return jsonClass.JsonResult_Str(dataTable, "Locations", "");
-
-
-        }
 
 
         [HttpGet]
@@ -91,13 +56,11 @@ namespace webapikits.Controllers
             string query = "Exec [spApp_GetColumn]  0  ,'', " + Type + "," + AppType + "," + IncludeZero;
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
 
         }
-
-
 
         [HttpGet]
         [Route("BrokerStack")]
@@ -109,14 +72,301 @@ namespace webapikits.Controllers
             }
 
             string query = "exec spApp_GetBrokerStack " + BrokerRef;
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
 
         }
 
+        [HttpGet]
+        [Route("getImageInfo")]
+        public string getImageInfo(string code)
+        {
 
 
+            string query = "Exec spApp_GetInfo 1, 'KsrImage', " + code + " , @RowCount=200, @CountFlag=1 ";
+
+            DataTable dataTable = db.ImageExecQuery(query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "");
+
+        }
+
+        [HttpGet]
+        [Route("GetMenuBroker")]
+        public string GetMenuBroker()
+        {
+
+
+            string query = "select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+
+
+        }
+
+        [HttpGet]
+        [Route("GetMaxRepLog")]
+        public string GetMaxRepLog()
+        {
+
+
+            string query = "Select top 1 * from RepLogData order by 1 desc";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
+
+
+        }
+
+        [HttpGet]
+        [Route("RetrofitReplicate")]
+        public string RetrofitReplicate(
+            string code,
+            string table,
+            string reptype,
+            string Reprow
+            )
+        {
+
+            string query = "Exec spApp_GetInfo " + reptype + ", " + table + ", " + code + ", @RowCount=" + Reprow + ", @CountFlag=1";
+
+
+            DataTable dataTable;
+            if (table.Equals("KsrImage"))
+            {
+                dataTable = db.ImageExecQuery(query);
+            }
+            else
+            {
+                dataTable = db.ExecQuery(Request.Path, query);
+            }
+
+            return jsonClass.JsonResult_Str1(dataTable, "Text", "");
+
+
+        }
+
+
+
+
+
+public class BrokerOrderClass
+    {
+        public List<HeaderDetail> HeaderDetails { get; set; }
+        public List<RowDetail> RowDetails { get; set; }
+    }
+
+    public class HeaderDetail
+    {
+        public string PreFactorCode { get; set; }
+        public string PreFactorDate { get; set; }
+        public string PreFactorExplain { get; set; }
+        public string CustomerRef { get; set; }
+        public string BrokerRef { get; set; }
+        public string RwCount { get; set; }
+    }
+
+    public class RowDetail
+    {
+        public string GoodRef { get; set; }
+        public string FactorAmount { get; set; }
+        public string Price { get; set; }
+    }
+
+
+
+
+
+    [HttpPost]
+    [Route("BrokerOrder")]
+    public string BrokerOrder([FromBody] BrokerOrderClass brokerOrderrequest)
+    {
+
+            List<HeaderDetail> headerDetails = brokerOrderrequest.HeaderDetails;
+            List<RowDetail> rowDetails = brokerOrderrequest.RowDetails;
+            
+
+            string Explain = _configuration.GetConnectionString("BrokerOrder_Explain");
+            string Stk = _configuration.GetConnectionString("BrokerOrder_Stack");
+            string HasMustAmount = _configuration.GetConnectionString("BrokerOrder_HasMustAmount");
+
+            var NotAmount = new List<Dictionary<string, object>>();
+
+            string MobFDate = "";
+            string factordate = "";
+            string ClassName = "";
+
+            int UserId = -1000;
+            int factorcode = 0;
+            int Customer = 0;
+            int Broker = 0;
+            int MobFCode = 0;
+            int ExistFlag = 0;
+            int CountRows = 0;
+            int z = 0;
+
+
+            MobFCode = Convert.ToInt32(headerDetails[0].PreFactorCode);
+            MobFDate=headerDetails[0].PreFactorDate;
+            Customer = Convert.ToInt32(headerDetails[0].CustomerRef);
+            Broker = Convert.ToInt32(headerDetails[0].BrokerRef);
+            Explain = headerDetails[0].PreFactorExplain;
+            CountRows = Convert.ToInt32(headerDetails[0].RwCount);
+
+
+                string sq = "IF Exists(Select 1 From DbSetup Where KeyValue = 'App_FactorTypeInKowsar' And DataValue='1')" +
+                            " Select ClassName = 'Factor' Else Select ClassName = 'PreFactor' ";
+                var ClassResult = db.ExecQuery(Request.Path, sq);
+                if (ClassResult != null)
+                {
+                    ClassName = ClassResult.Rows[0]["ClassName"].ToString();
+                }
+
+                 sq = $"Exec [dbo].[spPreFactor_Insert] '{ClassName}', {Stk}, {UserId}, 0, '', {Customer}, '{Explain}', {Broker}, {MobFCode}, '{MobFDate}'";
+
+            var result = db.ExecQuery(Request.Path, sq);
+            if (result != null)
+            {
+                factorcode = Convert.ToInt32(result.Rows[0]["PreFactorCode"]);
+                factordate = result.Rows[0]["PreFactorDate"].ToString();
+                ExistFlag = Convert.ToInt32(result.Rows[0]["ExistFlag"]);
+
+
+            }
+
+            DataTable dataTable1 = new DataTable();
+            DataTable dataTable2 = new DataTable();
+            DataTable dataTable3 = new DataTable();
+
+
+
+
+
+         if (ExistFlag == 0)
+        {
+
+
+                // Create a DataTable with two columns: GoodCode and Flag
+                DataTable notAmountTable = new DataTable();
+                notAmountTable.Columns.Add("GoodCode", typeof(int));
+                notAmountTable.Columns.Add("Flag", typeof(int));
+
+                foreach (RowDetail rowDetail_single in rowDetails)
+                {
+                    z++;
+                    int Code = Convert.ToInt32(rowDetail_single.GoodRef);
+                    int Amount = Convert.ToInt32(rowDetail_single.FactorAmount);
+                    int Price = Convert.ToInt32(rowDetail_single.Price);
+
+                    string sqrow = $"Exec [dbo].[spPreFactor_InsertRow] '{ClassName}', {factorcode}, {Code}, {Amount}, 0, {UserId}, '', {HasMustAmount}, 0, {Price}";
+                    var res = db.ExecQuery(Request.Path, sqrow);
+                    if (res != null)
+                    {
+                        int rowCode = Convert.ToInt32(res.Rows[0]["RowCode"]);
+                        // Add rows to the DataTable based on the result
+                        if (rowCode == -1 || rowCode == -2)
+                        {
+                            notAmountTable.Rows.Add(Code, rowCode);
+                        }
+                    }
+                }
+
+
+
+            
+
+            if (notAmountTable.Rows.Count < 1)
+            {
+                string sq1 = $"Select Sum(FacAmount) rcount From {ClassName}Rows Where {ClassName}Ref = {factorcode}";
+
+
+                var res1 = db.ExecQuery(Request.Path, sq1);
+                int rcount = Convert.ToInt32(res1.Rows[0]["rcount"]);
+
+                if (CountRows == rcount)
+                {
+                        string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
+                        return jsonClass.JsonResult_Str1(db.ExecQuery(Request.Path, query), "Text", "");
+
+                    }
+                    else
+                {
+                    string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
+                    string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
+
+
+                    db.ExecQuery(Request.Path, temp1);
+                    db.ExecQuery(Request.Path, temp2);
+                }
+            }
+            else
+            {
+                string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
+                string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
+                db.ExecQuery(Request.Path, temp1);
+                db.ExecQuery(Request.Path, temp2);
+            }
+                return jsonClass.JsonResult_Str1(notAmountTable, "Text", "");
+
+
+        }
+        else
+        {
+                string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
+                return jsonClass.JsonResult_Str1(db.ExecQuery(Request.Path, query), "Text", "");
+
+
+
+        }
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+        [HttpGet]
+        [Route("UpdateLocation")]
+        public string UpdateLocation([FromBody] string GpsLocations)
+        {
+
+
+            var locations = JsonConvert.DeserializeObject<List<GpsLocation>>(GpsLocations);
+
+            foreach (var lc in locations)
+            {
+                string longitude = lc.Longitude;
+                string latitude = lc.Latitude;
+                string brokerRef = lc.BrokerRef;
+                string gpsDate = lc.GpsDate.Replace("\\", "");
+
+                DateTime dateObj = DateTime.ParseExact(gpsDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
+                string formattedDate = dateObj.ToString("yyyy/MM/dd HH:mm:ss");
+
+                Query = "INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('" + longitude + "', '" + latitude + "', " + brokerRef + ", '" + formattedDate + "'); SELECT SCOPE_IDENTITY();";
+                DataTable = db.ExecQuery(Request.Path, Query);
+
+            }
+
+
+            Query = "select top 1 * from GpsLocation order by 1 desc  ";
+            DataTable dataTable = db.ExecQuery(Request.Path, Query);
+
+
+            return jsonClass.JsonResult_Str(dataTable, "Locations", "");
+
+
+        }
 
 
 
@@ -206,253 +456,12 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");
 
         }
-
-
-
-        [HttpGet]
-        [Route("getImageInfo")]
-        public string getImageInfo(string code)
-        {
-
-
-            string query = "Exec spApp_GetInfo 1, 'KsrImage', " + code + " , @RowCount=200, @CountFlag=1 ";
-
-            DataTable dataTable = db.ImageExecQuery(query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "");
-
-        }
-
-        [HttpGet]
-        [Route("GetMenuBroker")]
-        public string GetMenuBroker()
-        {
-
-
-            string query = "select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
-
-            DataTable dataTable = db.ExecQuery(query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
-
-
-        }
-
-
-        [HttpGet]
-        [Route("GetMaxRepLog")]
-        public string GetMaxRepLog()
-        {
-
-
-            string query = "Select top 1 * from RepLogData order by 1 desc";
-
-            DataTable dataTable = db.ExecQuery(query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
-
-
-        }
-
-
-        [HttpGet]
-        [Route("MaxRepLogCode")]
-        public string MaxRepLogCode()
-        {
-
-
-            string query = "Select top 1 * from RepLogData order by 1 desc";
-
-            DataTable dataTable = db.ExecQuery(query);
-
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
-
-        }
-
-
-
-
-
-        [HttpGet]
-        [Route("repinfo")]
-        public string repinfo(
-            string code,
-            string table,
-            string reptype,
-            string Reprow
-            )
-        {
-
-
-
-
-
-
-            string query = "Exec spApp_GetInfo " + reptype + ", " + table + ", " + code + ", @RowCount=" + Reprow + ", @CountFlag=1";
-
-
-            DataTable dataTable;
-            if (table.Equals("KsrImage"))
-            {
-                dataTable = db.ImageExecQuery(query);
-            }
-            else
-            {
-                dataTable = db.ExecQuery(query);
-            }
-
-            return jsonClass.JsonResult_Str1(dataTable, "Text", "");
-
-
-        }
-
-
-        [HttpGet]
-        [Route("BrokerOrder")]
-        public string BrokerOrder(string HeaderDetail, string RowDetail)
-        {
-            int UserId = -1000;
-            string factordate = "";
-            string Stk = _configuration.GetConnectionString("BrokerOrder_Stack");
-            string HJson = HeaderDetail;
-            var hobj = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(HJson);
-            int factorcode = 0;
-
-            string Explain = _configuration.GetConnectionString("BrokerOrder_Explain");
-            int Customer = 0;
-            int Broker = 0;
-            int MobFCode = 0;
-            string MobFDate = "";
-            int ExistFlag = 0;
-            string ClassName = _configuration.GetConnectionString("BrokerOrder_ClassName");
-            int CountRows = 0;
-
-
-            var NotAmount = new List<Dictionary<string, object>>();
-            int z = 0;
-
-            if (hobj != null)
-            {
-                if (hobj[0].ContainsKey("PreFactorCode")) { MobFCode = Convert.ToInt32(hobj[0]["PreFactorCode"]); }
-                if (hobj[0].ContainsKey("PreFactorDate")) { MobFDate = hobj[0]["PreFactorDate"].ToString(); }
-                if (hobj[0].ContainsKey("CustomerRef")) { Customer = Convert.ToInt32(hobj[0]["CustomerRef"]); }
-                if (hobj[0].ContainsKey("BrokerRef")) { Broker = Convert.ToInt32(hobj[0]["BrokerRef"]); }
-                if (hobj[0].ContainsKey("PreFactorExplain")) { Explain = hobj[0]["PreFactorExplain"].ToString(); }
-                if (hobj[0].ContainsKey("rwCount")) { CountRows = Convert.ToInt32(hobj[0]["rwCount"]); }
-
-                string sq = "IF Exists(Select 1 From DbSetup Where KeyValue = 'App_FactorTypeInKowsar' And DataValue='1') Select ClassName = 'Factor' Else Select ClassName = 'PreFactor' ";
-                var ClassResult = db.ExecQuery(sq);
-                if (ClassResult != null)
-                {
-                    ClassName = ClassResult.Rows[0]["ClassName"].ToString();
-                }
-
-                sq = $"Exec [dbo].[spPreFactor_Insert] '{ClassName}', {Stk}, {UserId}, 0, '', {Customer}, '{Explain}', {Broker}, {MobFCode}, '{MobFDate}'";
-
-
-                var result = db.ExecQuery(sq);
-                if (result != null)
-                {
-                    factorcode = Convert.ToInt32(result.Rows[0]["PreFactorCode"]);
-                    factordate = result.Rows[0]["PreFactorDate"].ToString();
-                    ExistFlag = Convert.ToInt32(result.Rows[0]["ExistFlag"]);
-                }
-            }
-
-            if (ExistFlag == 0)
-            {
-                string DJson = RowDetail;
-                var dobj = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(DJson);
-                if (dobj != null)
-                {
-                    foreach (var item in dobj)
-                    {
-                        z++;
-                        int Code = Convert.ToInt32(item["GoodRef"]);
-                        int Amount = Convert.ToInt32(item["FactorAmount"]);
-                        int Price = Convert.ToInt32(item["Price"]);
-
-                        string sq = $"Exec [dbo].[spPreFactor_InsertRow] '{ClassName}', {factorcode}, {Code}, {Amount}, 0, {UserId}, '', 1, 0, {Price}";
-
-                        var res = db.ExecQuery(sq);
-                        if (res != null)
-                        {
-                            if (Convert.ToInt32(res.Rows[0]["RowCode"]) == -1)
-                            {
-                                NotAmount.Add(new Dictionary<string, object> { { "GoodCode", Code }, { "Flag", 1 } });
-                            }
-                            else if (Convert.ToInt32(res.Rows[0]["RowCode"]) == -2)
-                            {
-                                NotAmount.Add(new Dictionary<string, object> { { "GoodCode", Code }, { "Flag", 2 } });
-                            }
-                        }
-                    }
-                }
-
-                if (NotAmount.Count < 1)
-                {
-                    string sq1 = $"Select Sum(FacAmount) rcount From {ClassName}Rows Where {ClassName}Ref = {factorcode}";
-
-
-                    var res1 = db.ExecQuery(sq1);
-                    int rcount = Convert.ToInt32(res1.Rows[0]["rcount"]);
-
-                    if (CountRows == rcount)
-                    {
-                        NotAmount.Add(new Dictionary<string, object>
-                        {
-                            { "GoodCode", "0" },
-                            { "PreFactorCode", factorcode },
-                            { "PreFactorDate", factordate },
-                            { "ExistFlag", ExistFlag }
-                        });
-                    }
-                    else
-                    {
-                        string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
-                        string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
-
-
-                        db.ExecQuery(temp1);
-                        db.ExecQuery(temp2);
-                    }
-                }
-                else
-                {
-                    string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
-                    string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
-                    db.ExecQuery(temp1);
-                    db.ExecQuery(temp2);
-                }
-            }
-            else
-            {
-                NotAmount.Add(new Dictionary<string, object>
-                {
-                    { "GoodCode", "0" },
-                    { "PreFactorCode", factorcode },
-                    { "PreFactorDate", factordate },
-                    { "ExistFlag", ExistFlag }
-                });
-            }
-
-
-
-
-
-            return "\""+JsonConvert.SerializeObject(NotAmount, Formatting.None, new JsonSerializerSettings { StringEscapeHandling = StringEscapeHandling.Default })+ "\"";
-        }
-
-
-
-
 
 
 

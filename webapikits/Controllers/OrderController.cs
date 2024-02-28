@@ -57,7 +57,7 @@ namespace webapikits.Controllers
 
             string query = " select * from AppPrinter ";
 
-            DataTable Table_print = db.ExecQuery(query);
+            DataTable Table_print = db.ExecQuery(Request.Path,  query);
 
             List<Printer> Printers = new List<Printer>();
 
@@ -106,7 +106,7 @@ namespace webapikits.Controllers
 
                 // Define query to retrieve data
                 query = $"Exec [dbo].[spApp_OrderGetFactor ] {AppBasketInfoRef} ";
-                DataTable dataTable_factor = db.ExecQuery(query);
+                DataTable dataTable_factor = db.ExecQuery(Request.Path, query);
 
                 List<Factor> factorHeader = new List<Factor>();
 
@@ -127,7 +127,7 @@ namespace webapikits.Controllers
                 string convertedString = printer.WhereClause.Replace("=''", "=N''");
 
                 query = $"Exec [dbo].[spApp_OrderGetFactorRow ] {AppBasketInfoRef} , {printer.GoodGroups} , N'{convertedString}' ";
-                DataTable dataTable_Row = db.ExecQuery(query);
+                DataTable dataTable_Row = db.ExecQuery(Request.Path, query);
 
 
 
@@ -209,7 +209,7 @@ namespace webapikits.Controllers
         {
             string query = $"exec spApp_OrderMizData {RstMizCode}";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.ConvertDataTableToJson(dataTable);
 
@@ -225,7 +225,7 @@ namespace webapikits.Controllers
 
             string query = $"exec spApp_OrderInfoInsert 0,{Miz},'','','',0,'','','{Date}',1,0 ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
             return jsonClass.ConvertDataTableToJson(dataTable);
         }
 
@@ -247,7 +247,7 @@ namespace webapikits.Controllers
 
             string query = $" exec spApp_OrderMizList  {InfoState}, N'{MizType}' ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
@@ -264,7 +264,7 @@ namespace webapikits.Controllers
 
             string query = "exec spApp_OrderReserveList "+ MizRef;
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
@@ -292,7 +292,7 @@ namespace webapikits.Controllers
 
             string query = "exec spApp_OrderInfoInsert "+Broker+","+Miz+",'"+PersonName+"','"+Mobile + "','" + InfoExplain + "'," +Prepayed+",'"+ReserveStartTime+"','"+ReserveEndTime+"','"+Date+"',"+State+","+InfoCode;
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
@@ -317,7 +317,7 @@ namespace webapikits.Controllers
 
             string query = $"[dbo].[spApp_OrderRowInsert] {GoodRef}, {FacAmount}, {Price}, {bUnitRef}, {bRatio}, '{Explain}', {UserId}, {InfoRef}, {RowCode}";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -335,7 +335,7 @@ namespace webapikits.Controllers
 
             string query = "select GoodCode,GoodName,MaxSellPrice,'' ImageName from vwGood where  GoodCode in(Select GoodRef From GoodGroup p Join GoodsGrp s on p.GoodGroupRef = s.GroupCode Where s.GroupCode = "+ GroupCode + " or s.L1 = "+ GroupCode + " or s.L2 = "+ GroupCode + " or s.L3 = "+ GroupCode + " )";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -352,7 +352,7 @@ namespace webapikits.Controllers
 
             string query = "select * from dbo.fnObjectType('"+ ObjectType + "') ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
 
@@ -368,7 +368,7 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
 
@@ -390,7 +390,7 @@ namespace webapikits.Controllers
             //string query = "Exec spApp_GetGoods2 @RowCount = $RowCount,@Where = N'$Where',@AppBasketInfoRef=$AppBasketInfoRef, @GroupCode = $GroupCode ,@AppType=3 , @OrderBy = ' order by PrivateCodeForSort ' ";
             string query = $"Exec spApp_GetGoods2 @RowCount = {RowCount}, @Where = N'{Where}', @AppBasketInfoRef = {AppBasketInfoRef}, @GroupCode = {GroupCode}, @AppType = 3, @OrderBy = ' order by PrivateCodeForSort '";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -410,7 +410,7 @@ namespace webapikits.Controllers
             //string query = "Exec spApp_GetGoods2 @RowCount = $RowCount,@Where = N'$Where',@AppBasketInfoRef=$AppBasketInfoRef, @GroupCode = $GroupCode ,@AppType=3 , @OrderBy = ' order by PrivateCodeForSort ' ";
             string query = $"Delete From AppBasket Where AppBasketInfoRef = {AppBasketInfoRef} and AppBasketCode = {RowCode}";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
 
@@ -426,7 +426,7 @@ namespace webapikits.Controllers
 
             string query = "select brokerCode,BrokerNameWithoutType from  vwSellBroker";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
 
@@ -442,7 +442,7 @@ namespace webapikits.Controllers
 
             string query = "Exec spApp_OrderGetSummmary "+AppBasketInfoRef;
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -459,7 +459,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec [dbo].[spApp_OrderGet] {AppBasketInfoRef} , {AppType} ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -476,7 +476,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec [dbo].[spApp_OrderToFactor] {AppBasketInfoRef} , {UserId} ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
@@ -492,7 +492,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec [dbo].[spApp_OrderGetFactor] {AppBasketInfoRef}  ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -514,7 +514,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_OrderGetFactorRow] {AppBasketInfoRef}, {GoodGroups}, '{Where}'";
 
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -529,7 +529,7 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppPrinter ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "AppPrinters", "");
 
@@ -548,7 +548,7 @@ namespace webapikits.Controllers
 
             string query = $"spApp_Order_CanPrint  {AppBasketInfoRef} ,{CanPrint}  ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
 
@@ -569,7 +569,7 @@ namespace webapikits.Controllers
 
             string query = $" spApp_OrderInfoUpdateExplain  '{Explain}', {AppBasketInfoCode}   ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
@@ -585,7 +585,7 @@ namespace webapikits.Controllers
 
             string query = $"Delete From AppBasket Where  PreFactorCode is null and  AppBasketInfoRef= {AppBasketInfoRef} ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
 
@@ -601,7 +601,7 @@ namespace webapikits.Controllers
 
             string query = $" spApp_OrderInfoReserveDelete  {AppBasketInfoRef} ";
 
-            DataTable dataTable = db.ExecQuery(query);
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
 
@@ -631,7 +631,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuery(sq);
+            DataTable dataTable = db.ExecQuery(Request.Path, sq);
 
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
@@ -662,7 +662,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuery(sq);
+            DataTable dataTable = db.ExecQuery(Request.Path, sq);
 
             return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
