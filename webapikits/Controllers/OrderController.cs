@@ -4,6 +4,7 @@ using webapikits.Model;
 
 using FastReport;
 using FastReport.Export.PdfSimple;
+using System.Reflection;
 
 
 namespace webapikits.Controllers
@@ -26,6 +27,84 @@ namespace webapikits.Controllers
             db = new DataBaseClass(_configuration);
 
         }
+
+
+
+
+        public class OrderModel
+        {
+            public string MizType { get; set; } = "";
+            public string InfoState { get; set; } = "0";
+
+
+
+            public string GroupCode { get; set; } = "0";
+            public string RowCount { get; set; } = "100";
+            public string Where { get; set; } = "";
+            public string AppBasketInfoRef { get; set; } = "0";
+
+
+
+
+            public string Broker { get; set; } = "0";
+            public string Miz { get; set; } = "0";
+            public string PersonName { get; set; } = "";
+            public string Mobile { get; set; } = "";
+            public string InfoExplain { get; set; } = "";
+            public string Prepayed { get; set; } = "0";
+            public string ReserveStartTime { get; set; } = "";
+            public string ReserveEndTime { get; set; } = "";
+            public string Date { get; set; } = "";
+            public string State { get; set; } = "0";
+            public string InfoCode { get; set; } = "0";
+
+
+
+            public string GoodRef { get; set; } = "0";
+            public string FacAmount { get; set; } = "0";
+            public string Price { get; set; } = "0";
+            public string bUnitRef { get; set; } = "0";
+            public string bRatio { get; set; } = "0";
+            public string Explain { get; set; } = "";
+            public string UserId { get; set; } = "-3000";
+            public string InfoRef { get; set; } = "0";
+            public string RowCode { get; set; } = "0";
+
+
+
+            public string AppBasketInfoCode { get; set; } = "0";
+
+
+        }
+
+
+        [HttpGet]
+        [Route("GetObjectTypeFromDbSetup")]
+        public string GetObjectTypeFromDbSetup(string ObjectType)
+        {
+
+            string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
+
+        }
+
+
+        [HttpPost]
+        [Route("OrderMizList")]
+        public string OrderMizList([FromBody] OrderModel orderModel)
+        {
+
+            string query = $" exec spApp_OrderMizList  {orderModel.InfoState}, N'{orderModel.MizType}' ";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
+
+        }
+
 
 
 
@@ -199,203 +278,40 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
         [HttpGet]
-        [Route("WebOrderMizData")]
-        public string WebOrderMizData(string RstMizCode)
-        {
-            string query = $"exec spApp_OrderMizData {RstMizCode}";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.ConvertDataTableToJson(dataTable);
-
-        }
-
-
-
-
-        [HttpGet]
-        [Route("WebOrderInfoInsert")]
-        public string WebOrderInfoInsert(string Miz, string Date)
+        [Route("GetOrdergroupList")]
+        public string GetOrdergroupList( string GroupCode   )
         {
 
-            string query = $"exec spApp_OrderInfoInsert 0,{Miz},'','','',0,'','','{Date}',1,0 ";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-            return jsonClass.ConvertDataTableToJson(dataTable);
-        }
+            string sq = "Exec [dbo].[spApp_GetGoodGroups]  @GroupName = N'' ";
 
 
+            if (!string.IsNullOrEmpty(GroupCode))
+            {
+                sq += $" @GroupCode = N'{GroupCode}' ";
+            }
 
 
+            DataTable dataTable = db.ExecQuery(Request.Path, sq);
 
-
-
-
-
-
-
-
-        [HttpGet]
-        [Route("OrderMizList")]
-        public string OrderMizList(string InfoState, string MizType)
-        {
-
-            string query = $" exec spApp_OrderMizList  {InfoState}, N'{MizType}' ";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
-
-        }
-
-
-
-
-
-        [HttpGet]
-        [Route("OrderReserveList")]
-        public string OrderReserveList(string MizRef)
-        {
-
-            string query = "exec spApp_OrderReserveList "+ MizRef;
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
+            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
         }
         
 
-
-
-        [HttpGet]
-        [Route("OrderInfoInsert")]
-        public string OrderInfoInsert(
-            string Broker,
-            string Miz,
-            string PersonName,
-            string Mobile,
-            string InfoExplain,
-            string Prepayed,
-            string ReserveStartTime,
-            string ReserveEndTime,
-            string Date,
-            string State,
-            string InfoCode
-            )
-        {
-
-            string query = "exec spApp_OrderInfoInsert "+Broker+","+Miz+",'"+PersonName+"','"+Mobile + "','" + InfoExplain + "'," +Prepayed+",'"+ReserveStartTime+"','"+ReserveEndTime+"','"+Date+"',"+State+","+InfoCode;
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
-
-        }
-
-
-
-        [HttpGet]
-        [Route("OrderRowInsert")]
-        public string OrderRowInsert(
-            string GoodRef,
-            string FacAmount,
-            string Price,
-            string bUnitRef,
-            string bRatio,
-            string Explain,
-            string UserId,
-            string InfoRef,
-            string RowCode
-            )
-        {
-
-            string query = $"[dbo].[spApp_OrderRowInsert] {GoodRef}, {FacAmount}, {Price}, {bUnitRef}, {bRatio}, '{Explain}', {UserId}, {InfoRef}, {RowCode}";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
-
-        }
-
-
-
-
-
-
-        [HttpGet]
-        [Route("GetGoodFromGroup")]
-        public string GetGoodFromGroup(string GroupCode)
-        {
-
-            string query = "select GoodCode,GoodName,MaxSellPrice,'' ImageName from vwGood where  GoodCode in(Select GoodRef From GoodGroup p Join GoodsGrp s on p.GoodGroupRef = s.GroupCode Where s.GroupCode = "+ GroupCode + " or s.L1 = "+ GroupCode + " or s.L2 = "+ GroupCode + " or s.L3 = "+ GroupCode + " )";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
-
-        }
-
-
-
-
-
-        [HttpGet]
-        [Route("GetObjectTypeFromDbSetup")]
-        public string GetObjectTypeFromDbSetup(string ObjectType)
-        {
-
-            string query = "select * from dbo.fnObjectType('"+ ObjectType + "') ";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
-
-        }
-
-
-
-
-        [HttpGet]
-        [Route("GetTodeyFromServer")]
-        public string GetTodeyFromServer()
-        {
-
-            string query = "select dbo.fnDate_Today() TodeyFromServer ";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
-
-        }
-
-
-
-
-        [HttpGet]
+        [HttpPost]
         [Route("GetOrderGoodList")]
-        public string GetOrderGoodList(
-            string GroupCode,
-            string RowCount,
-            string Where,
-            string AppBasketInfoRef
-            )
+        public string GetOrderGoodList([FromBody] OrderModel orderModel)
         {
 
             //string query = "Exec spApp_GetGoods2 @RowCount = $RowCount,@Where = N'$Where',@AppBasketInfoRef=$AppBasketInfoRef, @GroupCode = $GroupCode ,@AppType=3 , @OrderBy = ' order by PrivateCodeForSort ' ";
-            string query = $"Exec spApp_GetGoods2 @RowCount = {RowCount}, @Where = N'{Where}', @AppBasketInfoRef = {AppBasketInfoRef}, @GroupCode = {GroupCode}, @AppType = 3, @OrderBy = ' order by PrivateCodeForSort '";
+            string query = $"Exec spApp_GetGoods2 @RowCount = {orderModel.RowCount}, @Where = N'{orderModel.Where}', @AppBasketInfoRef = {orderModel.AppBasketInfoRef}, @GroupCode = {orderModel.GroupCode}, @AppType = 3, @OrderBy = ' order by PrivateCodeForSort '";
 
             DataTable dataTable = db.ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
-
 
 
 
@@ -417,30 +333,59 @@ namespace webapikits.Controllers
         }
 
 
-
-
-        [HttpGet]
-        [Route("GetSellBroker")]
-        public string GetSellBroker()
+        [HttpPost]
+        [Route("OrderInfoInsert")]
+        public string OrderInfoInsert([FromBody] OrderModel orderModel)
         {
 
-            string query = "select brokerCode,BrokerNameWithoutType from  vwSellBroker";
+            string query = $"exec spApp_OrderInfoInsert  {orderModel.Broker} , {orderModel.Miz} " +
+                        $" ,'{orderModel.PersonName}','{orderModel.Mobile}','{orderModel.InfoExplain}'" +
+                        $" ,{orderModel.Prepayed},'{orderModel.ReserveStartTime}','{orderModel.ReserveEndTime}'" +
+                        $" ,'{orderModel.Date}',{orderModel.State},{orderModel.InfoCode}";
 
             DataTable dataTable = db.ExecQuery(Request.Path, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
+            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
         }
 
 
-
-
         [HttpGet]
-        [Route("GetOrderSum")]
-        public string GetOrderSum(string AppBasketInfoRef)
+        [Route("OrderReserveList")]
+        public string OrderReserveList(string MizRef)
         {
 
-            string query = "Exec spApp_OrderGetSummmary "+AppBasketInfoRef;
+            string query = "exec spApp_OrderReserveList " + MizRef;
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
+
+        }
+
+        [HttpGet]
+        [Route("GetTodeyFromServer")]
+        public string GetTodeyFromServer()
+        {
+
+            string query = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+
+        }
+
+
+        [HttpPost]
+        [Route("OrderRowInsert")]
+        public string OrderRowInsert([FromBody] OrderModel orderModel)
+        {
+
+            string query = $"[dbo].[spApp_OrderRowInsert] {orderModel.GoodRef}," +
+                        $" {orderModel.FacAmount}, {orderModel.Price}, {orderModel.bUnitRef}," +
+                        $" {orderModel.bRatio}, '{orderModel.Explain}', {orderModel.UserId}," +
+                        $" {orderModel.InfoRef}, {orderModel.RowCode}";
 
             DataTable dataTable = db.ExecQuery(Request.Path, query);
 
@@ -449,12 +394,22 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetOrderSum")]
+        public string GetOrderSum(string AppBasketInfoRef)
+        {
 
+            string query = "Exec spApp_OrderGetSummmary " + AppBasketInfoRef;
 
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
 
         [HttpGet]
         [Route("OrderGet")]
-        public string OrderGet(string AppBasketInfoRef,string AppType)
+        public string OrderGet(string AppBasketInfoRef, string AppType)
         {
 
             string query = $"Exec [dbo].[spApp_OrderGet] {AppBasketInfoRef} , {AppType} ";
@@ -464,25 +419,6 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
-
-
-
-
-
-        [HttpGet]
-        [Route("OrderToFactor")]
-        public string OrderToFactor(string AppBasketInfoRef, string UserId)
-        {
-
-            string query = $"Exec [dbo].[spApp_OrderToFactor] {AppBasketInfoRef} , {UserId} ";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
-
-        }
-
-
 
 
         [HttpGet]
@@ -500,27 +436,18 @@ namespace webapikits.Controllers
 
 
 
-
-
         [HttpGet]
-        [Route("OrderGetFactorRow")]
-        public string OrderGetFactorRow(
-            string AppBasketInfoRef,
-            string GoodGroups,
-            string Where
-            )
+        [Route("OrderToFactor")]
+        public string OrderToFactor(string AppBasketInfoRef)
         {
 
-            string query = $"Exec [dbo].[spApp_OrderGetFactorRow] {AppBasketInfoRef}, {GoodGroups}, '{Where}'";
-
+            string query = $"Exec [dbo].[spApp_OrderToFactor] {AppBasketInfoRef} , -2000 ";
 
             DataTable dataTable = db.ExecQuery(Request.Path, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
         }
-
-
 
         [HttpGet]
         [Route("OrderGetAppPrinter")]
@@ -535,15 +462,12 @@ namespace webapikits.Controllers
 
         }
 
-
-
-
         [HttpGet]
         [Route("Order_CanPrint")]
         public string Order_CanPrint(
-            string AppBasketInfoRef,
-            string CanPrint
-            )
+    string AppBasketInfoRef,
+    string CanPrint
+    )
         {
 
             string query = $"spApp_Order_CanPrint  {AppBasketInfoRef} ,{CanPrint}  ";
@@ -553,30 +477,6 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
 
         }
-
-
-
-
-
-
-        [HttpGet]
-        [Route("OrderEditInfoExplain")]
-        public string OrderEditInfoExplain(
-            string AppBasketInfoCode,
-            string Explain
-            )
-        {
-
-            string query = $" spApp_OrderInfoUpdateExplain  '{Explain}', {AppBasketInfoCode}   ";
-
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
-
-        }
-
-
-
 
         [HttpGet]
         [Route("OrderDeleteAll")]
@@ -591,9 +491,6 @@ namespace webapikits.Controllers
 
         }
 
-
-
-
         [HttpGet]
         [Route("OrderInfoReserveDelete")]
         public string OrderInfoReserveDelete(string AppBasketInfoRef)
@@ -607,76 +504,25 @@ namespace webapikits.Controllers
 
         }
 
-
-
-
-        [HttpGet]
-        [Route("GetMenuOnlinegroups")]
-        public string GetMenuOnlinegroups(
-            string GroupName,
-            string GroupCode
-            )
+        [HttpPost]
+        [Route("OrderEditInfoExplain")]
+        public string OrderEditInfoExplain([FromBody] OrderModel orderModel)
         {
 
-            string sq = "Exec [dbo].[spApp_GetGoodGroups] @where=' And GroupCode <100', ";
+            string query = $" spApp_OrderInfoUpdateExplain  '{orderModel.Explain}', {orderModel.AppBasketInfoCode}   ";
 
-            if (!string.IsNullOrEmpty(GroupName))
-            {
-                sq += $" @GroupName = N'{GroupName}' ";
-            }
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
 
-            if (!string.IsNullOrEmpty(GroupCode))
-            {
-                sq += $" @GroupCode = N'{GroupCode}' ";
-            }
-
-
-            DataTable dataTable = db.ExecQuery(Request.Path, sq);
-
-            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
 
         }
 
-
-
-
-
-        [HttpGet]
-        [Route("GetOrdergroupList")]
-        public string GetOrdergroupList(
-            string GroupName,
-            string GroupCode
-            )
-        {
-
-            string sq = "Exec [dbo].[spApp_GetGoodGroups]  ";
-
-            if (!string.IsNullOrEmpty(GroupName))
-            {
-                sq += $" @GroupName = N'{GroupName}' ";
-            }
-
-            if (!string.IsNullOrEmpty(GroupCode))
-            {
-                sq += $" @GroupCode = N'{GroupCode}' ";
-            }
-
-
-            DataTable dataTable = db.ExecQuery(Request.Path, sq);
-
-            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
-
-        }
 
 
 
 
 
         /*
-
-
-
-
 
 
 
@@ -733,15 +579,96 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("WebOrderMizData")]
+        public string WebOrderMizData(string RstMizCode)
+        {
+            string query = $"exec spApp_OrderMizData {RstMizCode}";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.ConvertDataTableToJson(dataTable);
+
+        }
 
 
 
 
+        [HttpGet]
+        [Route("WebOrderInfoInsert")]
+        public string WebOrderInfoInsert(string Miz, string Date)
+        {
+
+            string query = $"exec spApp_OrderInfoInsert 0,{Miz},'','','',0,'','','{Date}',1,0 ";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            return jsonClass.ConvertDataTableToJson(dataTable);
+        }
 
 
 
 
+        [HttpGet]
+        [Route("GetMenuOnlinegroups")]
+        public string GetMenuOnlinegroups(
+            string GroupName,
+            string GroupCode
+            )
+        {
 
+            string sq = "Exec [dbo].[spApp_GetGoodGroups] @where=' And GroupCode <100', ";
+
+            if (!string.IsNullOrEmpty(GroupName))
+            {
+                sq += $" @GroupName = N'{GroupName}' ";
+            }
+
+            if (!string.IsNullOrEmpty(GroupCode))
+            {
+                sq += $" @GroupCode = N'{GroupCode}' ";
+            }
+
+
+            DataTable dataTable = db.ExecQuery(Request.Path, sq);
+
+            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+
+        }
+
+
+        [HttpGet]
+        [Route("GetGoodFromGroup")]
+        public string GetGoodFromGroup(string GroupCode)
+        {
+
+            string query = "select GoodCode,GoodName,MaxSellPrice,'' ImageName from vwGood where  GoodCode in(Select GoodRef From GoodGroup p Join GoodsGrp s on p.GoodGroupRef = s.GroupCode Where s.GroupCode = " + GroupCode + " or s.L1 = " + GroupCode + " or s.L2 = " + GroupCode + " or s.L3 = " + GroupCode + " )";
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
+
+
+        [HttpGet]
+        [Route("OrderGetFactorRow")]
+        public string OrderGetFactorRow(
+            string AppBasketInfoRef,
+            string GoodGroups,
+            string Where
+            )
+        {
+
+            string query = $"Exec [dbo].[spApp_OrderGetFactorRow] {AppBasketInfoRef}, {GoodGroups}, '{Where}'";
+
+
+            DataTable dataTable = db.ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
 
 
 
