@@ -46,22 +46,33 @@ namespace webapikits.Model
 
 
 
+        
 
-
-        public DataTable ExecQuerytestDb(String FunctionName, String query)
+        public DataTable Web_ExecQuery(String FunctionName, String query)
         {
-
-
-
             if (FunctionName != "/api/Web/GetWebLog")
             {
                 LogQuery(FunctionName, query);
             }
+            string connectionString = _configuration.GetConnectionString("Kowsar_Connection"); 
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
 
-
-
-
-            string connectionString = _configuration.GetConnectionString("TestConnection"); // استفاده از IConfiguration برای خواندن connection string
+        public DataTable Kowsar_ExecQuery(String FunctionName, String query)
+        {
+            if (FunctionName != "/api/Web/GetWebLog")
+            {
+                LogQuery(FunctionName, query);
+            }
+            string connectionString = _configuration.GetConnectionString("Kowsar_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
@@ -74,26 +85,109 @@ namespace webapikits.Model
         }
 
 
-        public DataTable ExecQuery(String FunctionName,String query)
+        public DataTable Broker_ExecQuery(String FunctionName,String query)
         {
-
-
 
             if (FunctionName != "/api/Web/GetWebLog")
             {
                 // Log the route and function name
                 LogQuery(FunctionName, query);
             }
-
-
-
-
-            string connectionString = _configuration.GetConnectionString("DefaultConnection"); // استفاده از IConfiguration برای خواندن connection string
+            string connectionString = _configuration.GetConnectionString("Broker_Connection"); 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
+                con.Open();
                 SqlDataAdapter ad = new SqlDataAdapter(query, con);
                 DataTable dataTable = new DataTable();
                 ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
+
+        public DataTable Ocr_ExecQuery(String FunctionName, String query)
+        {
+
+            if (FunctionName != "/api/Web/GetWebLog")
+            {
+                // Log the route and function name
+                LogQuery(FunctionName, query);
+            }
+            string connectionString = _configuration.GetConnectionString("Ocr_Connection");
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
+
+
+        public DataTable Order_ExecQuery(String FunctionName, String query)
+        {
+
+            if (FunctionName != "/api/Web/GetWebLog")
+            {
+                // Log the route and function name
+                LogQuery(FunctionName, query);
+            }
+            string connectionString = _configuration.GetConnectionString("Order_Connection");
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
+
+        public DataTable Company_ExecQuery(String FunctionName, String query)
+        {
+
+            if (FunctionName != "/api/Web/GetWebLog")
+            {
+                // Log the route and function name
+                LogQuery(FunctionName, query);
+            }
+            string connectionString = _configuration.GetConnectionString("Company_Connection");
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
+
+
+
+        public DataTable Kits_ExecQuery(String FunctionName, String query)
+        {
+
+            if (FunctionName != "/api/Web/GetWebLog")
+            {
+                // Log the route and function name
+                LogQuery(FunctionName, query);
+            }
+            string connectionString = _configuration.GetConnectionString("Kits_Connection");
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
                 return dataTable;
             }
         }
@@ -108,21 +202,25 @@ namespace webapikits.Model
 
 
 
+        public string ConvertToPersianNumber(string number)
+        {
+            // Implement your own logic to convert the numerical value to Persian text
+            // This could involve replacing each digit with its Persian equivalent
+            // For example, replace 1 with "۱", 2 with "۲", and so on
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            // Example implementation:
+            string result = number.Replace("1", "۱")
+                                  .Replace("2", "۲")
+                                  .Replace("3", "۳")
+                                  .Replace("4", "۴")
+                                  .Replace("5", "۵")
+                                  .Replace("6", "۶")
+                                  .Replace("7", "۷")
+                                  .Replace("8", "۸")
+                                  .Replace("9", "۹")
+                                  .Replace("0", "۰");
+            return result;
+        }
 
 
 
@@ -151,7 +249,7 @@ namespace webapikits.Model
             string Log = $"exec sp_WebLogInsert @ClassName='{FunctionName}',@TagName='',@LogValue='{query}'";
            
 
-            string connectionString = _configuration.GetConnectionString("DefaultConnection"); // استفاده از IConfiguration برای خواندن connection string
+            string connectionString = _configuration.GetConnectionString("Kits_Connection"); // استفاده از IConfiguration برای خواندن connection string
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 SqlDataAdapter ad = new SqlDataAdapter(Log, con);

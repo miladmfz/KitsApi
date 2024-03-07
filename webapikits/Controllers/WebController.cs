@@ -46,7 +46,7 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppBrokerCustomer";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -61,7 +61,7 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppBrokerCustomer Where AppBrokerCustomerCode = '{AppBrokerCustomerCode}'";
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -103,7 +103,7 @@ namespace webapikits.Controllers
                 $" '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', {brokercustomerdto.AppType} ";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -123,7 +123,7 @@ namespace webapikits.Controllers
                 $"'{brokercustomerdto.ServerURL}', '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', {brokercustomerdto.AppType} ";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -141,7 +141,7 @@ namespace webapikits.Controllers
             string query = $"Select Server_Name, STRING_AGG([Broker],',') within group (order by case when isnumeric([Broker])=1 then cast([Broker] as decimal) else 0 end, [Broker] ) as BrokerStr From (select Server_Name, Device_Id, [Broker] from app_info where DATEDIFF(m,Updatedate,GETDATE())<{Filter} group by Server_Name, Device_Id, [Broker]) ds group by Server_Name";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -160,7 +160,7 @@ namespace webapikits.Controllers
             string query = $"select top 50 * from WebLog order by 1 desc";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -177,7 +177,7 @@ namespace webapikits.Controllers
             string query = $"exec sp_WebLogInsert @ClassName='{ClassName}',@TagName='{TagName}',@LogValue='{LogValue}'";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -232,7 +232,7 @@ namespace webapikits.Controllers
             string query = $"Exec spWeb_AutLetterList '{Where}'";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -251,7 +251,7 @@ namespace webapikits.Controllers
             string query = $"exec dbo.spAutLetter_Insert @LetterDate='{LetterDate}', @InOutFlag=0,@Title ='{title}', @Description='{Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral =28, @OwnerCentral ={CentralRef} ";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -267,7 +267,7 @@ namespace webapikits.Controllers
             string query = $"select  LetterRowCode,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -284,7 +284,7 @@ namespace webapikits.Controllers
             string query = $"select CentralCode,CentralName from vwCentralUser ";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -305,7 +305,7 @@ namespace webapikits.Controllers
 
             string query = $"spAutLetterRow_Insert @LetterRef = {LetterRef}, @LetterDate = '{LetterDate}', @Description = '{Description}', @State = 'درحال انجام', @Priority = 'عادي', @CreatorCentral = {CreatorCentral}, @ExecuterCentral = {ExecuterCentral}";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -322,7 +322,7 @@ namespace webapikits.Controllers
 
             string query = $" Update AutLetterRow Set AlarmActive=0 Where LetterRowCode={LetterRowCode} ";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -340,7 +340,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spWeb_GetAutConversation  {LetterRef}";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -363,7 +363,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={letterdto.LetterRef}, @CentralRef={letterdto.CentralRef}, @ConversationText='{letterdto.ConversationText}'";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -382,7 +382,7 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_AutLetterListByPerson {PersonInfoCode}";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -406,7 +406,7 @@ namespace webapikits.Controllers
             string query = $"select Explain,RelationType,BrokerCode , CentralRef,BrokerNameWithoutType from vwSellBroker where active=0";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -423,7 +423,7 @@ namespace webapikits.Controllers
             string query = $"spWeb_BrokerDetail {BrokerCode} ";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -444,7 +444,7 @@ namespace webapikits.Controllers
             string query = $"Declare @D varchar(10)= dbo.fnDate_ConvertToShamsi(dateadd(d, -{Days}, getdate())) Select CustName,sum(RowsCount) RowsCount, Sum(SumAmount) SumAmount, Sum(SumPrice) SumPrice From vwPreFactor Where BrokerRef={BrokerCode} And PreFactorDate >= @D Group By CustName order by RowsCount desc";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -463,7 +463,7 @@ namespace webapikits.Controllers
             string query = $"spWeb_GetBrokerChartData {BrokerCode} ,  {Days} , 'CustName ' ,'CustName, '''' PreFactorDate' ";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -485,7 +485,7 @@ namespace webapikits.Controllers
             string query = $"spWeb_GetBrokerChartData {BrokerCode} ,  {Days} , 'PreFactorDate ' ,'PreFactorDate, '''' CustName' ";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -498,12 +498,12 @@ namespace webapikits.Controllers
         public string CreateAppBroker(string KowsarDb, string KowsarImage)
         {
 
-            db.ExecQuerytestDb(Request.Path, "DROP DATABASE IF EXISTS Appbroker");
+            db.Web_ExecQuery(Request.Path, "DROP DATABASE IF EXISTS Appbroker");
 
             string query = $"{KowsarDb}..spApp_BrokerRep 'Appbroker','{KowsarImage}'";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return TestImport();
 
@@ -517,7 +517,7 @@ namespace webapikits.Controllers
 
             db.TestImportedit();
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, "select  count (*) count from Good");
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, "select  count (*) count from Good");
             return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
@@ -558,7 +558,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -641,7 +641,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -654,7 +654,7 @@ namespace webapikits.Controllers
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -668,7 +668,7 @@ namespace webapikits.Controllers
                 " Select BrokerCode, CustomerCode,1, GetDate(),1, GetDate() From Customer c Join SellBroker b on 1=1" +
                 " Where c.Active<2 And b.Active<2 And Not Exists(Select 1 from BrokerCustomer s where s.BrokerRef=b.BrokerCode and s.CustomerRef=c.CustomerCode)";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -706,7 +706,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -729,7 +729,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -746,7 +746,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -774,7 +774,7 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -795,7 +795,7 @@ namespace webapikits.Controllers
             string query =  $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -813,7 +813,7 @@ namespace webapikits.Controllers
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -863,7 +863,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -892,7 +892,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -913,7 +913,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -934,7 +934,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -955,7 +955,7 @@ namespace webapikits.Controllers
 
                 string query1 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='Image'";
 
-                DataTable dataTable1 = db.ExecQuery(Request.Path, query1);
+                DataTable dataTable1 = db.Web_ExecQuery(Request.Path, query1);
                 string Conversationref = dataTable1.Rows[0]["ConversationCode"]+"";
 
 
@@ -1072,7 +1072,7 @@ namespace webapikits.Controllers
 
             string query = $" exec spApp_OrderMizList  {InfoState}, N'{MizType}' ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -1085,7 +1085,7 @@ namespace webapikits.Controllers
 
             string query = $" spWeb_Getchartpanel '{Date}' ,{State} ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -1100,7 +1100,7 @@ namespace webapikits.Controllers
 
             string query = $"select dbo.fnDate_AddDays(dbo.fnDate_Today(),{day}) TodeyFromServer  ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1112,7 +1112,7 @@ namespace webapikits.Controllers
 
             string query = $" spweb_Getorderpanel '{Date}' ,{State} ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1125,7 +1125,7 @@ namespace webapikits.Controllers
 
             string query = $" spWeb_GetCustomerMandeh ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1138,7 +1138,7 @@ namespace webapikits.Controllers
 
             string query = $" spWeb_GetCustomerlastGood {CustomerCode} ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1152,7 +1152,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec  spApp_GetGoodGroups  @GroupCode= {GroupCode} ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1168,7 +1168,7 @@ namespace webapikits.Controllers
 
             string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -1195,7 +1195,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spApp_GetGoods2 @RowCount = {searchDto.RowCount},@Where = N' GoodName like ''%{searchtarget}%''' ,@AppBasketInfoRef=0, @GroupCode = {searchDto.GroupCode} ,@AppType=3 ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1208,7 +1208,7 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_ChangeGoodActive {GoodCode},{ActiveFlag} ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1223,7 +1223,7 @@ namespace webapikits.Controllers
 
             string query = $"Select GoodCode,GoodName, CAST(MaxSellprice AS INT) MaxSellprice,GoodExplain1,GoodExplain2,GoodExplain3,GoodExplain4,GoodExplain5,GoodExplain6 from Good Where GoodCode = {Where} ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1234,7 +1234,7 @@ namespace webapikits.Controllers
 
             string query = $"select ActiveStack,GoodRef from GoodStack where goodref = {GoodCode}  order by 1 desc ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1287,7 +1287,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spWeb_InsertGood '{gooddto.GoodName}' , {gooddto.MaxSellPrice},'{gooddto.GoodExplain1}','{gooddto.GoodExplain2}','{gooddto.GoodExplain3}','{gooddto.GoodExplain4}','{gooddto.GoodExplain5}','{gooddto.GoodExplain6}' ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1300,7 +1300,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spWeb_UpdateGoodDetail {gooddto.GoodCode},'{gooddto.GoodName}' , {gooddto.MaxSellPrice},'{gooddto.GoodExplain1}','{gooddto.GoodExplain2}','{gooddto.GoodExplain3}','{gooddto.GoodExplain4}','{gooddto.GoodExplain5}','{gooddto.GoodExplain6}' ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1316,7 +1316,7 @@ namespace webapikits.Controllers
 
             string query = $"select GoodGroupCode,GoodGroupRef, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode where Goodref = {Where}  ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1329,7 +1329,7 @@ namespace webapikits.Controllers
 
             string query = $"select GoodGroupCode, GoodName, GoodCode from Good join GoodGroup on goodref = GoodCode  where GoodGroupRef = {Where}  ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1341,7 +1341,7 @@ namespace webapikits.Controllers
 
             string query = $" delete from GoodGroup Where GoodGroupCode = {Where}  ";
 
-            DataTable dataTable = db.ExecQuerytestDb(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -1388,7 +1388,7 @@ namespace webapikits.Controllers
             string query = $"Select * From(select * , rwn=row_Number() over (partition by gpsdate order by gpsdate)From GpsLocation Where Brokerref = {BrokerCode} And GpsDate between '{StartDate}' And '{EndDate}' ) ds where rwn=1 order by GpsDate ";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -1409,7 +1409,7 @@ namespace webapikits.Controllers
             string query = $"Exec spapp_IsXUser  '{UName}','{UPass}'";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -1427,7 +1427,7 @@ namespace webapikits.Controllers
             string query = $"Exec spApp_ChangeXUserPassword  '{UName}','{UPass}','{NewPass}'";
 
 
-            DataTable dataTable = db.ExecQuery( Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery( Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 

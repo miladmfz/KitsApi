@@ -74,7 +74,7 @@ namespace webapikits.Controllers
             string query = $"Exec dbo.spApp_ocrGetFactor '{ocrModel.barcode}',1,{ocrModel.Step},'{ocrModel.orderby}'";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
 
 
@@ -102,7 +102,7 @@ namespace webapikits.Controllers
             string query = "Exec dbo.spApp_ocrSetDelivery " + AppOCRCode + ", " + State + ",'" + Deliverer + "'";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -121,7 +121,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -139,7 +139,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -201,7 +201,7 @@ namespace webapikits.Controllers
             string sq = $"Exec dbo.spApp_ocrFactorList {ocrModel.State}, '{ocrModel.SearchTarget}', '{where}', {ocrModel.Row}, {ocrModel.PageNo} {order}";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, sq);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, sq);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
         }
@@ -217,7 +217,7 @@ namespace webapikits.Controllers
             string query = $"Exec dbo.spApp_ocrSetPackDetail {ocrModel.OcrFactorCode},'{ocrModel.Reader}','{ocrModel.Controler}','{ocrModel.Packer} - {ocrModel.AppDeliverDate}','{ocrModel.PackDeliverDate}',{ocrModel.PackCount}";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -233,7 +233,7 @@ namespace webapikits.Controllers
             string query = $"select cast(s.Amount as Int) TotalAvailable ,size,CoverType,cast(PageNo as Int) PageNo from vwGood with(nolock) Join GoodStack s with(nolock) on GoodCode = GoodRef where StackRef = {Stackref} And Goodcode={GoodCode}";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -249,7 +249,7 @@ namespace webapikits.Controllers
 
             string query = " update AppOCRFactor set HasSignature=0,AppIsDelivered=0 where AppOCRFactorCode= " + Where;
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -265,7 +265,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Jobs", "");
 
@@ -283,7 +283,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "JobPersons", "");
 
@@ -303,7 +303,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "AppOcrFactors", "");
 
@@ -319,7 +319,7 @@ namespace webapikits.Controllers
             string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_CustomerPath") + " , '') " + _configuration.GetConnectionString("Ocr_CustomerPath_Lible") + " From PropertyValue Where ClassName= 'TCustomer'";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -334,7 +334,7 @@ namespace webapikits.Controllers
             string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + " , '') " + _configuration.GetConnectionString("Ocr_StackCategory") + " From good";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -521,7 +521,7 @@ namespace webapikits.Controllers
             string sq = $"Exec dbo.spApp_ocrFactorListTotal {State}, '{SearchTarget}', '{where}', {Row}, {PageNo}";
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, sq);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, sq);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 

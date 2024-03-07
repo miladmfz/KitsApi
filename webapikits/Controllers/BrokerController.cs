@@ -56,7 +56,7 @@ namespace webapikits.Controllers
             string query = "Exec [spApp_GetColumn]  0  ,'', " + Type + "," + AppType + "," + IncludeZero;
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
 
@@ -72,7 +72,7 @@ namespace webapikits.Controllers
             }
 
             string query = "exec spApp_GetBrokerStack " + BrokerRef;
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
 
@@ -100,7 +100,7 @@ namespace webapikits.Controllers
 
             string query = "select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
@@ -115,7 +115,7 @@ namespace webapikits.Controllers
 
             string query = "Select top 1 * from RepLogData order by 1 desc";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
 
@@ -142,7 +142,7 @@ namespace webapikits.Controllers
             }
             else
             {
-                dataTable = db.ExecQuery(Request.Path, query);
+                dataTable = db.Broker_ExecQuery(Request.Path, query);
             }
 
             return jsonClass.JsonResult_Str1(dataTable, "Text", "");
@@ -220,7 +220,7 @@ public class BrokerOrderClass
 
                 string sq = "IF Exists(Select 1 From DbSetup Where KeyValue = 'App_FactorTypeInKowsar' And DataValue='1')" +
                             " Select ClassName = 'Factor' Else Select ClassName = 'PreFactor' ";
-                var ClassResult = db.ExecQuery(Request.Path, sq);
+                var ClassResult = db.Broker_ExecQuery(Request.Path, sq);
                 if (ClassResult != null)
                 {
                     ClassName = ClassResult.Rows[0]["ClassName"].ToString();
@@ -228,7 +228,7 @@ public class BrokerOrderClass
 
                  sq = $"Exec [dbo].[spPreFactor_Insert] '{ClassName}', {Stk}, {UserId}, 0, '', {Customer}, '{Explain}', {Broker}, {MobFCode}, '{MobFDate}'";
 
-            var result = db.ExecQuery(Request.Path, sq);
+            var result = db.Broker_ExecQuery(Request.Path, sq);
             if (result != null)
             {
                 factorcode = Convert.ToInt32(result.Rows[0]["PreFactorCode"]);
@@ -263,7 +263,7 @@ public class BrokerOrderClass
                     int Price = Convert.ToInt32(rowDetail_single.Price);
 
                     string sqrow = $"Exec [dbo].[spPreFactor_InsertRow] '{ClassName}', {factorcode}, {Code}, {Amount}, 0, {UserId}, '', {HasMustAmount}, 0, {Price}";
-                    var res = db.ExecQuery(Request.Path, sqrow);
+                    var res = db.Broker_ExecQuery(Request.Path, sqrow);
                     if (res != null)
                     {
                         int rowCode = Convert.ToInt32(res.Rows[0]["RowCode"]);
@@ -284,13 +284,13 @@ public class BrokerOrderClass
                 string sq1 = $"Select Sum(FacAmount) rcount From {ClassName}Rows Where {ClassName}Ref = {factorcode}";
 
 
-                var res1 = db.ExecQuery(Request.Path, sq1);
+                var res1 = db.Broker_ExecQuery(Request.Path, sq1);
                 int rcount = Convert.ToInt32(res1.Rows[0]["rcount"]);
 
                 if (CountRows == rcount)
                 {
                         string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
-                        return jsonClass.JsonResult_Str1(db.ExecQuery(Request.Path, query), "Text", "");
+                        return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(Request.Path, query), "Text", "");
 
                     }
                     else
@@ -299,16 +299,16 @@ public class BrokerOrderClass
                     string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
 
 
-                    db.ExecQuery(Request.Path, temp1);
-                    db.ExecQuery(Request.Path, temp2);
+                    db.Broker_ExecQuery(Request.Path, temp1);
+                    db.Broker_ExecQuery(Request.Path, temp2);
                 }
             }
             else
             {
                 string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
                 string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
-                db.ExecQuery(Request.Path, temp1);
-                db.ExecQuery(Request.Path, temp2);
+                db.Broker_ExecQuery(Request.Path, temp1);
+                db.Broker_ExecQuery(Request.Path, temp2);
             }
                 return jsonClass.JsonResult_Str1(notAmountTable, "Text", "");
 
@@ -317,7 +317,7 @@ public class BrokerOrderClass
         else
         {
                 string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
-                return jsonClass.JsonResult_Str1(db.ExecQuery(Request.Path, query), "Text", "");
+                return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(Request.Path, query), "Text", "");
 
 
 
@@ -354,13 +354,13 @@ public class BrokerOrderClass
                 string formattedDate = dateObj.ToString("yyyy/MM/dd HH:mm:ss");
 
                 Query = "INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('" + longitude + "', '" + latitude + "', " + brokerRef + ", '" + formattedDate + "'); SELECT SCOPE_IDENTITY();";
-                DataTable = db.ExecQuery(Request.Path, Query);
+                DataTable = db.Broker_ExecQuery(Request.Path, Query);
 
             }
 
 
             Query = "select top 1 * from GpsLocation order by 1 desc  ";
-            DataTable dataTable = db.ExecQuery(Request.Path, Query);
+            DataTable dataTable = db.Broker_ExecQuery(Request.Path, Query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Locations", "");
@@ -456,7 +456,7 @@ public class BrokerOrderClass
             }
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
 
 
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");

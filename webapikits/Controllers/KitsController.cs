@@ -172,7 +172,7 @@ public class ApiCredentials
 
 
            
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
@@ -187,7 +187,7 @@ public class ApiCredentials
         public string KowsarQuery(string str)
         {
             string query = str;
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Data", "");
         }
 
@@ -201,7 +201,7 @@ public class ApiCredentials
             Console.WriteLine("In yek matn dar konsol ast.");
             string query = "select * from AppBrokerCustomer Where ActivationCode = '" + ActivationCode + "'";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");
 
         }
@@ -215,7 +215,7 @@ public class ApiCredentials
             
             string query = "select * from AppBrokerCustomer Where ActivationCode = '" + Code + "'";
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
 
             Console.WriteLine(dataTable.Rows[0]["SQLiteURL"] + "");
             string filePath = dataTable.Rows[0]["SQLiteURL"] + "";
@@ -375,7 +375,7 @@ public class ApiCredentials
 
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
         }
@@ -401,7 +401,7 @@ public class ApiCredentials
 
 
 
-            DataTable dataTable = db.ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
