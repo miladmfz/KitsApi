@@ -71,8 +71,6 @@ namespace webapikits.Controllers
             public string InfoRef { get; set; } = "0";
             public string RowCode { get; set; } = "0";
 
-
-
             public string AppBasketInfoCode { get; set; } = "0";
 
 
@@ -118,7 +116,7 @@ namespace webapikits.Controllers
 
 
 
-            string query = " select * from AppPrinter ";
+            string query = " select * from AppPrinter where Apptype = 3 ";
 
             DataTable Table_print = db.Order_ExecQuery(Request.Path,  query);
 
@@ -152,175 +150,133 @@ namespace webapikits.Controllers
             foreach (Printer printer in Printers)
             {
 
-
-                string s1 = printer.AppPrinterCode;
-                string s2 = printer.PrinterName;
-                string s3 = printer.PrinterExplain;
-                string s4 = printer.GoodGroups;
-                string s5 = printer.WhereClause;
-                string s6 = printer.PrintCount;
-                string s7 = printer.PrinterActive;
-                string s8 = printer.FilePath;
-                string s9 = printer.AppType;
-
-
-                // نام فایل به عنوان هدر درخواست
-                Report report = new Report();
-                report.Load(printer.FilePath);
-
-
-                query = $"Exec [dbo].[spApp_OrderGetFactor ] {AppBasketInfoRef} ";
-                DataTable dataTable_factor = db.Order_ExecQuery(Request.Path, query);
-
-                List<Factor> factorHeader = new List<Factor>();
-
-
-
-
-
-
-                // Check if the DataTable has rows before accessing the first row
-                if (dataTable_factor.Rows.Count > 0)
+                if (Convert.ToInt64(printer.PrintCount) > 0)
                 {
-                    Factor factor = new Factor(); // Create a new Factor object
-                    factor.AppBasketInfoCode = Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]);
 
-                    // Add the factor object to the list
+
+                    Report report = new Report();
+                    report.Load(printer.FilePath);
+
+
+                    query = $"Exec [dbo].[spApp_OrderGetFactor ] {AppBasketInfoRef} ";
+                    DataTable dataTable_factor = db.Order_ExecQuery(Request.Path, query);
+
+                    List<Factor> factorHeader = new List<Factor>();
+                    Factor factor = new Factor();
+
+
+                    factor.AppBasketInfoCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]));
+                    factor.AppBasketInfoDate = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoDate"]));
+                    factor.DailyCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["DailyCode"]));
+                    factor.MizType = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["MizType"]));
+                    factor.RstMizName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["RstMizName"]));
+                    factor.InfoExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["InfoExplain"]));
+                    factor.FactorExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorExplain"]));
+                    factor.TimeStart = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["TimeStart"]));
+                    factor.InfoPrintCount = Convert.ToString(dataTable_factor.Rows[0]["InfoPrintCount"]);
+                    factor.InfoState = Convert.ToString(dataTable_factor.Rows[0]["InfoState"]);
+                    factor.ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
+                    if (Convert.ToInt64(dataTable_factor.Rows[0]["InfoPrintCount"]) > 0)
+                    {
+                        factor.CustName = "(چاپ مجدد)";
+                    }
                     factorHeader.Add(factor);
-                }
-                else
-                {
-                    // Handle the case when there are no rows in the DataTable
-                    // For example, you might want to log a message or handle it differently based on your requirements
-                }
+
+
+
+                    string convertedString = printer.WhereClause.Replace("=''", "=N''");
+
+                    query = $"Exec [dbo].[spApp_OrderGetFactorRow ] {AppBasketInfoRef} , {printer.GoodGroups} , N'{convertedString}' ";
+                    DataTable dataTable_Row = db.Order_ExecQuery(Request.Path, query);
 
 
 
 
+                    List<FactorRow> FactorRows = new List<FactorRow>();
 
 
-
-
-
-                if (dataTable_factor.Rows.Count > 0)
-                {
-
-
-                factorHeader[0].AppBasketInfoCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]));
-                factorHeader[0].AppBasketInfoDate = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoDate"]));
-                factorHeader[0].DailyCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["DailyCode"]));
-                factorHeader[0].MizType = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["MizType"]));
-                factorHeader[0].RstMizName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["RstMizName"]));
-                factorHeader[0].InfoExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["InfoExplain"]));
-                factorHeader[0].FactorExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorExplain"]));
-                factorHeader[0].TimeStart = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["TimeStart"]));
-                factorHeader[0].InfoPrintCount = Convert.ToString(dataTable_factor.Rows[0]["InfoPrintCount"]);
-                factorHeader[0].InfoState = Convert.ToString(dataTable_factor.Rows[0]["InfoState"]);
-                factorHeader[0].ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
-                if (Convert.ToInt64(dataTable_factor.Rows[0]["InfoPrintCount"]) > 0)
-                {
-                        factorHeader[0].CustName = "(چاپ مجدد)";
-                }
-                
-                }
-                {
-                    Console.WriteLine("No factor");
-
-                    // Handle the case when there are no rows in the DataTable
-                    // For example, you might want to log a message or handle it differently based on your requirements
-                }
-                string convertedString = printer.WhereClause.Replace("=''", "=N''");
-
-                query = $"Exec [dbo].[spApp_OrderGetFactorRow ] {AppBasketInfoRef} , {printer.GoodGroups} , N'{convertedString}' ";
-                DataTable dataTable_Row = db.Order_ExecQuery(Request.Path, query);
-
-
-
-
-                List<FactorRow> FactorRows = new List<FactorRow>();
-
-
-                if (dataTable_Row.Rows.Count > 0)
-                {
-                    for (int i = 0; i < dataTable_Row.Rows.Count; i++)
+                    if (dataTable_Row.Rows.Count > 0)
                     {
-                        FactorRow factorRow = new FactorRow();
-
-
-                        if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "1")
+                        for (int i = 0; i < dataTable_Row.Rows.Count; i++)
                         {
-                            factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"])+ " (سفارش مجدد) ";
-                            factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+                            FactorRow factorRow = new FactorRow();
+                            Console.WriteLine((dataTable_Row.Rows[i]["IsExtra"]));
+
+                            if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "True")
+                            {
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + " (سفارش مجدد) .";
+                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+
+                            }
+                            else
+                            {
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]);
+                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+
+                            }
+
+                            factorRow.FactorRowCode = Convert.ToString(dataTable_Row.Rows[i]["FactorRowCode"]);
+                            factorRow.GoodRef = Convert.ToString(dataTable_Row.Rows[i]["GoodRef"]);
+                            factorRow.FacAmount = Convert.ToString(dataTable_Row.Rows[i]["FacAmount"]);
+                            factorRow.FacAmount = factorRow.FacAmount.Substring(0, factorRow.FacAmount.IndexOf("."));
+                            factorRow.CanPrint = Convert.ToString(dataTable_Row.Rows[i]["CanPrint"]);
+                            factorRow.RowExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_Row.Rows[i]["RowExplain"]));
+                            factorRow.IsExtra = Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]);
+
+                            FactorRows.Add(factorRow);
+
 
                         }
-                        else {
-                            factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]);
-                            factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+
+                        List<Printer> printerss = new List<Printer>();
+                        printerss.Add(printer);
+                        string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
+
+                        report.RegisterData(factorHeader, "Factor");
+                        report.RegisterData(FactorRows, "FactorRow");
+                        report.RegisterData(printerss, "Printer");
+                        report.SetParameterValue("CurrentTime", time);
+
+
+
+                        if (report.Prepare())
+                        {
+                            // Export the report to PDF
+                            PDFSimpleExport pdfExport = new PDFSimpleExport();
+                            pdfExport.ShowProgress = false;
+                            pdfExport.Subject = "Subject Report";
+                            pdfExport.Title = "Report Title";
+                            MemoryStream ms = new MemoryStream();
+
+                            report.Export(pdfExport, ms);
+                            report.Dispose();
+                            pdfExport.Dispose();
+                            ms.Position = 0;
+
+
+                            fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
+
+                            PdfPrinter pdfPrinter = new PdfPrinter();
+
+                            pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+
+
+
+
 
                         }
-
-                        factorRow.FactorRowCode = Convert.ToString(dataTable_Row.Rows[i]["FactorRowCode"]);
-                        factorRow.GoodRef = Convert.ToString(dataTable_Row.Rows[i]["GoodRef"]);
-                        factorRow.FacAmount = Convert.ToString(dataTable_Row.Rows[i]["FacAmount"]);
-                        factorRow.FacAmount = factorRow.FacAmount.Substring(0,factorRow.FacAmount.IndexOf("."));
-                        factorRow.CanPrint = Convert.ToString(dataTable_Row.Rows[i]["CanPrint"]);
-                        factorRow.RowExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_Row.Rows[i]["RowExplain"]));
-                        factorRow.IsExtra = Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]);
-
-                        FactorRows.Add(factorRow);
-
 
                     }
-                
-                List<Printer> printerss = new List<Printer>();
-                printerss.Add(printer);
-                string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
 
-                report.RegisterData(factorHeader, "Factor");
-                report.RegisterData(FactorRows, "FactorRow");
-                report.RegisterData(printerss, "Printer");
-                report.SetParameterValue("CurrentTime", time);
-
-
-                if (Convert.ToInt64(printer.PrintCount) > 0) {
-
-                    if (report.Prepare())
-                    {
-                        // Export the report to PDF
-                        PDFSimpleExport pdfExport = new PDFSimpleExport();
-                        pdfExport.ShowProgress = false;
-                        pdfExport.Subject = "Subject Report";
-                        pdfExport.Title = "Report Title";
-                        MemoryStream ms = new MemoryStream();
-
-                        report.Export(pdfExport, ms);
-                        report.Dispose();
-                        pdfExport.Dispose();
-                        ms.Position = 0;
-
-
-                        fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
-
-                        PdfPrinter pdfPrinter = new PdfPrinter();
-
-                        pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
-
-
-
-
-                    }
-                    }
                 }
-
-
 
             }
 
-            string quer1y = $"spApp_Order_CanPrint  {AppBasketInfoRef} , 0  ";
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.Order_ExecQuery(Request.Path, quer1y);
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query11);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
+            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
 
 
         }
@@ -330,12 +286,8 @@ namespace webapikits.Controllers
         public string OrderChangeTable(String AppBasketInfoRef)
         {
 
-            string quer1y = $"spApp_Order_CanPrint  {AppBasketInfoRef} , 1  ";
 
-            DataTable dataTable1 = db.Order_ExecQuery(Request.Path, quer1y);
-
-
-            string query = " select * from AppPrinter ";
+            string query = " select * from AppPrinter where Apptype = 3 ";
 
             DataTable Table_print = db.Order_ExecQuery(Request.Path, query);
 
@@ -369,141 +321,97 @@ namespace webapikits.Controllers
             foreach (Printer printer in Printers)
             {
 
-
-                string s1 = printer.AppPrinterCode;
-                string s2 = printer.PrinterName;
-                string s3 = printer.PrinterExplain;
-                string s4 = printer.GoodGroups;
-                string s5 = printer.WhereClause;
-                string s6 = printer.PrintCount;
-                string s7 = printer.PrinterActive;
-                string s8 = printer.FilePath;
-                string s9 = printer.AppType;
-
-
-                // نام فایل به عنوان هدر درخواست
-                Report report = new Report();
-                report.Load(printer.FilePath);
-
-
-                query = $"Exec [dbo].[spApp_OrderGetFactor ] {AppBasketInfoRef} ";
-                DataTable dataTable_factor = db.Order_ExecQuery(Request.Path, query);
-
-                List<Factor> factorHeader = new List<Factor>();
-
-
-
-
-
-
-                // Check if the DataTable has rows before accessing the first row
-                if (dataTable_factor.Rows.Count > 0)
-                {
-                    Factor factor = new Factor(); // Create a new Factor object
-                    factor.AppBasketInfoCode = Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]);
-
-                    // Add the factor object to the list
-                    factorHeader.Add(factor);
-                }
-                else
-                {
-                    // Handle the case when there are no rows in the DataTable
-                    // For example, you might want to log a message or handle it differently based on your requirements
-                }
-
-
-
-
-
-
-
-
-
-                if (dataTable_factor.Rows.Count > 0)
+                if (Convert.ToInt64(printer.PrintCount) > 0)
                 {
 
 
-                    factorHeader[0].AppBasketInfoCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]));
-                    factorHeader[0].AppBasketInfoDate = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoDate"]));
-                    factorHeader[0].DailyCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["DailyCode"]));
-                    factorHeader[0].MizType = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["MizType"]));
-                    factorHeader[0].RstMizName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["RstMizName"]));
-                    factorHeader[0].InfoExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["InfoExplain"]));
-                    factorHeader[0].FactorExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorExplain"]));
-                    factorHeader[0].TimeStart = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["TimeStart"]));
-                    factorHeader[0].InfoPrintCount = Convert.ToString(dataTable_factor.Rows[0]["InfoPrintCount"]);
-                    factorHeader[0].InfoState = Convert.ToString(dataTable_factor.Rows[0]["InfoState"]);
-                    factorHeader[0].ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
+                    Report report = new Report();
+                    report.Load(printer.FilePath);
+
+
+                    query = $"Exec [dbo].[spApp_OrderGetFactor ] {AppBasketInfoRef} ";
+                    DataTable dataTable_factor = db.Order_ExecQuery(Request.Path, query);
+
+                    List<Factor> factorHeader = new List<Factor>();
+
+                    Factor factor = new Factor();
+
+
+                    factor.AppBasketInfoCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]));
+                    factor.AppBasketInfoDate = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoDate"]));
+                    factor.DailyCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["DailyCode"]));
+                    factor.MizType = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["MizType"]));
+                    factor.RstMizName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["RstMizName"]));
+                    factor.InfoExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["InfoExplain"]));
+                    factor.FactorExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorExplain"]));
+                    factor.TimeStart = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["TimeStart"]));
+                    factor.InfoPrintCount = Convert.ToString(dataTable_factor.Rows[0]["InfoPrintCount"]);
+                    factor.InfoState = Convert.ToString(dataTable_factor.Rows[0]["InfoState"]);
+                    factor.ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
                     if (Convert.ToInt64(dataTable_factor.Rows[0]["InfoPrintCount"]) > 0)
                     {
-                        factorHeader[0].CustName = "(چاپ مجدد)";
+                        factor.CustName = "(چاپ مجدد)";
                     }
+                    factorHeader.Add(factor);
 
-                }
-                {
-                    Console.WriteLine("No factor");
 
-                    // Handle the case when there are no rows in the DataTable
-                    // For example, you might want to log a message or handle it differently based on your requirements
-                }
-                string convertedString = printer.WhereClause.Replace("=''", "=N''");
+                    string convertedString = printer.WhereClause.Replace("=''", "=N''");
 
-                query = $"Exec [dbo].[spApp_OrderGetFactorRow ] {AppBasketInfoRef} , {printer.GoodGroups} , N'{convertedString}' ";
-                DataTable dataTable_Row = db.Order_ExecQuery(Request.Path, query);
+                    query = $"Exec [dbo].[spApp_OrderGetFactorRow ] {AppBasketInfoRef} , {printer.GoodGroups} , N'{convertedString}' ";
+                    DataTable dataTable_Row = db.Order_ExecQuery(Request.Path, query);
 
 
 
 
-                List<FactorRow> FactorRows = new List<FactorRow>();
+                    List<FactorRow> FactorRows = new List<FactorRow>();
 
 
-                if (dataTable_Row.Rows.Count > 0)
-                {
-                    for (int i = 0; i < dataTable_Row.Rows.Count; i++)
+                    if (dataTable_Row.Rows.Count > 0)
                     {
-                        FactorRow factorRow = new FactorRow();
-
-
-                        if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "1")
+                        for (int i = 0; i < dataTable_Row.Rows.Count; i++)
                         {
-                            factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + " (سفارش مجدد) ";
-                            factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+                            FactorRow factorRow = new FactorRow();
+
+
+                            if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "True")
+                            {
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + " (سفارش مجدد) ";
+                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+
+                            }
+                            else
+                            {
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]);
+                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+
+                            }
+
+                            factorRow.FactorRowCode = Convert.ToString(dataTable_Row.Rows[i]["FactorRowCode"]);
+                            factorRow.GoodRef = Convert.ToString(dataTable_Row.Rows[i]["GoodRef"]);
+                            factorRow.FacAmount = Convert.ToString(dataTable_Row.Rows[i]["FacAmount"]);
+                            factorRow.FacAmount = factorRow.FacAmount.Substring(0, factorRow.FacAmount.IndexOf("."));
+                            factorRow.CanPrint = Convert.ToString(dataTable_Row.Rows[i]["CanPrint"]);
+                            factorRow.RowExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_Row.Rows[i]["RowExplain"]));
+                            factorRow.IsExtra = Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]);
+
+                            FactorRows.Add(factorRow);
+
 
                         }
-                        else
+
+                        List<Printer> printerss = new List<Printer>();
+                        printerss.Add(printer);
+                        string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
+
+                        report.RegisterData(factorHeader, "Factor");
+                        report.RegisterData(FactorRows, "FactorRow");
+                        report.RegisterData(printerss, "Printer");
+                        report.SetParameterValue("CurrentTime", time);
+
+                        bool justtable = printer.WhereClause.Contains("%");
+                        if (!justtable)
                         {
-                            factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]);
-                            factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
 
-                        }
-
-                        factorRow.FactorRowCode = Convert.ToString(dataTable_Row.Rows[i]["FactorRowCode"]);
-                        factorRow.GoodRef = Convert.ToString(dataTable_Row.Rows[i]["GoodRef"]);
-                        factorRow.FacAmount = Convert.ToString(dataTable_Row.Rows[i]["FacAmount"]);
-                        factorRow.FacAmount = factorRow.FacAmount.Substring(0, factorRow.FacAmount.IndexOf("."));
-                        factorRow.CanPrint = Convert.ToString(dataTable_Row.Rows[i]["CanPrint"]);
-                        factorRow.RowExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_Row.Rows[i]["RowExplain"]));
-                        factorRow.IsExtra = Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]);
-
-                        FactorRows.Add(factorRow);
-
-
-                    }
-
-                    List<Printer> printerss = new List<Printer>();
-                    printerss.Add(printer);
-                    string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
-
-                    report.RegisterData(factorHeader, "Factor");
-                    report.RegisterData(FactorRows, "FactorRow");
-                    report.RegisterData(printerss, "Printer");
-                    report.SetParameterValue("CurrentTime", time);
-
-                    bool justtable = printer.WhereClause.Contains("%");
-                    if (!justtable)
-                    {
-                        if (Convert.ToInt64(printer.PrintCount) > 0)
-                        {
 
                             if (report.Prepare())
                             {
@@ -530,12 +438,12 @@ namespace webapikits.Controllers
 
 
                             }
+
                         }
                     }
+
+
                 }
-
-
-
             }
 
             string query2 = $"spApp_Order_CanPrint  {AppBasketInfoRef} , 0  ";

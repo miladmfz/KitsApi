@@ -4,6 +4,9 @@ using Newtonsoft.Json;
 using webapikits.Model;
 using System.Data.SqlClient;
 using static webapikits.Controllers.OrderController;
+using FastReport.Export.PdfSimple;
+using Microsoft.AspNetCore.Identity;
+using FastReport;
 
 namespace webapikits.Controllers
 {
@@ -344,6 +347,178 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("OrderPrintFactor")]
+        public string OrderPrintFactor(String AppBasketInfoRef)
+        {
+
+
+
+
+            string query = " select * from AppPrinter where Apptype = 2 ";
+
+            DataTable Table_print = db.Order_ExecQuery(Request.Path, query);
+
+            List<Printer> Printers = new List<Printer>();
+
+
+            if (Table_print.Rows.Count > 0)
+            {
+                for (int i = 0; i < Table_print.Rows.Count; i++)
+                {
+                    Printer printer = new Printer();
+
+                    printer.AppPrinterCode = Convert.ToString(Table_print.Rows[i]["AppPrinterCode"]);
+                    printer.PrinterName = Convert.ToString(Table_print.Rows[i]["PrinterName"]);
+                    printer.PrinterExplain = Convert.ToString(Table_print.Rows[i]["PrinterExplain"]);
+                    printer.GoodGroups = Convert.ToString(Table_print.Rows[i]["GoodGroups"]);
+                    printer.WhereClause = Convert.ToString(Table_print.Rows[i]["WhereClause"]);
+                    printer.PrintCount = Convert.ToString(Table_print.Rows[i]["PrintCount"]);
+                    printer.PrinterActive = Convert.ToString(Table_print.Rows[i]["PrinterActive"]);
+                    printer.FilePath = Convert.ToString(Table_print.Rows[i]["FilePath"]);
+                    printer.AppType = Convert.ToString(Table_print.Rows[i]["AppType"]);
+
+
+                    Printers.Add(printer);
+
+                }
+            }
+
+
+
+            foreach (Printer printer in Printers)
+            {
+
+                if (Convert.ToInt64(printer.PrintCount) > 0)
+                {
+
+
+                    Report report = new Report();
+                    report.Load(printer.FilePath);
+
+
+                    query = $"Exec [dbo].[spApp_OrderGetFactor ] {AppBasketInfoRef} ";
+                    DataTable dataTable_factor = db.Order_ExecQuery(Request.Path, query);
+
+                    List<Factor> factorHeader = new List<Factor>();
+                    Factor factor = new Factor();
+
+
+                    factor.AppBasketInfoCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]));
+                    factor.AppBasketInfoDate = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoDate"]));
+                    factor.DailyCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["DailyCode"]));
+                    factor.MizType = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["MizType"]));
+                    factor.RstMizName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["RstMizName"]));
+                    factor.InfoExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["InfoExplain"]));
+                    factor.FactorExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorExplain"]));
+                    factor.TimeStart = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["TimeStart"]));
+                    factor.InfoPrintCount = Convert.ToString(dataTable_factor.Rows[0]["InfoPrintCount"]);
+                    factor.InfoState = Convert.ToString(dataTable_factor.Rows[0]["InfoState"]);
+                    factor.ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
+                    if (Convert.ToInt64(dataTable_factor.Rows[0]["InfoPrintCount"]) > 0)
+                    {
+                        factor.CustName = "(چاپ مجدد)";
+                    }
+                    factorHeader.Add(factor);
+
+
+
+                    string convertedString = printer.WhereClause.Replace("=''", "=N''");
+
+                    query = $"Exec [dbo].[spApp_OrderGetFactorRow ] {AppBasketInfoRef} , {printer.GoodGroups} , N'{convertedString}' ";
+                    DataTable dataTable_Row = db.Order_ExecQuery(Request.Path, query);
+
+
+
+
+                    List<FactorRow> FactorRows = new List<FactorRow>();
+
+
+                    if (dataTable_Row.Rows.Count > 0)
+                    {
+                        for (int i = 0; i < dataTable_Row.Rows.Count; i++)
+                        {
+                            FactorRow factorRow = new FactorRow();
+                            Console.WriteLine((dataTable_Row.Rows[i]["IsExtra"]));
+
+                            if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "True")
+                            {
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + " (سفارش مجدد) .";
+                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+
+                            }
+                            else
+                            {
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]);
+                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
+
+                            }
+
+                            factorRow.FactorRowCode = Convert.ToString(dataTable_Row.Rows[i]["FactorRowCode"]);
+                            factorRow.GoodRef = Convert.ToString(dataTable_Row.Rows[i]["GoodRef"]);
+                            factorRow.FacAmount = Convert.ToString(dataTable_Row.Rows[i]["FacAmount"]);
+                            factorRow.FacAmount = factorRow.FacAmount.Substring(0, factorRow.FacAmount.IndexOf("."));
+                            factorRow.CanPrint = Convert.ToString(dataTable_Row.Rows[i]["CanPrint"]);
+                            factorRow.RowExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_Row.Rows[i]["RowExplain"]));
+                            factorRow.IsExtra = Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]);
+
+                            FactorRows.Add(factorRow);
+
+
+                        }
+
+                        List<Printer> printerss = new List<Printer>();
+                        printerss.Add(printer);
+                        string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
+
+                        report.RegisterData(factorHeader, "Factor");
+                        report.RegisterData(FactorRows, "FactorRow");
+                        report.RegisterData(printerss, "Printer");
+                        report.SetParameterValue("CurrentTime", time);
+
+
+
+                        if (report.Prepare())
+                        {
+                            // Export the report to PDF
+                            PDFSimpleExport pdfExport = new PDFSimpleExport();
+                            pdfExport.ShowProgress = false;
+                            pdfExport.Subject = "Subject Report";
+                            pdfExport.Title = "Report Title";
+                            MemoryStream ms = new MemoryStream();
+
+                            report.Export(pdfExport, ms);
+                            report.Dispose();
+                            pdfExport.Dispose();
+                            ms.Position = 0;
+
+
+                            fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
+
+                            PdfPrinter pdfPrinter = new PdfPrinter();
+
+                            pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+
+
+
+
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query11);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+
+
+        }
 
 
 
