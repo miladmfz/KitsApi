@@ -23,6 +23,7 @@ namespace webapikits.Controllers
         Response response = new();
         JsonClass jsonClass = new JsonClass();
         Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+        FileManager fileManager = new();
 
         public OcrController(IConfiguration configuration)
         {
@@ -50,6 +51,9 @@ namespace webapikits.Controllers
             public string HasShortage { get; set; } = "";
             public string IsEdited { get; set; } = "";
 
+            public string CountFlag { get; set; } = "";
+            public string DbName { get; set; } = "";
+
 
             public string OcrFactorCode { get; set; } = "";
             public string Reader { get; set; } = "";
@@ -64,11 +68,9 @@ namespace webapikits.Controllers
         }
 
 
-        
 
 
-
-        [HttpGet]
+    [HttpPost]
         [Route("GetOcrFactor")]
         public string GetOcrFactor([FromBody] OcrModel ocrModel)
         {
@@ -84,11 +86,125 @@ namespace webapikits.Controllers
 
             response.StatusCode = "200";
             response.Errormessage = "";
-            jsonDict.Add("response", JsonConvert.SerializeObject(response));
-            jsonDict.Add("Factor", jsonClass.ConvertDataTableToJson(dataTable));
 
-            jsonDict.Add("Goods", jsonClass.ConvertDataTableToJson(dataTable));
-            return JsonConvert.SerializeObject(jsonDict);
+            
+
+
+            List<Dictionary<string, object>> factor_rows = new List<Dictionary<string, object>>();
+            List<Dictionary<string, object>> goods_rows = new List<Dictionary<string, object>>();
+
+
+            Dictionary<string, object> f_currentRow = new Dictionary<string, object>();
+
+            Dictionary<string, object> result = new Dictionary<string, object>();
+
+
+
+
+
+
+            if (dataTable.Rows.Count > 0)
+            {
+
+                f_currentRow.Add("FactorCode", Convert.ToString(dataTable.Rows[0]["FactorCode"]));
+                f_currentRow.Add("FactorPrivateCode", Convert.ToString(dataTable.Rows[0]["FactorPrivateCode"]));
+                f_currentRow.Add("FactorDate", Convert.ToString(dataTable.Rows[0]["FactorDate"]));
+                f_currentRow.Add("SumAmount", Convert.ToString(dataTable.Rows[0]["SumAmount"]));
+                f_currentRow.Add("SumPrice", Convert.ToString(dataTable.Rows[0]["SumPrice"]));
+                f_currentRow.Add("NewSumPrice", Convert.ToString(dataTable.Rows[0]["NewSumPrice"]));
+                f_currentRow.Add("CustName", Convert.ToString(dataTable.Rows[0]["CustName"]));
+                f_currentRow.Add("CustomerRef", Convert.ToString(dataTable.Rows[0]["CustomerRef"]));
+                f_currentRow.Add("Address", Convert.ToString(dataTable.Rows[0]["Address"]));
+                f_currentRow.Add("Phone", Convert.ToString(dataTable.Rows[0]["Phone"]));
+                f_currentRow.Add("ErrCode", Convert.ToString(dataTable.Rows[0]["ErrCode"]));
+                f_currentRow.Add("ErrMessage", Convert.ToString(dataTable.Rows[0]["ErrMessage"]));
+                f_currentRow.Add("AppIsControled", Convert.ToString(dataTable.Rows[0]["AppIsControled"]));
+                f_currentRow.Add("AppIsPacked", Convert.ToString(dataTable.Rows[0]["AppIsPacked"]));
+                f_currentRow.Add("AppOCRFactorCode", Convert.ToString(dataTable.Rows[0]["AppOCRFactorCode"]));
+                // Add more columns as needed
+                factor_rows.Add(f_currentRow);
+
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    Dictionary<string, object> goods_currentRow = new Dictionary<string, object>();
+
+                    // Add specific columns to the JSON
+                    goods_currentRow.Add("GoodCode", Convert.ToString(row["GoodRef"]));
+                    goods_currentRow.Add("GoodMaxSellPrice", Convert.ToString(row["GoodMaxSellPrice"]));
+                    goods_currentRow.Add("FactorRowCode", Convert.ToString(row["FactorRowCode"]));
+                    goods_currentRow.Add("GoodName", Convert.ToString(row["GoodName"]));
+                    goods_currentRow.Add("Price", Convert.ToString(row["Price"]));
+                    goods_currentRow.Add("FacAmount", Convert.ToString(row["FacAmount"]));
+                    goods_currentRow.Add("GoodExplain4", Convert.ToString(row["GoodExplain4"]));
+                    goods_currentRow.Add("AppRowIsControled", Convert.ToString(row["AppRowIsControled"]));
+                    goods_currentRow.Add("AppRowIsPacked", Convert.ToString(row["AppRowIsPacked"]));
+                    goods_currentRow.Add("AppOCRFactorRowCode", Convert.ToString(row["AppOCRFactorRowCode"]));
+                    goods_currentRow.Add("ShortageAmount", Convert.ToString(row["ShortageAmount"]));
+                    goods_currentRow.Add("CachedBarCode", Convert.ToString(row["CachedBarCode"]));
+                    // Add more columns as needed
+
+                    goods_rows.Add(goods_currentRow);
+                }
+
+            }
+            else {
+                f_currentRow.Add("FactorCode", "0");
+                f_currentRow.Add("FactorPrivateCode", "0");
+                f_currentRow.Add("FactorDate", "");
+                f_currentRow.Add("SumAmount", "0");
+                f_currentRow.Add("SumPrice", "0");
+                f_currentRow.Add("NewSumPrice", "0");
+                f_currentRow.Add("CustName", "");
+                f_currentRow.Add("CustomerRef", "");
+                f_currentRow.Add("Address", "");
+                f_currentRow.Add("Phone", "");
+                f_currentRow.Add("ErrCode", "");
+                f_currentRow.Add("ErrMessage", "");
+                f_currentRow.Add("AppIsControled", "");
+                f_currentRow.Add("AppIsPacked", "");
+                f_currentRow.Add("AppOCRFactorCode", "");
+                // Add more columns as needed
+                factor_rows.Add(f_currentRow);
+
+                Dictionary<string, object> goods_currentRow = new Dictionary<string, object>();
+
+
+                // Add specific columns to the JSON
+                goods_currentRow.Add("GoodCode","0");
+                goods_currentRow.Add("GoodMaxSellPrice","0");
+                goods_currentRow.Add("FactorRowCode","0");
+                goods_currentRow.Add("GoodName","");
+                goods_currentRow.Add("Price","0");
+                goods_currentRow.Add("FacAmount","0");
+                goods_currentRow.Add("GoodExplain4","");
+                goods_currentRow.Add("AppRowIsControled","");
+                goods_currentRow.Add("AppRowIsPacked","");
+                goods_currentRow.Add("AppOCRFactorRowCode","");
+                goods_currentRow.Add("ShortageAmount","");
+                goods_currentRow.Add("CachedBarCode","");
+                // Add more columns as needed
+
+                goods_rows.Add(goods_currentRow);
+                
+
+
+            }
+
+
+
+
+
+
+
+            result.Add("Factors", factor_rows);
+            result.Add("OcrGoods", goods_rows);
+
+            //jsonDict.Add("Factor", jsonClass.ConvertDataTableToJson(jsonClass.ConvertDictionaryListToDataTable(factor_rows)));
+            ///jsonDict.Add("Goods", jsonClass.ConvertDataTableToJson(jsonClass.ConvertDictionaryListToDataTable(goods_rows)));
+            return JsonConvert.SerializeObject(result);
+
+            //return jsonClass.JsonResult_Str(dataTable, "OcrGoods", "");
+
 
 
         }
@@ -160,6 +276,8 @@ namespace webapikits.Controllers
             }
             string order = "";
             string where = "";
+            string countflag = "";
+            string dbname = "";
 
             if (ocrModel.State == "0")
             {
@@ -201,7 +319,26 @@ namespace webapikits.Controllers
                 where = where + " And o.IsEdited = 1 ";
             }
 
-            string sq = $"Exec dbo.spApp_ocrFactorList {ocrModel.State}, '{ocrModel.SearchTarget}', '{where}', {ocrModel.Row}, {ocrModel.PageNo} {order}";
+
+            if (ocrModel.CountFlag == "1")
+            {
+                countflag = countflag + ", @CountFlag=1 ";
+            }
+            else if (ocrModel.CountFlag == "0")
+            {
+                countflag = countflag + ", @CountFlag=0 ";
+            }
+
+            if (ocrModel.DbName == "")
+            {
+                dbname = dbname + $" , @Db='{ocrModel.DbName}'";
+            }
+            if (ocrModel.IsEdited == "1")
+            {
+                dbname = dbname + " ,  @Db='' ";
+            }
+
+            string sq = $"Exec dbo.spApp_ocrFactorList {ocrModel.State}, '{ocrModel.SearchTarget}', '{where}', {ocrModel.Row}, {ocrModel.PageNo} {order} {countflag} {dbname}";
 
 
             DataTable dataTable = db.Ocr_ExecQuery(Request.Path, sq);

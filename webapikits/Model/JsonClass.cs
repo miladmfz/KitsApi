@@ -29,6 +29,81 @@ namespace webapikits.Model
 
             return json;
         }
+        public DataTable ConvertJsonToDataTable(string json)
+        {
+            DataTable dataTable = new DataTable();
+            // Add columns to the DataTable based on the JSON data structure
+            // For simplicity, let's assume all rows have the same structure
+            if (!string.IsNullOrEmpty(json))
+            {
+                List<Dictionary<string, object>> rows = JsonConvert.DeserializeObject<List<Dictionary<string, object>>>(json);
+                if (rows.Count > 0)
+                {
+                    foreach (string key in rows[0].Keys)
+                    {
+                        dataTable.Columns.Add(key, typeof(object)); // You might need to change 'typeof(object)' to match the actual data types
+                    }
+                    foreach (Dictionary<string, object> row in rows)
+                    {
+                        DataRow dataRow = dataTable.NewRow();
+                        foreach (string key in row.Keys)
+                        {
+                            dataRow[key] = row[key];
+                        }
+                        dataTable.Rows.Add(dataRow);
+                    }
+                }
+            }
+            return dataTable;
+        }
+
+        public List<Dictionary<string, object>> ConvertJsonToDictionaryList(string json)
+        {
+            List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+            DataTable dataTable = ConvertJsonToDataTable(json);
+
+            foreach (DataRow row in dataTable.Rows)
+            {
+                Dictionary<string, object> currentRow = new Dictionary<string, object>();
+
+                foreach (DataColumn col in dataTable.Columns)
+                {
+                    currentRow.Add(col.ColumnName, row[col]);
+                }
+
+                rows.Add(currentRow);
+            }
+
+            return rows;
+        }
+
+        public DataTable ConvertDictionaryListToDataTable(List<Dictionary<string, object>> dictionaryList)
+        {
+            DataTable dataTable = new DataTable();
+
+            // Add columns to the DataTable based on the keys of the dictionaries
+            if (dictionaryList.Count > 0)
+            {
+                foreach (string key in dictionaryList[0].Keys)
+                {
+                    dataTable.Columns.Add(key, typeof(object)); // You might need to change 'typeof(object)' to match the actual data types
+                }
+
+                // Add rows to the DataTable based on the values of the dictionaries
+                foreach (Dictionary<string, object> dictionary in dictionaryList)
+                {
+                    DataRow dataRow = dataTable.NewRow();
+                    foreach (string key in dictionary.Keys)
+                    {
+                        dataRow[key] = dictionary[key];
+                    }
+                    dataTable.Rows.Add(dataRow);
+                }
+            }
+
+            return dataTable;
+        }
+
 
         public string ConvertImageToBase64(DataTable dataTable)
         {
