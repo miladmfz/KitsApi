@@ -15,7 +15,11 @@ namespace webapikits.Model
 		public string InfoState { get; set; }
 		public string ReserveStart { get; set; }
 		public string CustName { get; set; }
+        public string FactorCode { get; set; } = "";
+        public string FactorPrivateCode { get; set; } = "";
+        public string AppPackCount { get; set; } = "";
+        public string AppDeliverer { get; set; } = "";
+        public string AppPackCounter { get; set; } = "";
 
-
-	}
+    }
 }

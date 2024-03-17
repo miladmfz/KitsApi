@@ -258,8 +258,11 @@ namespace webapikits.Controllers
 
                             PdfPrinter pdfPrinter = new PdfPrinter();
 
-                            pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
 
+
+                                pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+
+                            
 
 
 
@@ -432,8 +435,11 @@ namespace webapikits.Controllers
 
                                 PdfPrinter pdfPrinter = new PdfPrinter();
 
-                                pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+     
 
+                                    pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+
+                                
 
 
 

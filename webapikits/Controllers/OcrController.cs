@@ -7,6 +7,12 @@ using static webapikits.Controllers.OrderController;
 using FastReport.Export.PdfSimple;
 using Microsoft.AspNetCore.Identity;
 using FastReport;
+using System.IO.Compression;
+using System;
+using System.IO;
+using System.IO.Compression;
+using System.Data.SqlClient;
+using System.Text;
 
 namespace webapikits.Controllers
 {
@@ -62,7 +68,264 @@ namespace webapikits.Controllers
             public string PackDeliverDate { get; set; } = "";
             public string PackCount { get; set; } = "";
             public string AppDeliverDate { get; set; } = "";
+            public string FactorCode { get; set; } = "";
+            public string StackCategory { get; set; } = "";
+            public string Sender { get; set; } = "";
+            public string ImageStr { get; set; } = "";
 
+
+
+        }
+        
+
+
+        [HttpPost]
+        [Route("OcrPrintControler")]
+        public string OcrPrintControler([FromBody] OcrModel ocrModel)
+        {
+
+
+
+
+            string query = " select * from AppPrinter where Apptype = 2 ";
+            string where = ocrModel.StackCategory;
+            string sender = ocrModel.Sender;
+
+            DataTable Table_print = db.Ocr_ExecQuery(Request.Path, query);
+
+            List<Printer> Printers = new List<Printer>();
+
+
+            if (Table_print.Rows.Count > 0)
+            {
+                for (int i = 0; i < Table_print.Rows.Count; i++)
+                {
+                    Printer printer = new Printer();
+
+                    printer.AppPrinterCode = Convert.ToString(Table_print.Rows[i]["AppPrinterCode"]);
+                    printer.PrinterName = Convert.ToString(Table_print.Rows[i]["PrinterName"]);
+                    printer.PrinterExplain = Convert.ToString(Table_print.Rows[i]["PrinterExplain"]);
+                    printer.GoodGroups = Convert.ToString(Table_print.Rows[i]["GoodGroups"]);
+                    printer.WhereClause = Convert.ToString(Table_print.Rows[i]["WhereClause"]);
+                    printer.PrintCount = Convert.ToString(Table_print.Rows[i]["PrintCount"]);
+                    printer.PrinterActive = Convert.ToString(Table_print.Rows[i]["PrinterActive"]);
+                    printer.FilePath = Convert.ToString(Table_print.Rows[i]["FilePath"]);
+                    printer.AppType = Convert.ToString(Table_print.Rows[i]["AppType"]);
+
+
+                    Printers.Add(printer);
+
+                }
+            }
+
+
+
+            foreach (Printer printer in Printers)
+            {
+                if (printer.WhereClause.Equals(where)) { 
+                
+
+
+                    Report report = new Report();
+                    report.Load(printer.FilePath);
+
+
+                    query = $"select CustName,FactorCode,FactorPrivateCode,AppPackCount,AppDeliverer from vwfactor where factorcode = {ocrModel.FactorCode} ";
+                    DataTable dataTable_factor = db.Ocr_ExecQuery(Request.Path, query);
+
+                    List<Factor> factorHeader = new List<Factor>();
+                    Factor factor = new Factor();
+
+
+                    factor.CustName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["CustName"]));
+                    factor.FactorCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorCode"]));
+                    factor.FactorPrivateCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorPrivateCode"]));
+                    factor.AppPackCount = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppPackCount"]));
+                    factor.AppDeliverer = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppDeliverer"]));
+
+                    factorHeader.Add(factor);
+
+
+                    List<Printer> printerss = new List<Printer>();
+                    printerss.Add(printer);
+                    string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
+
+
+                    report.RegisterData(factorHeader, "Factor");
+                    report.RegisterData(printerss, "Printer");
+                    report.SetParameterValue("CurrentTime", time);
+                    report.SetParameterValue("CurrentSender", sender);
+ 
+
+
+                    if (report.Prepare())
+                    {
+                        // Export the report to PDF
+                        PDFSimpleExport pdfExport = new PDFSimpleExport();
+                        pdfExport.ShowProgress = false;
+                        pdfExport.Subject = "Subject Report";
+                        pdfExport.Title = "Report Title";
+                        MemoryStream ms = new MemoryStream();
+
+                        report.Export(pdfExport, ms);
+                        report.Dispose();
+                        pdfExport.Dispose();
+                        ms.Position = 0;
+
+
+                        fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
+
+                        PdfPrinter pdfPrinter = new PdfPrinter();
+
+
+                            pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+
+                        
+
+
+                    }
+
+                }
+
+            }
+
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query11);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+
+
+        }
+
+
+
+        [HttpPost]
+        [Route("OcrPrintPacker")]
+        public string OcrPrintPacker([FromBody] OcrModel ocrModel)
+        {
+
+
+
+
+            string query = " select * from AppPrinter where Apptype = 2 ";
+            string where = ocrModel.StackCategory;
+            string sender = ocrModel.Sender;
+
+            DataTable Table_print = db.Ocr_ExecQuery(Request.Path, query);
+
+            List<Printer> Printers = new List<Printer>();
+
+
+            if (Table_print.Rows.Count > 0)
+            {
+                for (int i = 0; i < Table_print.Rows.Count; i++)
+                {
+                    Printer printer = new Printer();
+
+                    printer.AppPrinterCode = Convert.ToString(Table_print.Rows[i]["AppPrinterCode"]);
+                    printer.PrinterName = Convert.ToString(Table_print.Rows[i]["PrinterName"]);
+                    printer.PrinterExplain = Convert.ToString(Table_print.Rows[i]["PrinterExplain"]);
+                    printer.GoodGroups = Convert.ToString(Table_print.Rows[i]["GoodGroups"]);
+                    printer.WhereClause = Convert.ToString(Table_print.Rows[i]["WhereClause"]);
+                    printer.PrintCount = Convert.ToString(Table_print.Rows[i]["PrintCount"]);
+                    printer.PrinterActive = Convert.ToString(Table_print.Rows[i]["PrinterActive"]);
+                    printer.FilePath = Convert.ToString(Table_print.Rows[i]["FilePath"]);
+                    printer.AppType = Convert.ToString(Table_print.Rows[i]["AppType"]);
+
+
+                    Printers.Add(printer);
+
+                }
+            }
+
+
+
+            foreach (Printer printer in Printers)
+            {
+                
+
+                if (Convert.ToInt64(printer.PrintCount) > 0 && printer.WhereClause.Equals("Pack"))
+                {
+
+
+
+
+                    query = $"select CustName,FactorCode,FactorPrivateCode,AppPackCount,AppDeliverer from vwfactor where factorcode = {ocrModel.FactorCode} ";
+                    DataTable dataTable_factor = db.Ocr_ExecQuery(Request.Path, query);
+
+                    List<Factor> factorHeader = new List<Factor>();
+                    Factor factor = new Factor();
+
+
+                    factor.CustName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["CustName"]));
+                    factor.FactorCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorCode"]));
+                    factor.FactorPrivateCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorPrivateCode"]));
+                    factor.AppPackCount = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppPackCount"]));
+                    factor.AppDeliverer = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppDeliverer"]));
+                    factorHeader.Add(factor);
+
+                    int counter = Convert.ToInt32(dataTable_factor.Rows[0]["AppPackCount"]);
+
+                   
+
+                    for (int i = 0; i < counter; i++)
+                    {
+                        Console.WriteLine("" + (i + 1));
+                        List<Printer> printerss = new List<Printer>();
+                        printerss.Add(printer);
+                        string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
+
+                        string pack = db.ConvertToPersianNumber(Convert.ToString((i + 1)));
+
+                        Report report = new Report();
+                        report.Load(printer.FilePath);
+
+                        report.RegisterData(factorHeader, "Factor");
+                        report.RegisterData(printerss, "Printer");
+                        report.SetParameterValue("CurrentTime", time);
+                        report.SetParameterValue("CurrentPack", pack);
+                        report.SetParameterValue("CurrentSender", sender);
+
+
+
+                        if (report.Prepare())
+                        {
+                            // Export the report to PDF
+                            PDFSimpleExport pdfExport = new PDFSimpleExport();
+                            pdfExport.ShowProgress = false;
+                            pdfExport.Subject = "Subject Report";
+                            pdfExport.Title = "Report Title";
+                            MemoryStream ms = new MemoryStream();
+
+                            report.Export(pdfExport, ms);
+                            report.Dispose();
+                            pdfExport.Dispose();
+                            ms.Position = 0;
+
+
+                            fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
+                            PdfPrinter pdfPrinter = new PdfPrinter();
+                            pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
+
+
+                        }
+                        report.Clear();
+                    }
+
+
+
+
+
+                }
+
+            }
+
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query11);
+
+            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
 
 
         }
@@ -70,7 +333,7 @@ namespace webapikits.Controllers
 
 
 
-    [HttpPost]
+        [HttpPost]
         [Route("GetOcrFactor")]
         public string GetOcrFactor([FromBody] OcrModel ocrModel)
         {
@@ -192,19 +455,10 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
             result.Add("Factors", factor_rows);
             result.Add("OcrGoods", goods_rows);
 
-            //jsonDict.Add("Factor", jsonClass.ConvertDataTableToJson(jsonClass.ConvertDictionaryListToDataTable(factor_rows)));
-            ///jsonDict.Add("Goods", jsonClass.ConvertDataTableToJson(jsonClass.ConvertDictionaryListToDataTable(goods_rows)));
             return JsonConvert.SerializeObject(result);
-
-            //return jsonClass.JsonResult_Str(dataTable, "OcrGoods", "");
-
 
 
         }
@@ -484,437 +738,88 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
-        [Route("OrderPrintFactor")]
-        public string OrderPrintFactor(String AppBasketInfoRef)
+        [HttpPost]
+        [Route("SaveOcrImage")]
+        public string SaveOcrImage([FromBody] OcrModel ocrModel)
         {
 
 
+            string image_base64 = ocrModel.ImageStr;
+            string query = $"Exec dbo.spApp_ocrGetFactor '{ocrModel.barcode}', 0 ";
 
-
-            string query = " select * from AppPrinter where Apptype = 2 ";
-
-            DataTable Table_print = db.Order_ExecQuery(Request.Path, query);
-
-            List<Printer> Printers = new List<Printer>();
-
-
-            if (Table_print.Rows.Count > 0)
-            {
-                for (int i = 0; i < Table_print.Rows.Count; i++)
-                {
-                    Printer printer = new Printer();
-
-                    printer.AppPrinterCode = Convert.ToString(Table_print.Rows[i]["AppPrinterCode"]);
-                    printer.PrinterName = Convert.ToString(Table_print.Rows[i]["PrinterName"]);
-                    printer.PrinterExplain = Convert.ToString(Table_print.Rows[i]["PrinterExplain"]);
-                    printer.GoodGroups = Convert.ToString(Table_print.Rows[i]["GoodGroups"]);
-                    printer.WhereClause = Convert.ToString(Table_print.Rows[i]["WhereClause"]);
-                    printer.PrintCount = Convert.ToString(Table_print.Rows[i]["PrintCount"]);
-                    printer.PrinterActive = Convert.ToString(Table_print.Rows[i]["PrinterActive"]);
-                    printer.FilePath = Convert.ToString(Table_print.Rows[i]["FilePath"]);
-                    printer.AppType = Convert.ToString(Table_print.Rows[i]["AppType"]);
-
-
-                    Printers.Add(printer);
-
-                }
-            }
-
-
-
-            foreach (Printer printer in Printers)
-            {
-
-                if (Convert.ToInt64(printer.PrintCount) > 0)
-                {
-
-
-                    Report report = new Report();
-                    report.Load(printer.FilePath);
-
-
-                    query = $"Exec [dbo].[spApp_OrderGetFactor ] {AppBasketInfoRef} ";
-                    DataTable dataTable_factor = db.Order_ExecQuery(Request.Path, query);
-
-                    List<Factor> factorHeader = new List<Factor>();
-                    Factor factor = new Factor();
-
-
-                    factor.AppBasketInfoCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoCode"]));
-                    factor.AppBasketInfoDate = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["AppBasketInfoDate"]));
-                    factor.DailyCode = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["DailyCode"]));
-                    factor.MizType = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["MizType"]));
-                    factor.RstMizName = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["RstMizName"]));
-                    factor.InfoExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["InfoExplain"]));
-                    factor.FactorExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["FactorExplain"]));
-                    factor.TimeStart = db.ConvertToPersianNumber(Convert.ToString(dataTable_factor.Rows[0]["TimeStart"]));
-                    factor.InfoPrintCount = Convert.ToString(dataTable_factor.Rows[0]["InfoPrintCount"]);
-                    factor.InfoState = Convert.ToString(dataTable_factor.Rows[0]["InfoState"]);
-                    factor.ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
-                    if (Convert.ToInt64(dataTable_factor.Rows[0]["InfoPrintCount"]) > 0)
-                    {
-                        factor.CustName = "(چاپ مجدد)";
-                    }
-                    factorHeader.Add(factor);
-
-
-
-                    string convertedString = printer.WhereClause.Replace("=''", "=N''");
-
-                    query = $"Exec [dbo].[spApp_OrderGetFactorRow ] {AppBasketInfoRef} , {printer.GoodGroups} , N'{convertedString}' ";
-                    DataTable dataTable_Row = db.Order_ExecQuery(Request.Path, query);
-
-
-
-
-                    List<FactorRow> FactorRows = new List<FactorRow>();
-
-
-                    if (dataTable_Row.Rows.Count > 0)
-                    {
-                        for (int i = 0; i < dataTable_Row.Rows.Count; i++)
-                        {
-                            FactorRow factorRow = new FactorRow();
-                            Console.WriteLine((dataTable_Row.Rows[i]["IsExtra"]));
-
-                            if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "True")
-                            {
-                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + " (سفارش مجدد) .";
-                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
-
-                            }
-                            else
-                            {
-                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]);
-                                factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
-
-                            }
-
-                            factorRow.FactorRowCode = Convert.ToString(dataTable_Row.Rows[i]["FactorRowCode"]);
-                            factorRow.GoodRef = Convert.ToString(dataTable_Row.Rows[i]["GoodRef"]);
-                            factorRow.FacAmount = Convert.ToString(dataTable_Row.Rows[i]["FacAmount"]);
-                            factorRow.FacAmount = factorRow.FacAmount.Substring(0, factorRow.FacAmount.IndexOf("."));
-                            factorRow.CanPrint = Convert.ToString(dataTable_Row.Rows[i]["CanPrint"]);
-                            factorRow.RowExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_Row.Rows[i]["RowExplain"]));
-                            factorRow.IsExtra = Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]);
-
-                            FactorRows.Add(factorRow);
-
-
-                        }
-
-                        List<Printer> printerss = new List<Printer>();
-                        printerss.Add(printer);
-                        string time = db.ConvertToPersianNumber(DateTime.Now.ToString("HH:mm"));
-
-                        report.RegisterData(factorHeader, "Factor");
-                        report.RegisterData(FactorRows, "FactorRow");
-                        report.RegisterData(printerss, "Printer");
-                        report.SetParameterValue("CurrentTime", time);
-
-
-
-                        if (report.Prepare())
-                        {
-                            // Export the report to PDF
-                            PDFSimpleExport pdfExport = new PDFSimpleExport();
-                            pdfExport.ShowProgress = false;
-                            pdfExport.Subject = "Subject Report";
-                            pdfExport.Title = "Report Title";
-                            MemoryStream ms = new MemoryStream();
-
-                            report.Export(pdfExport, ms);
-                            report.Dispose();
-                            pdfExport.Dispose();
-                            ms.Position = 0;
-
-
-                            fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
-
-                            PdfPrinter pdfPrinter = new PdfPrinter();
-
-                            pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
-
-
-
-
-
-                        }
-
-                    }
-
-                }
-
-            }
-
-            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
-
-            DataTable dataTable = db.Order_ExecQuery(Request.Path, query11);
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
-
-
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        /*
-        
-        
-        
-        [HttpGet]
-        [Route("GetFactorListCount")]
-        public string GetFactorListCount(
-            string State,
-            string SearchTarget,
-            string Stack,
-            string path,
-            string Row,
-            string PageNo,
-            string HasShortage,
-            string IsEdited
-            )
-        {
-
-
-            string where = "";
-
-            if (State == "0")
-            {
-                if (Stack == "همه")
-                {
-                    where = "";
-                }
-                else
-                {
-                    where = " And Exists(Select 1 From FactorRows r Join Good g on GoodRef = GoodCode Join AppOCRFactorRow cr on cr.AppFactorRowRef = r.FactorRowCode And cr.AppOCRFactorRef = o.AppOCRFactorCode Where r.FactorRef = FactorCode And IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + ", '''') = ''" + Stack + "'' And IsNull(cr.AppRowIsControled, 0) = 0) ";
-                }
-            }
-
-            if (path == "همه")
-            {
-                where = where + " ";
-            }
-            else
-            {
-                where = where + " And IsNull(" + _configuration.GetConnectionString("Ocr_Ersall") + ", '''') = N''" + path + "'' ";
-            }
-
-            if (HasShortage == "1")
-            {
-                where = where + " And o.HasShortage = 1 ";
-            }
-            if (IsEdited == "1")
-            {
-                where = where + " And o.IsEdited = 1 ";
-            }
-
-            string sq = $"Exec dbo.spApp_ocrFactorListTotal {State}, '{SearchTarget}', '{where}', {Row}, {PageNo}";
-
-
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, sq);
-
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
-
-
-
-        }
-
-
-
-
-        
-        public void SaveOcrImage(string barcode, string zipPath)
-        {
-            string query = $"Exec dbo.spApp_ocrGetFactor '{barcode}', 0 ";
-
-            DataTable dataTable = ExecQuery(query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             string dbname = Convert.ToString(dataTable.Rows[0]["dbname"]);
             string FactorRef = Convert.ToString(dataTable.Rows[0]["FactorRef"]);
             string TcPrintRef = Convert.ToString(dataTable.Rows[0]["TcPrintRef"]);
 
-            byte[] fileContent = fileManager.GetFile(zipPath);
 
-            string query1 = $"Insert Into {dbname}.dbo.AttachedFiles(Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate, TcPrintRef) " +
-                $"Select 'App_ocr', 'Factor', {FactorRef}, '{barcode}.jpg', @FContent, 'zip', -1000, GetDate(), -1000, GetDate(), {TcPrintRef} ";
 
-            ExecNonQueryWithBinaryParam(query1, fileContent);
 
-            string query3 = $"set nocount on Update AppOCRFactor Set HasSignature = 1 Where AppTcPrintRef = {TcPrintRef} ";
+            string base64Image = ocrModel.ImageStr;
+            byte[] imageBytes = Convert.FromBase64String(base64Image);
 
-            ExecNonQuery(query3);
 
-            Console.WriteLine("\"done\"");
-        }
 
-        private DataTable ExecQuery(string query)
-        {
+            string imageName = $"{ocrModel.barcode}.jpg"; // Constructing the image name
+            string imageName_zip = $"{ocrModel.barcode}.zip"; // Constructing the image name
+            string imagePath = _configuration.GetConnectionString("Ocr_imagePath") + $"{imageName}"; // Provide the path where you want to save the image
+            string image_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{imageName_zip}"; // Provide the path where you want to save the zip file
+
+            System.IO.File.WriteAllBytes(imagePath, imageBytes);
+
+            // Create a zip archive and add the image file to it
+            using (FileStream zipStream = new FileStream(image_zipPath, FileMode.Create))
+            {
+                using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+                {
+                    archive.CreateEntryFromFile(imagePath, imageName);
+                }
+            }
+            string connectionString = "Your_Connection_String"; // Provide your SQL Server connection string
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                using (SqlCommand cmd = new SqlCommand(query, connection))
+                using (SqlCommand command = connection.CreateCommand())
                 {
-                    using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
-                    {
-                        DataTable dataTable = new DataTable();
-                        adapter.Fill(dataTable);
-                        return dataTable;
-                    }
+                    // Construct the SQL query
+                    command.CommandText = @" INSERT INTO  @dbname.dbo.AttachedFiles (Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate, TcPrintRef)
+                    VALUES (@Title, @ClassName, @ObjectRef, @FileName, @SourceFile, @Type, @Owner, @CreationDate, @Reformer, @ReformDate, @TcPrintRef);
+                    UPDATE AppOCRFactor SET HasSignature = 1 WHERE AppTcPrintRef = @TcPrintRef; ";
+
+                    // Set parameter values
+                    command.Parameters.AddWithValue("@dbname", dbname);
+                    command.Parameters.AddWithValue("@Title", "App_ocr");
+                    command.Parameters.AddWithValue("@ClassName", "Factor");
+                    command.Parameters.AddWithValue("@ObjectRef", FactorRef);
+                    command.Parameters.AddWithValue("@FileName", imageName);
+                    command.Parameters.AddWithValue("@SourceFile", System.IO.File.ReadAllBytes(image_zipPath));
+                    command.Parameters.AddWithValue("@Type", "zip");
+                    command.Parameters.AddWithValue("@Owner", -1000);
+                    command.Parameters.AddWithValue("@CreationDate", DateTime.Now);
+                    command.Parameters.AddWithValue("@Reformer", -1000);
+                    command.Parameters.AddWithValue("@ReformDate", DateTime.Now);
+                    command.Parameters.AddWithValue("@TcPrintRef", TcPrintRef);
+
+                    // Execute the command
+                    command.ExecuteNonQuery();
                 }
             }
+
+            // Cleanup: Delete the temporary image file and zip archive
+            System.IO.File.Delete(imagePath);
+            System.IO.File.Delete(image_zipPath);
+
+
+
+
+
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable2 = db.Order_ExecQuery(Request.Path, query11);
+
+            return jsonClass.JsonResult_Str(dataTable2, "Text", "TodeyFromServer");
         }
-
-        private void ExecNonQueryWithBinaryParam(string query, byte[] binaryData)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                using (SqlCommand cmd = new SqlCommand(query, connection))
-                {
-                    cmd.Parameters.Add("@FContent", SqlDbType.VarBinary, -1).Value = binaryData;
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-        private void ExecNonQuery(string query)
-        {
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                using (SqlCommand cmd = new SqlCommand(query, connection))
-                {
-                    cmd.ExecuteNonQuery();
-                }
-            }
-        }
-
-
-        */
-
-
 
 
 
@@ -926,4 +831,5 @@ namespace webapikits.Controllers
 
 
 }
+
 
