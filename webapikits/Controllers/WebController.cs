@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Spire.Pdf.OPC;
 using webapikits.Model;
+using static webapikits.Controllers.OcrController;
 
 
 namespace webapikits.Controllers
@@ -966,7 +967,13 @@ namespace webapikits.Controllers
 
 
                 // Save the image bytes to a file
-                string filePath = $"E:\\KowsarAcc\\WebApiLocation\\Log_SaveStorage\\{Conversationref}.jpg"; // Adjust the file path as needed
+
+                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{Conversationref}.jpg"; // Provide the path where you want to save the image
+
+
+
+
+
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
 
 
@@ -1019,7 +1026,9 @@ namespace webapikits.Controllers
                 byte[] decodedImage = Convert.FromBase64String(data.image);
 
                 // Save the image bytes to a file
-                string filePath = $"E:\\KowsarAcc\\WebApiLocation\\Log_SaveStorage\\{data.ObjectCode}.jpg"; // Adjust the file path as needed
+
+                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{data.ObjectCode}.jpg"; // Provide the path where you want to save the image
+
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
 
 
@@ -1441,51 +1450,6 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
-
-
-
-        /*
-        [HttpGet]
-        [Route("WebImageConversation")]
-        public void WebImageConversation()
-        {
-            
-            string ObjectId = "0";
-            string LetterRef = HttpContext.Current.Request["LetterRef"] ?? "";
-            string CentralRef = HttpContext.Current.Request["CentralRef"] ?? "";
-            string ConversationText = HttpContext.Current.Request["ConversationText"] ?? "";
-
-            string sq = $"Exec spWeb_AutLetterConversation_Insert @LetterRef='{LetterRef}', @CentralRef='{CentralRef}', @ConversationText='Image'";
-
-            List<Dictionary<string, object>> ClassResult = database.custom_sqlSRV(sq, true);
-
-            if (ClassResult.Count > 0)
-            {
-                ObjectId = ClassResult[0]["ConversationCode"].ToString();
-            }
-
-            string Image = HttpContext.Current.Request["Image"];
-            byte[] decodedImage = Convert.FromBase64String(Image);
-            string imagePath = HttpContext.Current.Server.MapPath("~/LetterImage/" + ObjectId + ".jpg");
-            File.WriteAllBytes(imagePath, decodedImage);
-
-            sq = $"Exec spImageImport 'Aut', {ObjectId}, '{imagePath}'; select @@IDENTITY KsrImageCode";
-            MainClass.LogFile("WebImageConversation", sq);
-            List<Dictionary<string, object>> response = database.custom_imgSRV(sq, true);
-
-            string Last = JsonConvert.SerializeObject(response, Formatting.None);
-            HttpContext.Current.Response.Write(Last);
-            string filename = HttpContext.Current.Server.MapPath("~/LetterImage/" + ObjectId + ".jpg");
-            File.Delete(filename);
-            
-        }
-
-
-        */
 
 
 

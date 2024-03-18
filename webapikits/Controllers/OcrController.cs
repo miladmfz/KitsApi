@@ -13,6 +13,16 @@ using System.IO;
 using System.IO.Compression;
 using System.Data.SqlClient;
 using System.Text;
+using Serilog;
+using SixLabors.ImageSharp;
+using Aspose.Pdf.Operators;
+using static Stimulsoft.Base.StiDbType;
+using System.Data.Common;
+using System;
+using System.Data.SqlClient;
+using System.IO;
+
+
 
 namespace webapikits.Controllers
 {
@@ -673,7 +683,7 @@ namespace webapikits.Controllers
         public string GetJobPerson(string Where)
         {
 
-            string query = "select j.JobCode,jp.JobPersonCode,j.Title,c.Name,c.FName from  JobPerson jp  join job j on j.JobCode=jp.JobRef  join Central c on c.CentralCode=jp.CentralRef  where j.Title='" + Where + "'";
+            string query = "select j.JobCode,jp.JobPersonCode,j.Title,c.Name,c.FName from JobPerson jp  join job j on j.JobCode=jp.JobRef  join Central c on c.CentralCode=jp.CentralRef  where j.Title='" + Where + "'";
 
 
 
@@ -694,9 +704,6 @@ namespace webapikits.Controllers
         {
 
             string query = "[dbo].[spApp_ocrGetFactorDetail] " + OCRFactorCode;
-
-
-
             DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "AppOcrFactors", "");
@@ -711,10 +718,7 @@ namespace webapikits.Controllers
         {
 
             string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_CustomerPath") + " , '') " + _configuration.GetConnectionString("Ocr_CustomerPath_Lible") + " From PropertyValue Where ClassName= 'TCustomer'";
-
-
             DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
-
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
         }
@@ -726,10 +730,7 @@ namespace webapikits.Controllers
         {
 
             string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + " , '') " + _configuration.GetConnectionString("Ocr_StackCategory") + " From good";
-
-
             DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
-
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -743,7 +744,6 @@ namespace webapikits.Controllers
         public string SaveOcrImage([FromBody] OcrModel ocrModel)
         {
 
-
             string image_base64 = ocrModel.ImageStr;
             string query = $"Exec dbo.spApp_ocrGetFactor '{ocrModel.barcode}', 0 ";
 
@@ -752,7 +752,6 @@ namespace webapikits.Controllers
             string dbname = Convert.ToString(dataTable.Rows[0]["dbname"]);
             string FactorRef = Convert.ToString(dataTable.Rows[0]["FactorRef"]);
             string TcPrintRef = Convert.ToString(dataTable.Rows[0]["TcPrintRef"]);
-
 
 
 
@@ -765,9 +764,11 @@ namespace webapikits.Controllers
             string imageName_zip = $"{ocrModel.barcode}.zip"; // Constructing the image name
             string imagePath = _configuration.GetConnectionString("Ocr_imagePath") + $"{imageName}"; // Provide the path where you want to save the image
             string image_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{imageName_zip}"; // Provide the path where you want to save the zip file
+            Console.WriteLine(imagePath);
+            Console.WriteLine(image_zipPath);
 
             System.IO.File.WriteAllBytes(imagePath, imageBytes);
-
+            
             // Create a zip archive and add the image file to it
             using (FileStream zipStream = new FileStream(image_zipPath, FileMode.Create))
             {
@@ -776,43 +777,48 @@ namespace webapikits.Controllers
                     archive.CreateEntryFromFile(imagePath, imageName);
                 }
             }
-            string connectionString = "Your_Connection_String"; // Provide your SQL Server connection string
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                connection.Open();
-                using (SqlCommand command = connection.CreateCommand())
-                {
-                    // Construct the SQL query
-                    command.CommandText = @" INSERT INTO  @dbname.dbo.AttachedFiles (Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate, TcPrintRef)
-                    VALUES (@Title, @ClassName, @ObjectRef, @FileName, @SourceFile, @Type, @Owner, @CreationDate, @Reformer, @ReformDate, @TcPrintRef);
-                    UPDATE AppOCRFactor SET HasSignature = 1 WHERE AppTcPrintRef = @TcPrintRef; ";
 
-                    // Set parameter values
-                    command.Parameters.AddWithValue("@dbname", dbname);
-                    command.Parameters.AddWithValue("@Title", "App_ocr");
-                    command.Parameters.AddWithValue("@ClassName", "Factor");
-                    command.Parameters.AddWithValue("@ObjectRef", FactorRef);
-                    command.Parameters.AddWithValue("@FileName", imageName);
-                    command.Parameters.AddWithValue("@SourceFile", System.IO.File.ReadAllBytes(image_zipPath));
-                    command.Parameters.AddWithValue("@Type", "zip");
-                    command.Parameters.AddWithValue("@Owner", -1000);
-                    command.Parameters.AddWithValue("@CreationDate", DateTime.Now);
-                    command.Parameters.AddWithValue("@Reformer", -1000);
-                    command.Parameters.AddWithValue("@ReformDate", DateTime.Now);
-                    command.Parameters.AddWithValue("@TcPrintRef", TcPrintRef);
+            
+            string connectionString = _configuration.GetConnectionString("Ocr_Connection"); // Provide your SQL Server connection string
+
+
+
+            using (SqlConnection dbConnection = new SqlConnection(connectionString))
+            {
+                dbConnection.Open();
+
+                // Construct the SQL query with parameters
+                string sqlCommandText = @" INSERT INTO " + dbname + @".dbo.AttachedFiles
+                                            (Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate, TcPrintRef)
+                                             VALUES
+                                             ('App_ocr', 'Factor', @FactorRef, @ImageName, @SourceFile, 'Zip', -1000, GETDATE(), -1000, GETDATE(), @TcPrintRef)  ";
+
+                // Create a SqlCommand object
+                using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
+                {
+                    // Bind parameters
+                    sqlCommand.Parameters.AddWithValue("@FactorRef", FactorRef);
+                    sqlCommand.Parameters.AddWithValue("@ImageName", ocrModel.barcode + ".zip");
+                    sqlCommand.Parameters.AddWithValue("@SourceFile", System.IO.File.ReadAllBytes(image_zipPath));
+                    sqlCommand.Parameters.AddWithValue("@TcPrintRef", TcPrintRef);
 
                     // Execute the command
-                    command.ExecuteNonQuery();
+                    sqlCommand.ExecuteNonQuery();
                 }
             }
 
-            // Cleanup: Delete the temporary image file and zip archive
+
+
+
             System.IO.File.Delete(imagePath);
             System.IO.File.Delete(image_zipPath);
 
 
 
 
+
+            string query4 = $"UPDATE AppOCRFactor SET HasSignature = 1 WHERE AppTcPrintRef = {TcPrintRef} ";
+            DataTable dataTable4 = db.Order_ExecQuery(Request.Path, query4);
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
@@ -831,5 +837,4 @@ namespace webapikits.Controllers
 
 
 }
-
 
