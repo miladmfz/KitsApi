@@ -505,7 +505,6 @@ namespace webapikits.Controllers
             )
         {
 
-            //string query = "Exec spApp_GetGoods2 @RowCount = $RowCount,@Where = N'$Where',@AppBasketInfoRef=$AppBasketInfoRef, @GroupCode = $GroupCode ,@AppType=3 , @OrderBy = ' order by PrivateCodeForSort ' ";
             string query = $"Delete From AppBasket Where AppBasketInfoRef = {AppBasketInfoRef} and AppBasketCode = {RowCode}";
 
             DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
@@ -702,120 +701,6 @@ namespace webapikits.Controllers
 
 
 
-
-
-        /*
-
-
-
-
-       [HttpGet]
-       [Route("OrderSendImage")]
-       public string OrderSendImage(
-           string Image,
-           string Code,
-           string PrinterName,
-           string PrintCount
-           )
-       {
-
-
-
-                 $decodedImage = base64_decode($Image);
-         file_put_contents("FactorImage/$Code.jpg", $decodedImage);
-
-
-         try {
-
-             $tux = EscposImage::load(__DIR__ . "/../FactorImage/$Code.jpg", false);
-             //$connector = new WindowsPrintConnector($PrinterName);
-             //$connector = new FilePrintConnector("//192.168.1.33/asd");
-             $connector = new FilePrintConnector("$PrinterName");
-             $printer = new Printer($connector);
-             $printer -> setJustification( Printer::JUSTIFY_CENTER );
-             echo "{\"Text\":\"Done\"}";
-             for ($x = 0; $x < $PrintCount; $x++) {
-                 $printer -> getPrintConnector() -> write(PRINTER::RS);
-
-                 $printer -> graphics($tux);
-                 $printer -> cut();
-             }
-
-
-             $printer -> close();
-              $filename=__DIR__ . "/../FactorImage/$Code.jpg";
-              unlink($filename);
-             DataTable dataTable = db.Order_ExecQuery(sq);
-
-           return jsonClass.JsonResult_Str(dataTable, "Groups", "");
-           
-
-
-
-    }
-
-
-         */
-
-
-
-
-
-        [HttpGet]
-        [Route("WebOrderMizData")]
-        public string WebOrderMizData(string RstMizCode)
-        {
-            string query = $"exec spApp_OrderMizData {RstMizCode}";
-
-            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
-
-            return jsonClass.ConvertDataTableToJson(dataTable);
-
-        }
-
-
-
-
-        [HttpGet]
-        [Route("WebOrderInfoInsert")]
-        public string WebOrderInfoInsert(string Miz, string Date)
-        {
-
-            string query = $"exec spApp_OrderInfoInsert 0,{Miz},'','','',0,'','','{Date}',1,0 ";
-
-            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
-            return jsonClass.ConvertDataTableToJson(dataTable);
-        }
-
-
-
-
-        [HttpGet]
-        [Route("GetMenuOnlinegroups")]
-        public string GetMenuOnlinegroups(
-            string GroupName,
-            string GroupCode
-            )
-        {
-
-            string sq = "Exec [dbo].[spApp_GetGoodGroups] @where=' And GroupCode <100', ";
-
-            if (!string.IsNullOrEmpty(GroupName))
-            {
-                sq += $" @GroupName = N'{GroupName}' ";
-            }
-
-            if (!string.IsNullOrEmpty(GroupCode))
-            {
-                sq += $" @GroupCode = N'{GroupCode}' ";
-            }
-
-
-            DataTable dataTable = db.Order_ExecQuery(Request.Path, sq);
-
-            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
-
-        }
 
 
         [HttpGet]

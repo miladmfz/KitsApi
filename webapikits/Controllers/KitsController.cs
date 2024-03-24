@@ -31,9 +31,16 @@ namespace webapikits.Controllers
 
 
 
-        
+        public class PrintRequest
+        {
+            public string Image { get; set; }
+            public string Code { get; set; }
+            public string PrinterName { get; set; }
+            public int PrintCount { get; set; }
+        }
 
-public class ApiCredentials
+
+        public class ApiCredentials
     {
         public string UserApiKey { get; set; }
         public string SecretKey { get; set; }
@@ -127,10 +134,7 @@ public class ApiCredentials
                 if (response.IsSuccessStatusCode)
                 {
                     var resultJson = await response.Content.ReadAsStringAsync();
-                    Console.WriteLine("Response: " + resultJson);
 
-                    // Handle the response as needed
-                    // You can deserialize the JSON response if it contains useful data.
                     return resultJson;
                 }
                 else
@@ -146,19 +150,6 @@ public class ApiCredentials
 
         return "Error"; // You may want to return an error message or handle this differently.
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -198,7 +189,7 @@ public class ApiCredentials
         [Route("Activation")]
         public string Activation(string ActivationCode)
         {
-            Console.WriteLine("In yek matn dar konsol ast.");
+            
             string query = "select * from AppBrokerCustomer Where ActivationCode = '" + ActivationCode + "'";
 
             DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
@@ -217,9 +208,7 @@ public class ApiCredentials
 
             DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
 
-            Console.WriteLine(dataTable.Rows[0]["SQLiteURL"] + "");
             string filePath = dataTable.Rows[0]["SQLiteURL"] + "";
-            Console.WriteLine(filePath);
 
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
             {
@@ -244,8 +233,8 @@ public class ApiCredentials
         [Route("OcrKowsar")]
         public IActionResult OcrKowsar()
         {
-
-            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\OcrKowsar.apk";
+            
+            string filePath = _configuration.GetConnectionString("Ocr_path");
 
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
             {
@@ -261,7 +250,7 @@ public class ApiCredentials
         public IActionResult BrokerKowsar()
         {
 
-            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\BrokerKowsar.apk";
+            string filePath = _configuration.GetConnectionString("Broker_path");
 
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
             {
@@ -278,7 +267,7 @@ public class ApiCredentials
         public IActionResult OrderKowsar()
         {
 
-            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\OrderKowsar.apk";
+            string filePath = _configuration.GetConnectionString("Order_path");
 
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
             {
@@ -294,8 +283,8 @@ public class ApiCredentials
         [Route("KowsarCompany")]
         public IActionResult KowsarCompany()
         {
-
-            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\KowsarCompany.apk";
+            
+            string filePath = _configuration.GetConnectionString("KowsarCompany_path");
 
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
             {
@@ -313,7 +302,7 @@ public class ApiCredentials
         public IActionResult setup()
         {
 
-            string filePath = "E:\\KowsarAcc\\WebApiLocation\\Applications\\setup.rar";
+            string filePath = _configuration.GetConnectionString("setup_path");
 
             if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
             {
@@ -325,35 +314,6 @@ public class ApiCredentials
 
         }
 
-
-
-
-        [HttpGet]
-        [Route("DownloadFile1")]
-        public IActionResult DownloadFile1()
-        {
-            string filePath = "E:\\KowsarAcc\\WebApiLocation\\database\\111111\\KowsarDb.sqlite";
-            try
-            {
-                if (string.IsNullOrEmpty(filePath) || !System.IO.File.Exists(filePath))
-                {
-                    return NotFound("File not found");
-                }
-
-                // خواندن فایل به عنوان آرایه بایت
-                byte[] fileBytes = System.IO.File.ReadAllBytes(filePath);
-
-                // تعیین نوع محتوای فایل (مثلاً برای PDF)
-                string contentType = "application/pdf"; // مثال: برای PDF
-
-                // ارسال فایل به مشتری
-                return File(fileBytes, contentType, Path.GetFileName(filePath));
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"Internal server error: {ex.Message}");
-            }
-        }
 
 
 
@@ -408,13 +368,6 @@ public class ApiCredentials
 
         }
 
-        public class PrintRequest
-        {
-            public string Image { get; set; }
-            public string Code { get; set; }
-            public string PrinterName { get; set; }
-            public int PrintCount { get; set; }
-        }
 
 
 
