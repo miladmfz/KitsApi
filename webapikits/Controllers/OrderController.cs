@@ -178,7 +178,7 @@ namespace webapikits.Controllers
                     factor.ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
                     if (Convert.ToInt64(dataTable_factor.Rows[0]["InfoPrintCount"]) > 0)
                     {
-                        factor.CustName = "(چاپ مجدد)";
+                        factor.CustName = _configuration.GetConnectionString("Order_chapmojadad");
                     }
                     factorHeader.Add(factor);
 
@@ -204,7 +204,7 @@ namespace webapikits.Controllers
 
                             if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "True")
                             {
-                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + " (سفارش مجدد) .";
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + _configuration.GetConnectionString("Order_sefareshmojadad");
                                 factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
 
                             }
@@ -353,7 +353,7 @@ namespace webapikits.Controllers
                     factor.ReserveStart = Convert.ToString(dataTable_factor.Rows[0]["ReserveStart"]);
                     if (Convert.ToInt64(dataTable_factor.Rows[0]["InfoPrintCount"]) > 0)
                     {
-                        factor.CustName = "(چاپ مجدد)";
+                        factor.CustName = _configuration.GetConnectionString("Order_chapmojadad");
                     }
                     factorHeader.Add(factor);
 
@@ -378,7 +378,7 @@ namespace webapikits.Controllers
 
                             if (Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]) == "True")
                             {
-                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + " (سفارش مجدد) ";
+                                factorRow.GoodName = Convert.ToString(dataTable_Row.Rows[i]["GoodName"]) + _configuration.GetConnectionString("Order_sefareshmojadad");
                                 factorRow.GoodName = db.ConvertToPersianNumber(factorRow.GoodName);
 
                             }

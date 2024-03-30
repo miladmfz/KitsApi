@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Data;
 using System.Drawing;
+using Image = System.Drawing.Image;
 
 namespace webapikits.Model
 {
@@ -148,7 +149,7 @@ namespace webapikits.Model
 
             using (MemoryStream ms = new MemoryStream(imageData))
             {
-                Image image = Image.FromStream(ms);
+                    Image image = Image.FromStream(ms);
 
                 // Check image size and scale if necessary
                 if (Math.Max(image.Width, image.Height) > targetSize)
