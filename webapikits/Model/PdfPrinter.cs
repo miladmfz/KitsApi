@@ -1,41 +1,65 @@
-﻿using System.Drawing.Printing;
-using System.Drawing;
-using System.Media;
-
-using Spire.Pdf;
-using System.IO;
-using System;
-
+﻿using Spire.Pdf;
 using System.Drawing.Printing;
-using System;
-using Spire.Pdf;
-using System;
-using System.Drawing;
-using System.Drawing.Printing;
-using System.Media;
 
 public class PdfPrinter
 {
 
-    public void PrintPdf(String FilePath,String PrinterName)
+    public void PrintPdf(String FilePath, String PrinterName)
     {
-
-
+        
+        
         Console.WriteLine(FilePath);
 
 
         PdfDocument doc = new PdfDocument();
         doc.LoadFromFile(FilePath);
-        doc.PrintSettings.PrinterName = PrinterName; 
-        doc.PrintSettings.SelectPageRange(1, 5);
-
-        doc.PrintSettings.PrintController = new StandardPrintController();
+        doc.PrintSettings.PrinterName = PrinterName;
+        doc.PrintSettings.SelectPageRange(1, 1);
+        
         doc.Print();
 
 
-        FileManager fileManager = new ();        
+
+
+
+
+
+
+        FileManager fileManager = new();
         fileManager.DeletePdfFromStorage(FilePath);
+
         
+        
+
+
+    }
+
+
+
+    public void PrintPdfs(MemoryStream ms, String PrinterName)
+    {
+
+
+        PdfDocument doc = new PdfDocument();
+        doc.LoadFromStream(ms);
+        doc.PrintSettings.PrinterName = PrinterName;
+        doc.PrintSettings.SelectPageRange(1, 1);
+
+        doc.Print();
+
+
+
+
+        /*
+
+
+        FileManager fileManager = new();
+        fileManager.DeletePdfFromStorage(FilePath);
+        */
+
+
+
+
     }
 
 
@@ -53,19 +77,4 @@ public class PdfPrinter
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
-
-

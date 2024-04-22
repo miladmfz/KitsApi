@@ -1,13 +1,6 @@
 ﻿using System.Data;
-using System.Net;
-using System.Net.NetworkInformation;
-using System.Security.Cryptography;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Spire.Pdf.OPC;
 using webapikits.Model;
-using static webapikits.Controllers.OcrController;
 
 
 namespace webapikits.Controllers

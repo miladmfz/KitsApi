@@ -1,12 +1,9 @@
 ﻿using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using webapikits.Model;
-
-using FastReport;
 using FastReport.Export.PdfSimple;
-using System.Reflection;
-using static Stimulsoft.Report.StiOptions;
-
+using FastReport;
+using System.Drawing.Printing;
 
 namespace webapikits.Controllers
 {
@@ -197,6 +194,7 @@ namespace webapikits.Controllers
 
                     if (dataTable_Row.Rows.Count > 0)
                     {
+                        
                         for (int i = 0; i < dataTable_Row.Rows.Count; i++)
                         {
                             FactorRow factorRow = new FactorRow();
@@ -218,7 +216,6 @@ namespace webapikits.Controllers
                             factorRow.FactorRowCode = Convert.ToString(dataTable_Row.Rows[i]["FactorRowCode"]);
                             factorRow.GoodRef = Convert.ToString(dataTable_Row.Rows[i]["GoodRef"]);
                             factorRow.FacAmount = Convert.ToString(dataTable_Row.Rows[i]["FacAmount"]);
-                            factorRow.FacAmount = factorRow.FacAmount.Substring(0, factorRow.FacAmount.IndexOf("."));
                             factorRow.CanPrint = Convert.ToString(dataTable_Row.Rows[i]["CanPrint"]);
                             factorRow.RowExplain = db.ConvertToPersianNumber(Convert.ToString(dataTable_Row.Rows[i]["RowExplain"]));
                             factorRow.IsExtra = Convert.ToString(dataTable_Row.Rows[i]["IsExtra"]);
@@ -241,12 +238,18 @@ namespace webapikits.Controllers
 
                         if (report.Prepare())
                         {
+
+
                             // Export the report to PDF
                             PDFSimpleExport pdfExport = new PDFSimpleExport();
                             pdfExport.ShowProgress = false;
                             pdfExport.Subject = "Subject Report";
                             pdfExport.Title = "Report Title";
                             MemoryStream ms = new MemoryStream();
+
+
+
+
 
                             report.Export(pdfExport, ms);
                             report.Dispose();
@@ -255,13 +258,10 @@ namespace webapikits.Controllers
 
 
                             fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
-
+                            
                             PdfPrinter pdfPrinter = new PdfPrinter();
-
-
-
-                                pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
-
+                            pdfPrinter.PrintPdfs( ms, printer.PrinterName);
+                            
                             
 
 
@@ -284,7 +284,35 @@ namespace webapikits.Controllers
 
         }
 
-        [HttpGet]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    [HttpGet]
         [Route("OrderChangeTable")]
         public string OrderChangeTable(String AppBasketInfoRef)
         {
@@ -418,31 +446,29 @@ namespace webapikits.Controllers
 
                             if (report.Prepare())
                             {
+
+                                MemoryStream ms = new MemoryStream();
+
+
                                 // Export the report to PDF
                                 PDFSimpleExport pdfExport = new PDFSimpleExport();
                                 pdfExport.ShowProgress = false;
                                 pdfExport.Subject = "Subject Report";
                                 pdfExport.Title = "Report Title";
-                                MemoryStream ms = new MemoryStream();
+                                
 
                                 report.Export(pdfExport, ms);
                                 report.Dispose();
                                 pdfExport.Dispose();
                                 ms.Position = 0;
 
-
+                                
                                 fileManager.SavePdfToStorage(ms, _configuration.GetConnectionString("Pdf_SaveStorage"));
 
                                 PdfPrinter pdfPrinter = new PdfPrinter();
-
-     
-
-                                    pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
-
+                                pdfPrinter.PrintPdf(_configuration.GetConnectionString("Pdf_SaveStorage"), printer.PrinterName);
                                 
-
-
-
+                                
                             }
 
                         }
@@ -460,7 +486,13 @@ namespace webapikits.Controllers
         }
 
 
-        [HttpGet]
+
+
+
+
+
+
+[HttpGet]
         [Route("GetOrdergroupList")]
         public string GetOrdergroupList( string GroupCode   )
         {

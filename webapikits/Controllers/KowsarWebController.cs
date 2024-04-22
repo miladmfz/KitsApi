@@ -26,19 +26,6 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
-        [Route("GetTodeyFromServer")]
-        public string GetTodeyFromServer()
-        {
-
-            string query = "select dbo.fnDate_Today() TodeyFromServer ";
-
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
-
-        }
-
 
 
 
@@ -601,19 +588,17 @@ namespace webapikits.Controllers
 
 
 
-        public class ksrImageModel
+        public class ksrImageModeldto
         {
-            public string ObjectCode { get; set; }
-            public string image { get; set; }
-            public string ClassName { get; set; }
-            public string LetterRef { get; set; }
-            public string CentralRef { get; set; }
+            public string? ObjectCode { get; set; }
+            public string? image { get; set; }
+            public string? ClassName { get; set; }
         }
 
 
         [HttpPost]
         [Route("UploadImage")]
-        public string UploadImage([FromBody] ksrImageModel data)
+        public string UploadImage([FromBody] ksrImageModeldto data)
         {
 
 
@@ -636,7 +621,7 @@ namespace webapikits.Controllers
 
                 DataTable dataTable = db.ImageExecQuery(query);
 
-                return "Ok";
+                return "\"Ok\"";
             }
             catch (Exception ex)
             {
@@ -722,6 +707,90 @@ namespace webapikits.Controllers
 
             DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+        /// <summary>
+        /// ////////////////////////////////////////////////////////////////////
+        /// </summary>
+        /// <param name="GoodCode"></param>
+        /// <returns></returns>
+
+
+
+
+        [HttpGet]
+        [Route("GetObjectTypeFromDbSetup")]
+        public string GetObjectTypeFromDbSetup(string ObjectType)
+        {
+
+            string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
+
+        }
+
+
+
+
+        [HttpGet]
+        [Route("GetGoodBase")]
+        public string GetGoodBase(string GoodCode)
+        {
+
+            string query = $"  spWeb_GetGoodById {GoodCode},1";
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
+        [HttpGet]
+        [Route("GetGoodComplete")]
+        public string GetGoodComplete(string GoodCode)
+        {
+
+            string query = $"  spWeb_GetGoodById {GoodCode},2";
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
+
+
+        [HttpGet]
+        [Route("GetGoodUnits")]
+        public string GetGoodUnits(string GoodCode)
+        {
+
+            string query = $"  spWeb_GetGoodById {GoodCode},3";
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
+
+
+
+
+        [HttpGet]
+        [Route("GetGoodRelations")]
+        public string GetGoodRelations(string GoodCode)
+        {
+
+            string query = $"  spWeb_GetGoodById {GoodCode},4";
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
         }
 
 

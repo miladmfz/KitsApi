@@ -3,24 +3,9 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using webapikits.Model;
 using System.Data.SqlClient;
-using static webapikits.Controllers.OrderController;
 using FastReport.Export.PdfSimple;
-using Microsoft.AspNetCore.Identity;
 using FastReport;
 using System.IO.Compression;
-using System;
-using System.IO;
-using System.IO.Compression;
-using System.Data.SqlClient;
-using System.Text;
-using Serilog;
-using SixLabors.ImageSharp;
-using Aspose.Pdf.Operators;
-using static Stimulsoft.Base.StiDbType;
-using System.Data.Common;
-using System;
-using System.Data.SqlClient;
-using System.IO;
 
 
 
