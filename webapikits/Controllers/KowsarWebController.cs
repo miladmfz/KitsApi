@@ -531,7 +531,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -741,6 +741,18 @@ namespace webapikits.Controllers
         public string GetGoodBase(string GoodCode)
         {
 
+            string query = $"  spWeb_GetGoodById {GoodCode},0";
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+        [HttpGet]
+        [Route("GetGoodExplain")]
+        public string GetGoodExplain(string GoodCode)
+        {
+
             string query = $"  spWeb_GetGoodById {GoodCode},1";
 
             DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
@@ -765,8 +777,8 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
-        [Route("GetGoodUnits")]
-        public string GetGoodUnits(string GoodCode)
+        [Route("GetGoodProperty")]
+        public string GetGoodProperty(string GoodCode)
         {
 
             string query = $"  spWeb_GetGoodById {GoodCode},3";

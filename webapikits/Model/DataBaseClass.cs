@@ -60,7 +60,7 @@ namespace webapikits.Model
                 con.Open();
                 SqlDataAdapter ad = new SqlDataAdapter(query, con);
                 DataTable dataTable = new DataTable();
-                ad.Fill(dataTable);
+                 ad.Fill(dataTable);
                 con.Close();
                 return dataTable;
             }
