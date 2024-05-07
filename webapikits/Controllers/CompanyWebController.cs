@@ -4,6 +4,8 @@ using webapikits.Model;
 
 namespace webapikits.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class CompanyWebController : Controller
     {
         public readonly IConfiguration _configuration;
@@ -62,7 +64,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -82,7 +84,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -135,7 +137,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -148,7 +150,7 @@ namespace webapikits.Controllers
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -165,7 +167,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -182,7 +184,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -209,7 +211,7 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -230,7 +232,7 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -248,7 +250,7 @@ namespace webapikits.Controllers
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -278,7 +280,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Company_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
