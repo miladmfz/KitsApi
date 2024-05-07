@@ -21,7 +21,7 @@ internal class Program
         {
             options.AddDefaultPolicy(builder =>
             {
-                builder.AllowAnyOrigin() // Replace with your actual client origin.
+                builder.AllowAnyOrigin() 
                        .AllowAnyHeader()
                        .AllowAnyMethod();
 

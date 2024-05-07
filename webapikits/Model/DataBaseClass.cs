@@ -22,7 +22,7 @@ namespace webapikits.Model
         {
             byte[] imageData = null;
             Console.WriteLine(query);
-            DataTable dataTableImg = ImageExecQuery(query);
+            DataTable dataTableImg = Image_ExecQuery(query);
             if (dataTableImg.Rows.Count > 0)
             {
                 if (!Convert.IsDBNull(dataTableImg.Rows[0][0]))
@@ -83,6 +83,41 @@ namespace webapikits.Model
                 return dataTable;
             }
         }
+
+                public DataTable Image_ExecQuery(String query)
+        {
+            string connectionString = _configuration.GetConnectionString("ImageConnection"); // استفاده از IConfiguration برای خواندن connection string
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
+
+
+
+
+        public DataTable ImageExecQuery(String query)
+        {
+            string connectionString = _configuration.GetConnectionString("ImageConnection"); // استفاده از IConfiguration برای خواندن connection string
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
+
+
 
 
         public DataTable Broker_ExecQuery(String FunctionName,String query)
@@ -226,18 +261,6 @@ namespace webapikits.Model
 
 
 
-
-        public DataTable ImageExecQuery(String query)
-        {
-            string connectionString = _configuration.GetConnectionString("ImageConnection"); // استفاده از IConfiguration برای خواندن connection string
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                SqlDataAdapter ad = new SqlDataAdapter(query, con);
-                DataTable dataTable = new DataTable();
-                ad.Fill(dataTable);
-                return dataTable;
-            }
-        }
 
 
 

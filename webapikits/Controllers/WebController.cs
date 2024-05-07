@@ -65,55 +65,11 @@ namespace webapikits.Controllers
         }
 
 
-        public class BrokerCustomerDto
-        {
-
-            
-            
-            
-            public string? ActivationCode { get; set; }
-            public string? EnglishCompanyName { get; set; }
-            public string? PersianCompanyName { get; set; }
-            public string? ServerURL { get; set; }
-            public string? SQLiteURL { get; set; }
-            public string? MaxDevice { get; set; }
-            public string? SecendServerURL { get; set; }
-            public string? DbName { get; set; }
-            public string? AppType { get; set; }
-        }
-
-        public class GoodDto
-        {
-            public string? GoodCode { get; set; }
-            public string? GoodName { get; set; }
-            public string? MaxSellPrice { get; set; }
-            public string? GoodType { get; set; }
-            public string? GoodExplain1 { get; set; }
-            public string? GoodExplain2 { get; set; }
-            public string? GoodExplain3 { get; set; }
-            public string? GoodExplain4 { get; set; }
-            public string? GoodExplain5 { get; set; }
-            public string? GoodExplain6 { get; set; }
 
 
-        }
 
 
-        public class ksrImageModel
-        {
-            public string ObjectCode { get; set; }
-            public string image { get; set; }
-            public string ClassName { get; set; }
-            public string LetterRef { get; set; }
-            public string CentralRef { get; set; }
-        }
 
-        public class SearchDto
-        {
-            public string? RowCount { get; set; }
-            public string? Where { get; set; }
-            public string? GroupCode { get; set; }
-        }
 
 
         [HttpPost]
@@ -476,7 +432,7 @@ namespace webapikits.Controllers
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
 
 
-            DataTable dataTable = db.ImageExecQuery(query);
+            DataTable dataTable = db.Image_ExecQuery(query);
 
 
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
@@ -521,7 +477,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetOrderGoodList")]
-        public string GetOrderGoodList([FromBody] SearchDto searchDto)
+        public string GetOrderGoodList([FromBody] OrderGoodListSearchDto searchDto)
         {
             string searchtarget = searchDto.Where.Replace(" ", "%");
 
@@ -617,6 +573,8 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
+
+
         [Route("GetGoodFromGroup")]
         public string GetGoodFromGroup(string Where)
         {
