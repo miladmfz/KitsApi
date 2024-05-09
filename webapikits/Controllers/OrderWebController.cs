@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using webapikits.Model;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace webapikits.Controllers
 {
@@ -76,10 +77,10 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("minMaxGood")]
-        public string minMaxGood(string Date, string State)
+        public string minMaxGood(string StartDate, string EndDate, string State)
         {
 
-            string query = $" spweb_Getorderpanel '{Date}' ,{State} ";
+            string query = $" spweb_Getorderpanel '{StartDate}' ,'{EndDate}' ,{State} ";
 
             DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);

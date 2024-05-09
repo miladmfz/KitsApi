@@ -24,7 +24,20 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetProperty")]
+        public string GetProperty(string Where)
+        {
 
+            string query = $" Select  PropertySchema,PropertyValueMap,PropertyName  from PropertySchema Where ClassName = 'TGOOD' And  ObjectType = '{Where}'";
+
+
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+        }
 
 
         [HttpGet]

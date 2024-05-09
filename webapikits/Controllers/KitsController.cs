@@ -59,9 +59,7 @@ namespace webapikits.Controllers
     [Route("SendSms")]
     public async Task<string> SendSms(string RandomCode, string NumberPhone)
     {
-            string query = " "+ RandomCode + " " + NumberPhone;
-            Logger logger = new Logger();
-            logger.LogFile(_configuration, "LOG", query); ;
+
             try
         {
             string url = "https://RestfulSms.com/api/Token";

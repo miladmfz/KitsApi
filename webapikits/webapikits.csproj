@@ -14,7 +14,7 @@
   <ItemGroup>
     <PackageReference Include="FastReport.OpenSource" Version="2023.3.4" />
     <PackageReference Include="FastReport.OpenSource.Export.PdfSimple" Version="2023.3.4" />
-    <PackageReference Include="IPE.SmsIR" Version="1.0.5" />
+    <PackageReference Include="IPE.SmsIr" Version="1.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
     <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.0" />
