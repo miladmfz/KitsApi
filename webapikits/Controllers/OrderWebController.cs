@@ -342,6 +342,177 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpPost]
+        [Route("GetOrderGoodList")]
+        public string GetOrderGoodList([FromBody] OrderGoodListSearchDto searchDto)
+        {
+            string searchtarget = searchDto.Where.Replace(" ", "%");
+
+            string query = $"Exec spApp_GetGoods2 @RowCount = {searchDto.RowCount},@Where = N' GoodName like ''%{searchtarget}%''' ,@AppBasketInfoRef=0, @GroupCode = {searchDto.GroupCode} ,@AppType=3 ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+        [HttpGet]
+        [Route("ChangeGoodActive")]
+        public string ChangeGoodActive(string GoodCode, string ActiveFlag)
+        {
+
+            string query = $"spWeb_ChangeGoodActive {GoodCode},{ActiveFlag} ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("GetGoodEdit")]
+        public string GetGoodEdit(string Where)
+        {
+
+            string query = $"Select GoodCode,GoodName, CAST(MaxSellprice AS INT) MaxSellprice,GoodExplain1,GoodExplain2,GoodExplain3,GoodExplain4,GoodExplain5,GoodExplain6 from Good Where GoodCode = {Where} ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+        [HttpGet]
+        [Route("GetActiveGood")]
+        public string GetActiveGood(string GoodCode)
+        {
+
+            string query = $"select ActiveStack,GoodRef from GoodStack where goodref = {GoodCode}  order by 1 desc ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+
+
+        [HttpPost]
+        [Route("Web_InsertGood")]
+        public string Web_InsertGood([FromBody] GoodDto gooddto)
+        {
+
+            string query = $"Exec spWeb_InsertGood '{gooddto.GoodName}' , {gooddto.MaxSellPrice},'{gooddto.GoodExplain1}','{gooddto.GoodExplain2}','{gooddto.GoodExplain3}','{gooddto.GoodExplain4}','{gooddto.GoodExplain5}','{gooddto.GoodExplain6}' ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+        [HttpPost]
+        [Route("Web_UpdateGoodDetail")]
+        public string Web_UpdateGoodDetail([FromBody] GoodDto gooddto)
+        {
+
+            string query = $"Exec spWeb_UpdateGoodDetail {gooddto.GoodCode},'{gooddto.GoodName}' , {gooddto.MaxSellPrice},'{gooddto.GoodExplain1}','{gooddto.GoodExplain2}','{gooddto.GoodExplain3}','{gooddto.GoodExplain4}','{gooddto.GoodExplain5}','{gooddto.GoodExplain6}' ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+
+
+
+        [HttpGet]
+        [Route("GetGroupFromGood")]
+        public string GetGroupFromGood(string Where)
+        {
+
+            string query = $"select GoodGroupCode,GoodGroupRef, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode where Goodref = {Where}  ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+        [HttpGet]
+
+
+        [Route("GetGoodFromGroup")]
+        public string GetGoodFromGroup(string Where)
+        {
+
+            string query = $"select GoodGroupCode, GoodName, GoodCode from Good join GoodGroup on goodref = GoodCode  where GoodGroupRef = {Where}  ";
+
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+        [HttpGet]
+        [Route("DeleteGoodGroupCode")]
+        public string DeleteGoodGroupCode(string Where)
+        {
+
+            string query = $" delete from GoodGroup Where GoodGroupCode = {Where}  ";
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+
+        [HttpGet]
+        [Route("GetWebImagess")]
+        public string GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
+        {
+            string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
+
+
+            DataTable dataTable = db.Image_ExecQuery(query);
+
+
+            return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
+
+        }
+
+        [HttpPost]
+        [Route("UploadImage")]
+        public string UploadImage([FromBody] ksrImageModeldto data)
+        {
+
+
+            try
+            {
+
+
+                // Decode the base64 string to bytes
+                byte[] decodedImage = Convert.FromBase64String(data.image);
+
+                // Save the image bytes to a file
+
+                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{data.ObjectCode}.jpg"; // Provide the path where you want to save the image
+
+                System.IO.File.WriteAllBytes(filePath, decodedImage);
+
+
+                string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
+
+
+                DataTable dataTable = db.Image_ExecQuery(query);
+
+                return "\"Ok\"";
+            }
+            catch (Exception ex)
+            {
+                return $"{ex.Message}";
+
+            }
+        }
 
     }
 }
