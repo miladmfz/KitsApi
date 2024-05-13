@@ -98,7 +98,7 @@ namespace webapikits.Controllers
                         $"SearchVisible,ColumnType,OrderIndex,Condition,AppType from AppBasketColumn " +
                         $" where apptype ={AppType} and SearchVisible > 0 And ObjectType='' order by SearchVisible  ";
             }
-
+            
 
 
 
