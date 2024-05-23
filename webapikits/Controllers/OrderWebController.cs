@@ -460,7 +460,7 @@ namespace webapikits.Controllers
 
             string query = $" delete from GoodGroup Where GoodGroupCode = {Where}  ";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Order_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 

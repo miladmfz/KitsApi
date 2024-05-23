@@ -34,7 +34,7 @@ namespace webapikits.Controllers
         [Route("OcrFactorList")]
         public string OcrFactorList([FromBody] ConditionDto conditionDto)
         {
-            string query = $"Exec dbo.spApp_ocrFactorList 4 , '{conditionDto.SearchTarget}' ,' ',50 ,0 , ' order by o.AppTcPrintRef desc'  ";
+            string query = $"Exec dbo.spApp_ocrFactorList 4 , '{conditionDto.SearchTarget}' ,' ',50 ,0 , ' order by o.AppTcPrintRef desc' ,0,'{_configuration.GetConnectionString("OcrSecond_Db")}',{conditionDto.SourceFlag} ";
 
             DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);

@@ -4,6 +4,8 @@ using webapikits.Model;
 using Newtonsoft.Json;
 using System.Text;
 using SmsIrRestful;
+using IPE.SmsIrClient.Models.Requests;
+using IPE.SmsIrClient;
 
 namespace webapikits.Controllers
 {
@@ -46,13 +48,6 @@ namespace webapikits.Controllers
         public string SecretKey { get; set; }
     }
 
-    ApiCredentials credentials = new ApiCredentials
-    {
-        UserApiKey = "ce2ee6d2a00e4451f540e6d2",
-        SecretKey = "Kowsar321@!"
-    };
-
-    
 
 
     [HttpPost]
@@ -60,95 +55,26 @@ namespace webapikits.Controllers
     public async Task<string> SendSms(string RandomCode, string NumberPhone)
     {
 
-            try
-        {
-            string url = "https://RestfulSms.com/api/Token";
-            var credentials = new { UserApiKey = "ce2ee6d2a00e4451f540e6d2", SecretKey = "Kowsar321@!" };
-            string json = JsonConvert.SerializeObject(credentials);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            HttpClient httpClient = new HttpClient();
+            httpClient.DefaultRequestHeaders.Add("x-api-key", "me8CfaoTR0rLZEpRWQqdvtCnzcsRwpPtVz9mmwYdbWv5kBEjtSJKZG3wMYCvEndd");
+            var payload = @"{" + "\n" +
+            @"  ""mobile"": """+ NumberPhone + @"""," + "\n" +
+            @"  ""templateId"": 100000," + "\n" +
+            @"  ""parameters"": [" + "\n" +
+            @"    {" + "\n" +
+            @"      ""name"": ""CODE""," + "\n" +
+            @"      ""value"": """+ RandomCode + @"""" + "\n" +
+            @"    }" + "\n" +
+            @"  ]" + "\n" +
+            @"}";
+            HttpContent content = new StringContent(payload, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("https://api.sms.ir/v1/send/verify", content);
+            var result = await response.Content.ReadAsStringAsync();
 
-            using (var httpClient = new HttpClient())
-            {
-                var response = await httpClient.PostAsync(url, content);
 
-                if (response.IsSuccessStatusCode)
-                {
-                        var resultJson = await response.Content.ReadAsStringAsync();
-                        var resultObject = JsonConvert.DeserializeObject<TokenResultObject>(resultJson);
 
-                        if (resultObject.IsSuccessful)
-                        {
-                            VerificationCode(RandomCode, NumberPhone, resultObject.TokenKey);
-                            DataTable tb = new();
-                            return jsonClass.JsonResult_Str(tb, "Text", "done");
-                        }
-                        else
-                        {
-                            Console.WriteLine("API Request was successful, but Token not available.");
-                        }
-                    }
-                else
-                {
-                    Console.WriteLine("Request failed with status code: " + response.StatusCode);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error: " + ex.Message);
-        }
-
-        return ""; // You may want to return an error message or handle this differently.
+            return result; // You may want to return an error message or handle this differently.
     }
-
-
-
-
-    [HttpPost]
-    [Route("VerificationCode")]
-    public async Task<string> VerificationCode(string RandomCode, string NumberPhone, string Token_Str)
-    {
-        try
-        {
-            string url = "https://RestfulSms.com/api/VerificationCode";
-
-            // Define the request body
-            var requestBody = new
-            {
-                Code = RandomCode,
-                MobileNumber = NumberPhone
-            };
-
-            string json = JsonConvert.SerializeObject(requestBody);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            // Define the headers
-            using (var httpClient = new HttpClient())
-            {
-                httpClient.DefaultRequestHeaders.Add("x-sms-ir-secure-token", Token_Str);
-
-                var response = await httpClient.PostAsync(url, content);
-
-                if (response.IsSuccessStatusCode)
-                {
-                    var resultJson = await response.Content.ReadAsStringAsync();
-
-                    return resultJson;
-                }
-                else
-                {
-                    Console.WriteLine("API Request failed with status code: " + response.StatusCode);
-                }
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine("Error: " + ex.Message);
-        }
-
-        return "Error"; // You may want to return an error message or handle this differently.
-    }
-
 
 
     [HttpGet]

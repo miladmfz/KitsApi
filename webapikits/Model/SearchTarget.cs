@@ -5,6 +5,7 @@
     {
 
         public string? SearchTarget { get; set; }
+        public string? SourceFlag { get; set; }
     }
 
 }
