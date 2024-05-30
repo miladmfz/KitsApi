@@ -206,6 +206,43 @@ namespace webapikits.Controllers
 
             return jsonClass.JsonResult_Str(dataTable, "users", "");
         }
+
+
+
+        [HttpGet]
+        [Route("ChangeXUserPassword")]
+        public string ChangeXUserPassword(string UName, string UPass, string NewPass)
+        {
+
+            string query = $"Exec spApp_ChangeXUserPassword  '{UName}','{UPass}','{NewPass}'";
+
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
+
+
+        [HttpPost]
+        [Route("GetKowsarCustomer")] 
+        public string GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+        }
+
+
+
+
+
+
+
     }
 }
 

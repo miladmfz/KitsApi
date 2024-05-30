@@ -7,5 +7,10 @@
         public string? SearchTarget { get; set; }
         public string? SourceFlag { get; set; }
     }
+    public class SearchTargetDto
+    {
+
+        public string? SearchTarget { get; set; }
+    }
 
 }

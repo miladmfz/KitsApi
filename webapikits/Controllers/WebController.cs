@@ -319,12 +319,7 @@ namespace webapikits.Controllers
         }
 
 
-        public class LetterDto
-        {
-            public string? LetterRef { get; set; }
-            public string? CentralRef { get; set; }
-            public string? ConversationText { get; set; }
-        }
+
 
 
 
