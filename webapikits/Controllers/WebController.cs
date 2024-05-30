@@ -221,12 +221,12 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
+        [HttpPost]
         [Route("LetterInsert")]
-        public string LetterInsert(string LetterDate, string title, string Description, string CentralRef)
+        public string LetterInsert([FromBody] LetterInsert letterInsert)
         {
 
-            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{LetterDate}', @InOutFlag=0,@Title ='{title}', @Description='{Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral =28, @OwnerCentral ={CentralRef} ";
+            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=0,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral =28, @OwnerCentral ={letterInsert.CentralRef} ";
 
 
             DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
@@ -270,18 +270,12 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
+        [HttpPost]
         [Route("AutLetterRowInsert")]
-        public string AutLetterRowInsert(
-           string LetterRef,
-           string LetterDate,
-           string Description,
-           string CreatorCentral,
-           string ExecuterCentral
-            )
+        public string AutLetterRowInsert([FromBody] AutLetterRowInsert autLetterRowInsert)
         {
 
-            string query = $"spAutLetterRow_Insert @LetterRef = {LetterRef}, @LetterDate = '{LetterDate}', @Description = '{Description}', @State = 'درحال انجام', @Priority = 'عادي', @CreatorCentral = {CreatorCentral}, @ExecuterCentral = {ExecuterCentral}";
+            string query = $"spAutLetterRow_Insert @LetterRef = {autLetterRowInsert.LetterRef}, @LetterDate = '{autLetterRowInsert.LetterDate}', @Description = '{autLetterRowInsert.Description}', @State = 'درحال انجام', @Priority = 'عادي', @CreatorCentral = {autLetterRowInsert.CreatorCentral}, @ExecuterCentral = {autLetterRowInsert.ExecuterCentral}";
 
             DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
 

@@ -1,6 +1,11 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FastReport;
+using Microsoft.AspNetCore.Mvc;
 using System.Data;
+using System.Net;
+using System.Reflection;
+using System.Xml.Linq;
 using webapikits.Model;
+using Microsoft.AspNetCore.Http;
 
 namespace webapikits.Controllers
 {
@@ -169,6 +174,38 @@ namespace webapikits.Controllers
 
 
 
+        [HttpPost]
+        [Route("XUserCreate")]
+        public string XUserCreate([FromBody] UserDto userdto)
+        {
+             //  0 - ایجاد نام کاربری جدید
+             //  1 - بروز رسانی اطلاعات کاربر
+             //  2 - تغییر رمز عبور
+             //  3 - ثبت رمز عبور از طیق بازیابی
+             //  4 - بازیابی رمز عبور با استفاده از شماره موبایل
+             //  5 - ورود حساب کاربری
+
+            string query = $"Exec [dbo].[spApp_XUserCreate] " +
+                $"'{userdto.UName}','{userdto.UPass}','{userdto.NewPass}'," +
+                $"'{userdto.FName}','{userdto.LName}','{userdto.mobile}'," +
+                $"'{userdto.company}','{userdto.address}','{userdto.PostalCode}'," +
+                $"'{userdto.email}',-2000,{userdto.Flag}";
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "users", "");
+        }
+
+
+        [HttpPost]
+        [Route("IsUser")]
+        public string IsUser([FromBody] LoginUserDto loginUserDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_IsXUser] '{loginUserDto.UName}','{loginUserDto.UPass}'";
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "users", "");
+        }
     }
 }
 

@@ -44,9 +44,38 @@ namespace webapikits.Model
 
 
 
-
-
         
+
+        public DataTable Web_ExecQuery11(HttpRequest request, String query)
+        {
+
+            LogQuery11(request, query);
+
+
+            string connectionString = _configuration.GetConnectionString("Kowsar_Connection");
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
+        public void LogQuery11(HttpRequest request, String query)
+        {
+
+
+        }
+
+
+
+
+
+
+
 
         public DataTable Web_ExecQuery(String FunctionName, String query)
         {
@@ -269,7 +298,7 @@ namespace webapikits.Model
 
             query = query.Replace("'", "''");
 
-            string Log = $"exec sp_WebLogInsert @ClassName='{FunctionName}',@TagName='',@LogValue='{query}'";
+            string Log = $"exec sp_WebLogInsert @ClassName='{FunctionName}',@TagName='',@LogValue='{query}' ,@IpAddress='',@UserAgent='',@SessionId=''";
            
 
             string connectionString = _configuration.GetConnectionString("Kits_Connection"); // استفاده از IConfiguration برای خواندن connection string
@@ -280,6 +309,9 @@ namespace webapikits.Model
                 ad.Fill(dataTable);
             }
         }
+
+
+
 
 
 

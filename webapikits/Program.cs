@@ -1,5 +1,9 @@
 ﻿
-
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 
 internal class Program
 {
@@ -7,6 +11,7 @@ internal class Program
     {
 
         var builder = WebApplication.CreateBuilder(args);
+
         builder.Host.UseWindowsService();
         builder.Services.AddWindowsService();
 
