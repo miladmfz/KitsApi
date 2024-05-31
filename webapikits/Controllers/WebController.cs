@@ -28,6 +28,20 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetTodeyFromServer")]
+        public string GetTodeyFromServer()
+        {
+
+            string query = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+        }
+
 
 
 
