@@ -473,7 +473,7 @@ namespace webapikits.Controllers
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
 
 
-            DataTable dataTable = db.Image_ExecQuery(query);
+            DataTable dataTable = db.Web_ImageExecQuery(query);
 
 
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
@@ -503,7 +503,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable = db.Image_ExecQuery(query);
+                DataTable dataTable = db.Web_ImageExecQuery(query);
 
                 return "\"Ok\"";
             }

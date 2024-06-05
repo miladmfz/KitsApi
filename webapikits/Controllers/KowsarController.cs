@@ -360,7 +360,7 @@ namespace webapikits.Controllers
 
             string sq = $"Exec dbo.spApp_GetImage {ObjectRef}, {IX}, '{ClassName}'";
 
-            byte[] imageBytes = db.GetImageData(sq);
+            byte[] imageBytes = db.Web_GetImageData(sq);
 
 
             if (imageBytes != null)
@@ -434,7 +434,7 @@ namespace webapikits.Controllers
 
             string sq = "Exec dbo.spApp_GetKsrImage "+ KsrImageCode;
 
-            byte[] imageBytes = db.GetImageData(sq);
+            byte[] imageBytes = db.Web_GetImageData(sq);
 
 
             if (imageBytes != null)
@@ -511,7 +511,7 @@ namespace webapikits.Controllers
 
             string sq = $"set nocount on  select IMG from ksrimage where ClassName ='{ClassName}' and ObjectRef={ObjectRef} ";
 
-            byte[] imageBytes = db.GetImageData(sq);
+            byte[] imageBytes = db.Web_GetImageData(sq);
 
 
             if (imageBytes != null)

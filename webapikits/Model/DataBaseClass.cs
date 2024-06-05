@@ -18,11 +18,11 @@ namespace webapikits.Model
 
 
 
-        public byte[] GetImageData(String query)
+        public byte[] Web_GetImageData(String query)
         {
             byte[] imageData = null;
             Console.WriteLine(query);
-            DataTable dataTableImg = Image_ExecQuery(query);
+            DataTable dataTableImg = Web_ImageExecQuery(query);
             if (dataTableImg.Rows.Count > 0)
             {
                 if (!Convert.IsDBNull(dataTableImg.Rows[0][0]))
@@ -44,15 +44,13 @@ namespace webapikits.Model
 
 
 
-        
-
-        public DataTable Web_ExecQuery11(HttpRequest request, String query)
+        public DataTable Support_ExecQuery(String FunctionName, String query)
         {
-
-            LogQuery11(request, query);
-
-
-            string connectionString = _configuration.GetConnectionString("Kowsar_Connection");
+            if (FunctionName != "/api/Web/GetWebLog")
+            {
+                LogQuery(FunctionName, query);
+            }
+            string connectionString = _configuration.GetConnectionString("Support_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
@@ -64,18 +62,24 @@ namespace webapikits.Model
             }
         }
 
-        public void LogQuery11(HttpRequest request, String query)
+
+        public DataTable SupportApp_ExecQuery(String FunctionName, String query)
         {
-
-
+            if (FunctionName != "/api/Web/GetWebLog")
+            {
+                LogQuery(FunctionName, query);
+            }
+            string connectionString = _configuration.GetConnectionString("SupportApp_Connection");
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
         }
-
-
-
-
-
-
-
 
         public DataTable Web_ExecQuery(String FunctionName, String query)
         {
@@ -83,7 +87,7 @@ namespace webapikits.Model
             {
                 LogQuery(FunctionName, query);
             }
-            string connectionString = _configuration.GetConnectionString("Kowsar_Connection"); 
+            string connectionString = _configuration.GetConnectionString("Web_Connection"); 
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
@@ -113,9 +117,12 @@ namespace webapikits.Model
             }
         }
 
-                public DataTable Image_ExecQuery(String query)
+
+
+
+        public DataTable Support_ImageExecQuery(String query)
         {
-            string connectionString = _configuration.GetConnectionString("ImageConnection"); // استفاده از IConfiguration برای خواندن connection string
+            string connectionString = _configuration.GetConnectionString("Support_ImageConnection"); // استفاده از IConfiguration برای خواندن connection string
             using (SqlConnection con = new SqlConnection(connectionString))
             {
                 con.Open();
@@ -127,11 +134,7 @@ namespace webapikits.Model
             }
         }
 
-
-
-
-
-        public DataTable ImageExecQuery(String query)
+        public DataTable Web_ImageExecQuery(String query)
         {
             string connectionString = _configuration.GetConnectionString("ImageConnection"); // استفاده از IConfiguration برای خواندن connection string
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -259,6 +262,22 @@ namespace webapikits.Model
 
 
 
+        public void LogQuery(String FunctionName, String query)
+        {
+
+            query = query.Replace("'", "''");
+
+            string Log = $"exec sp_WebLogInsert @ClassName='{FunctionName}',@TagName='',@LogValue='{query}' ,@IpAddress='',@UserAgent='',@SessionId=''";
+
+
+            string connectionString = _configuration.GetConnectionString("Web_Connection"); // استفاده از IConfiguration برای خواندن connection string
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                SqlDataAdapter ad = new SqlDataAdapter(Log, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+            }
+        }
 
 
 
@@ -293,22 +312,6 @@ namespace webapikits.Model
 
 
 
-        public void LogQuery(String FunctionName, String query)
-        {
-
-            query = query.Replace("'", "''");
-
-            string Log = $"exec sp_WebLogInsert @ClassName='{FunctionName}',@TagName='',@LogValue='{query}' ,@IpAddress='',@UserAgent='',@SessionId=''";
-           
-
-            string connectionString = _configuration.GetConnectionString("Kits_Connection"); // استفاده از IConfiguration برای خواندن connection string
-            using (SqlConnection con = new SqlConnection(connectionString))
-            {
-                SqlDataAdapter ad = new SqlDataAdapter(Log, con);
-                DataTable dataTable = new DataTable();
-                ad.Fill(dataTable);
-            }
-        }
 
 
 

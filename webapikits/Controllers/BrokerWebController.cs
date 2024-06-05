@@ -51,7 +51,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable = db.Image_ExecQuery(query);
+                DataTable dataTable = db.Web_ImageExecQuery(query);
 
                 return "\"Ok\"";
             }
@@ -445,6 +445,23 @@ namespace webapikits.Controllers
             DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
+
+
+
+        [HttpGet]
+        [Route("Gettracker")]
+        public string Gettracker(string BrokerCode, string StartDate, string EndDate)
+        {
+
+            string query = $"Select * From(select * , rwn=row_Number() over (partition by gpsdate order by gpsdate)From GpsLocation Where Brokerref = {BrokerCode} And GpsDate between '{StartDate}' And '{EndDate}' ) ds where rwn=1 order by GpsDate ";
+
+
+            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
 
 
 

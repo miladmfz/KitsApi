@@ -38,7 +38,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -52,7 +52,7 @@ namespace webapikits.Controllers
 
             string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
 
             return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
 
@@ -68,7 +68,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},0";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -80,7 +80,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},1";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -93,7 +93,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},2";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -108,7 +108,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},3";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -125,7 +125,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},4";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -139,7 +139,7 @@ namespace webapikits.Controllers
 
             string query = $"  select top 10 KsrImageCode,ClassName,ObjectRef,IsDefaultImage,FileName from KsrImage where objectref={GoodCode}";
 
-            DataTable dataTable = db.Image_ExecQuery(query);
+            DataTable dataTable = db.Web_ImageExecQuery(query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -152,7 +152,7 @@ namespace webapikits.Controllers
 
             string query = $"select GoodGroupCode,GroupCode, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode\r\n where Goodref = {GoodCode}  ";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -166,76 +166,10 @@ namespace webapikits.Controllers
 
             string query = $"select GoodStackCode,GoodRef,StackRef,Amount,ReservedAmount,Name,ActiveStack  from vwGoodStack where goodref= {GoodCode}  ";
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
         }
 
-
-
-
-
-        [HttpPost]
-        [Route("XUserCreate")]
-        public string XUserCreate([FromBody] UserDto userdto)
-        {
-             //  0 - ایجاد نام کاربری جدید
-             //  1 - بروز رسانی اطلاعات کاربر
-             //  2 - تغییر رمز عبور
-             //  3 - ثبت رمز عبور از طیق بازیابی
-             //  4 - بازیابی رمز عبور با استفاده از شماره موبایل
-             //  5 - ورود حساب کاربری
-
-            string query = $"Exec [dbo].[spApp_XUserCreate] " +
-                $"'{userdto.UName}','{userdto.UPass}','{userdto.NewPass}'," +
-                $"'{userdto.FName}','{userdto.LName}','{userdto.mobile}'," +
-                $"'{userdto.company}','{userdto.address}','{userdto.PostalCode}'," +
-                $"'{userdto.email}',-2000,{userdto.Flag}";
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
-            return jsonClass.JsonResult_Str(dataTable, "users", "");
-        }
-
-
-        [HttpPost]
-        [Route("IsUser")]
-        public string IsUser([FromBody] LoginUserDto loginUserDto)
-        {
-
-
-            string query = $"Exec [dbo].[spWeb_IsXUser] '{loginUserDto.UName}','{loginUserDto.UPass}'";
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "users", "");
-        }
-
-
-
-        [HttpGet]
-        [Route("ChangeXUserPassword")]
-        public string ChangeXUserPassword(string UName, string UPass, string NewPass)
-        {
-
-            string query = $"Exec spApp_ChangeXUserPassword  '{UName}','{UPass}','{NewPass}'";
-
-
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResultWithout_Str(dataTable);
-
-        }
-
-
-
-        [HttpPost]
-        [Route("GetKowsarCustomer")] 
-        public string GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
-        {
-
-
-            string query = $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
-        }
 
 
 

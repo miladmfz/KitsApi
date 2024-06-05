@@ -128,7 +128,7 @@ namespace webapikits.Controllers
 
             string query = "Exec spApp_GetInfo 1, 'KsrImage', " + code + " , @RowCount=200, @CountFlag=1 ";
 
-            DataTable dataTable = db.ImageExecQuery(query);
+            DataTable dataTable = db.Web_ImageExecQuery(query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "");
 
@@ -180,7 +180,7 @@ namespace webapikits.Controllers
             DataTable dataTable;
             if (table.Equals("KsrImage"))
             {
-                dataTable = db.ImageExecQuery(query);
+                dataTable = db.Web_ImageExecQuery(query);
             }
             else
             {
