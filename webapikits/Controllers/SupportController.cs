@@ -150,8 +150,10 @@ namespace webapikits.Controllers
         [Route("LetterInsert")]
         public string LetterInsert([FromBody] LetterInsert letterInsert)
         {
+            string CreatorCentral = _configuration.GetConnectionString("Support_CreatorCentral");
 
-            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=0,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral =28, @OwnerCentral ={letterInsert.CentralRef} ";
+
+            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=2,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral ={CreatorCentral}, @OwnerCentral ={letterInsert.CentralRef} ";
 
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
@@ -300,7 +302,7 @@ namespace webapikits.Controllers
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
                 string query = $"Exec spImageImport  '{data.ClassName}',{Conversationref},'{filePath}' ;select @@IDENTITY KsrImageCode";
                 DataTable dataTable = db.Support_ImageExecQuery(query);
-                return "Ok";
+                return jsonClass.JsonResultWithout_Str(dataTable);
             }
             catch (Exception ex) 
             { return $"{ex.Message}";  }
