@@ -69,8 +69,67 @@ namespace webapikits.Controllers
 
         /// <returns></returns>
 
+        [HttpPost]
+        [Route("UploadImage")]
+        public string UploadImage([FromBody] ksrImageModeldto data)
+        {
 
 
+            try
+            {
+
+
+                // Decode the base64 string to bytes
+                byte[] decodedImage = Convert.FromBase64String(data.image);
+
+                // Save the image bytes to a file
+
+                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{data.ObjectCode}.jpg"; // Provide the path where you want to save the image
+
+                System.IO.File.WriteAllBytes(filePath, decodedImage);
+
+
+                string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
+
+
+                DataTable dataTable = db.Support_ImageExecQuery(query);
+
+                return "\"Ok\"";
+            }
+            catch (Exception ex)
+            {
+                return $"{ex.Message}";
+
+            }
+        }
+
+
+
+
+        [HttpGet]
+        [Route("GetCentralById")]
+        public string GetCentralById(string CentralCode)
+        {
+
+
+            string query = $"select CentralCode,Title,Name,FName,Manager,Delegacy,CentralName from vwcentral where CentralCode={CentralCode}";
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+        }
+
+
+        [HttpPost]
+        [Route("GetKowsarCentral")]
+        public string GetKowsarCentral([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_GetKowsarCentral] '{searchTargetDto.SearchTarget}'";
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+        }
 
 
 

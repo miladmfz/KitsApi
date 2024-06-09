@@ -25,6 +25,15 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("GetWebImagess")]
+        public string GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
+        {
+            string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
+            DataTable dataTable = db.Support_ImageExecQuery(query);
+            return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
+
+        }
 
         /// <summary>
 
