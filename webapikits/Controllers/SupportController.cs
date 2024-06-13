@@ -46,6 +46,36 @@ namespace webapikits.Controllers
 
 
 
+
+
+
+        [HttpPost]
+        [Route("UpdatePersonInfo")]
+        public string UpdatePersonInfo([FromBody] PersonInfoDto personInfoDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_UpdatePersonInfo] {personInfoDto.PersonInfoCode} ,'{personInfoDto.PhFirstName}','{personInfoDto.PhLastName}','{personInfoDto.PhCompanyName}','{personInfoDto.PhAddress1}','{personInfoDto.PhTel1}','{personInfoDto.PhMobile1}','{personInfoDto.PhEmail}'";
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "users", "");
+        }
+
+
+
+        [HttpGet]
+        [Route("GetKowsarPersonInfo")]
+        public string GetKowsarPersonInfo(String PersonInfoCode)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_GetKowsarPersonInfo] {PersonInfoCode}";
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "users", "");
+        }
+
+
         [HttpPost]
         [Route("IsUser")]
         public string IsUser([FromBody] LoginUserDto loginUserDto)

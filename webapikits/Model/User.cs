@@ -22,5 +22,20 @@
         public string UPass { get; set; } = "";
 
     }
+
+
+    public class PersonInfoDto
+    {
+
+        public string PersonInfoCode { get; set; } = "";
+        public string PhFirstName { get; set; } = "";
+        public string PhLastName { get; set; } = "";
+        public string PhCompanyName { get; set; } = "";
+        public string PhAddress1 { get; set; } = "";
+        public string PhTel1 { get; set; } = "";
+        public string PhMobile1 { get; set; } = "";
+        public string PhEmail { get; set; } = "";
+
+    }
 }
 
