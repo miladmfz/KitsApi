@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using webapikits.Model;
+using System.IO.Compression;
+using System.Data.SqlClient;
 
 namespace webapikits.Controllers
 {
@@ -421,6 +423,130 @@ namespace webapikits.Controllers
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
 
         }
+
+        [HttpPost]
+        [Route("KowsarAttachFile")]
+        public string KowsarAttachFile([FromBody] SearchTargetDto searchTarget)
+        {
+            string query = $"spWeb_SearchAttachFile {searchTarget.SearchTarget}";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
+        [HttpPost]
+        [Route("KowsarAttachUrl")]
+        public string KowsarAttachUrl([FromBody] SearchTargetDto searchTarget)
+        {
+            string query = $"spWeb_SearchAttachFile '{searchTarget.SearchTarget}' ,'URL'";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
+
+
+        [HttpPost]
+        [Route("SaveDocKowsar")]
+        public string SaveDocKowsar([FromBody] AttachFile attachFile)
+        {
+
+            if (attachFile.Type == "URL")
+            {
+
+
+                string query = $"exec spWeb_AttachFile '{attachFile.Title}','{attachFile.FileName}','{attachFile.ClassName}','{attachFile.Type}','{attachFile.FilePath}',''";
+
+                DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+                return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+
+
+
+            }
+            else {
+
+
+
+                string data_base64 = attachFile.Data;
+                byte[] data_Bytes = Convert.FromBase64String(data_base64);
+
+
+
+                string dataName = $"{attachFile.FileName}.{attachFile.FileType}"; // Constructing the image name
+                string dataName_zip = $"{attachFile.FileName}.zip"; // Constructing the image name
+                string dataPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName}"; // Provide the path where you want to save the image
+                string data_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName_zip}"; // Provide the path where you want to save the zip file
+                Console.WriteLine(dataPath);
+                Console.WriteLine(data_zipPath);
+
+                System.IO.File.WriteAllBytes(dataPath, data_Bytes);
+
+                // Create a zip archive and add the image file to it
+                using (FileStream zipStream = new FileStream(data_zipPath, FileMode.Create))
+                {
+                    using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
+                    {
+                        archive.CreateEntryFromFile(dataPath, dataName);
+                    }
+                }
+
+
+                string connectionString = _configuration.GetConnectionString("Support_Connection"); // Provide your SQL Server connection string
+
+
+
+                using (SqlConnection dbConnection = new SqlConnection(connectionString))
+                {
+                    dbConnection.Open();
+
+                    // Construct the SQL query with parameters
+
+                    string sqlCommandText = @"exec spWeb_AttachFile '@Title','@FileName','@ClassName','@Type','@FilePath','@SourceFile'  ";
+
+
+                    // Create a SqlCommand object
+                    using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
+                    {
+                        // Bind parameters
+                        sqlCommand.Parameters.AddWithValue("@Title", attachFile.Title);
+                        sqlCommand.Parameters.AddWithValue("@FileName", attachFile.FileName);
+                        sqlCommand.Parameters.AddWithValue("@ClassName", attachFile.ClassName);
+                        sqlCommand.Parameters.AddWithValue("@Type", attachFile.Type);
+                        sqlCommand.Parameters.AddWithValue("@FilePath", attachFile.FilePath);
+                        sqlCommand.Parameters.AddWithValue("@SourceFile", System.IO.File.ReadAllBytes(data_zipPath));
+
+                        // Execute the command
+                        sqlCommand.ExecuteNonQuery();
+                    }
+                }
+
+
+
+
+                System.IO.File.Delete(dataPath);
+                System.IO.File.Delete(data_zipPath);
+
+            }
+
+
+
+
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable2 = db.Order_ExecQuery(Request.Path, query11);
+
+            return jsonClass.JsonResult_Str(dataTable2, "Text", "TodeyFromServer");
+
+        }
+
+
 
 
 
