@@ -3,6 +3,7 @@ using System.Data;
 using webapikits.Model;
 using System.IO.Compression;
 using System.Data.SqlClient;
+using static webapikits.Controllers.OcrController;
 
 namespace webapikits.Controllers
 {
@@ -504,12 +505,17 @@ namespace webapikits.Controllers
 
                 using (SqlConnection dbConnection = new SqlConnection(connectionString))
                 {
+
                     dbConnection.Open();
 
-                    // Construct the SQL query with parameters
+                    string query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+                    DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
+                    string dbname = dataTable1.Rows[0]["dbname"] + "";
 
-                    string sqlCommandText = @"exec spWeb_AttachFile '@Title','@FileName','@ClassName','@Type','@FilePath','@SourceFile'  ";
-
+                    string sqlCommandText = @" INSERT INTO " + dbname + @".dbo.AttachedFiles
+                                            (Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate,FilePath)
+                                             VALUES
+                                             (@Title, @ClassName, 0, @FileName, @SourceFile, @Type, -1000, GETDATE(), -1000, GETDATE(),@FilePath)  ";
 
                     // Create a SqlCommand object
                     using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
@@ -525,13 +531,42 @@ namespace webapikits.Controllers
                         // Execute the command
                         sqlCommand.ExecuteNonQuery();
                     }
+
+
+
+                    /*
+
+                    // Construct the SQL query with parameters
+
+                    //string sqlCommandText = @"exec spWeb_AttachFile '@Title','@FileName','@ClassName','@Type','@FilePath','@SourceFile'  ";
+                    string sqlCommandText = @"exec spWeb_AttachFile @Title,@FileName,@ClassName,@Type,@FilePath,@SourceFile  ";
+
+
+                    // Create a SqlCommand object
+                    using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
+                    {
+
+
+                        byte[] fileBytes = System.IO.File.ReadAllBytes(data_zipPath);
+                        string base64File = Convert.ToBase64String(fileBytes);
+
+                        // Bind parameters
+                        sqlCommand.Parameters.AddWithValue("@Title", attachFile.Title);
+                        sqlCommand.Parameters.AddWithValue("@FileName", attachFile.FileName);
+                        sqlCommand.Parameters.AddWithValue("@ClassName", attachFile.ClassName);
+                        sqlCommand.Parameters.AddWithValue("@Type", attachFile.Type);
+                        sqlCommand.Parameters.AddWithValue("@FilePath", attachFile.FilePath);
+                        sqlCommand.Parameters.AddWithValue("@SourceFile", base64File);
+
+                        // Execute the command
+                        sqlCommand.ExecuteNonQuery();
+                    }
+
+                    */
                 }
 
-
-
-
-                System.IO.File.Delete(dataPath);
-                System.IO.File.Delete(data_zipPath);
+               System.IO.File.Delete(dataPath);
+               System.IO.File.Delete(data_zipPath);
 
             }
 
@@ -548,6 +583,37 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("GetAttachFile")]
+        public IActionResult GetAttachFile(string Code)
+        {
+
+
+
+            string query1 = $"spWeb_GetAttachFiletest '{Code}'";
+            DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
+            string base64File = dataTable1.Rows[0]["SourceFile"] + "";
+            byte[] fileBytes = Convert.FromBase64String(base64File);
+
+
+
+            string query = $"exec spWeb_GetAttachFile  '{Code}'";
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            string FileName = dataTable.Rows[0]["FileName"] + "";
+            string dataName_zip = $"{FileName}.zip"; // Constructing the image name
+            string data_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName_zip}";
+            string contentType = $"application/{dataTable.Rows[0]["Type"]}";
+
+
+            System.IO.File.WriteAllBytes(data_zipPath, fileBytes);
+            return File(fileBytes, contentType, Path.GetFileName(data_zipPath));
+
+
+
+
+
+        }
 
 
 
