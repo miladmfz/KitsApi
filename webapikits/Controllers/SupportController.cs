@@ -4,6 +4,7 @@ using webapikits.Model;
 using System.IO.Compression;
 using System.Data.SqlClient;
 using static webapikits.Controllers.OcrController;
+using System.Data.Entity.Core.Objects;
 
 namespace webapikits.Controllers
 {
@@ -318,6 +319,11 @@ namespace webapikits.Controllers
 
 
 
+
+
+
+
+
         [HttpGet]
         [Route("SetAlarmOff")]
         public string SetAlarmOff(
@@ -452,8 +458,8 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("SaveDocKowsar")]
-        public string SaveDocKowsar([FromBody] AttachFile attachFile)
+        [Route("SetAttachFile")]
+        public string SetAttachFile([FromBody] AttachFile attachFile)
         {
 
             if (attachFile.Type == "URL")
@@ -507,15 +513,31 @@ namespace webapikits.Controllers
                 {
 
                     dbConnection.Open();
+                    string dbname = "";
+                    string query1 = "";
+                    if (attachFile.ClassName == "AutLetter") {
+                         query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {attachFile.ObjectRef}  Select @db dbname";
 
-                    string query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+                    }else if (attachFile.ClassName == "Factor")
+                    {
+
+                        query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {attachFile.ObjectRef}  Select @db dbname";
+
+                    }
+                    else
+                    {
+                        query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+                    }
+
                     DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
-                    string dbname = dataTable1.Rows[0]["dbname"] + "";
+                    dbname = dataTable1.Rows[0]["dbname"] + "";
 
                     string sqlCommandText = @" INSERT INTO " + dbname + @".dbo.AttachedFiles
                                             (Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate,FilePath)
                                              VALUES
-                                             (@Title, @ClassName, 0, @FileName, @SourceFile, @Type, -1000, GETDATE(), -1000, GETDATE(),@FilePath)  ";
+                                             (@Title, @ClassName, @ObjectRef, @FileName, @SourceFile, @Type, -1000, GETDATE(), -1000, GETDATE(),@FilePath)  ";
 
                     // Create a SqlCommand object
                     using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
@@ -523,6 +545,7 @@ namespace webapikits.Controllers
                         // Bind parameters
                         sqlCommand.Parameters.AddWithValue("@Title", attachFile.Title);
                         sqlCommand.Parameters.AddWithValue("@FileName", attachFile.FileName);
+                        sqlCommand.Parameters.AddWithValue("@ObjectRef", attachFile.ObjectRef);
                         sqlCommand.Parameters.AddWithValue("@ClassName", attachFile.ClassName);
                         sqlCommand.Parameters.AddWithValue("@Type", attachFile.Type);
                         sqlCommand.Parameters.AddWithValue("@FilePath", attachFile.FilePath);
@@ -532,37 +555,6 @@ namespace webapikits.Controllers
                         sqlCommand.ExecuteNonQuery();
                     }
 
-
-
-                    /*
-
-                    // Construct the SQL query with parameters
-
-                    //string sqlCommandText = @"exec spWeb_AttachFile '@Title','@FileName','@ClassName','@Type','@FilePath','@SourceFile'  ";
-                    string sqlCommandText = @"exec spWeb_AttachFile @Title,@FileName,@ClassName,@Type,@FilePath,@SourceFile  ";
-
-
-                    // Create a SqlCommand object
-                    using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
-                    {
-
-
-                        byte[] fileBytes = System.IO.File.ReadAllBytes(data_zipPath);
-                        string base64File = Convert.ToBase64String(fileBytes);
-
-                        // Bind parameters
-                        sqlCommand.Parameters.AddWithValue("@Title", attachFile.Title);
-                        sqlCommand.Parameters.AddWithValue("@FileName", attachFile.FileName);
-                        sqlCommand.Parameters.AddWithValue("@ClassName", attachFile.ClassName);
-                        sqlCommand.Parameters.AddWithValue("@Type", attachFile.Type);
-                        sqlCommand.Parameters.AddWithValue("@FilePath", attachFile.FilePath);
-                        sqlCommand.Parameters.AddWithValue("@SourceFile", base64File);
-
-                        // Execute the command
-                        sqlCommand.ExecuteNonQuery();
-                    }
-
-                    */
                 }
 
                System.IO.File.Delete(dataPath);
@@ -575,7 +567,7 @@ namespace webapikits.Controllers
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable2 = db.Order_ExecQuery(Request.Path, query11);
+            DataTable dataTable2 = db.Support_ExecQuery(Request.Path, query11);
 
             return jsonClass.JsonResult_Str(dataTable2, "Text", "TodeyFromServer");
 
@@ -583,27 +575,98 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
-        [Route("GetAttachFile")]
-        public IActionResult GetAttachFile(string Code)
+
+        [HttpPost]
+        [Route("GetAttachFileList")]
+        public string GetAttachFileList([FromBody] AttachFile attachFile)
         {
 
 
+            string dbname = "";
+            string query1 = "";
+            if (attachFile.ClassName == "AutLetter")
+            {
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {attachFile.ObjectRef}  Select @db dbname";
 
-            string query1 = $"spWeb_GetAttachFiletest '{Code}'";
+            }
+            else if (attachFile.ClassName == "Factor")
+            {
+
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {attachFile.ObjectRef}  Select @db dbname";
+
+            }
+            else
+            {
+                query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+            }
+
+
+
+            DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
+            dbname = dataTable1.Rows[0]["dbname"] + "";
+
+            string query = $"select * from {dbname}..AttachedFiles where ClassName = '{attachFile.ClassName}' And ObjectRef = {attachFile.ObjectRef} ";
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
+
+
+        }
+
+
+
+        [HttpGet]
+        [Route("GetAttachFile")]
+        public IActionResult GetAttachFile(string AttachedFileCode, string ClassName, string ObjectRef)
+        {
+
+            string dbname = "";
+            string query11 = "";
+            if (ClassName == "AutLetter")
+            {
+                query11 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else if (ClassName == "Factor")
+            {
+
+                query11 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else
+            {
+                query11 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+            }
+
+
+
+            DataTable dataTable4 = db.Support_ExecQuery(Request.Path, query11);
+            dbname = dataTable4.Rows[0]["dbname"] + "";
+
+
+
+
+
+
+
+            string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
             DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
             string base64File = dataTable1.Rows[0]["SourceFile"] + "";
             byte[] fileBytes = Convert.FromBase64String(base64File);
 
 
+            string FileName = dataTable1.Rows[0]["FileName"] + "";
 
-            string query = $"exec spWeb_GetAttachFile  '{Code}'";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
 
-            string FileName = dataTable.Rows[0]["FileName"] + "";
+
+
             string dataName_zip = $"{FileName}.zip"; // Constructing the image name
             string data_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName_zip}";
-            string contentType = $"application/{dataTable.Rows[0]["Type"]}";
+            string contentType = $"application/{dataTable1.Rows[0]["Type"]}";
 
 
             System.IO.File.WriteAllBytes(data_zipPath, fileBytes);

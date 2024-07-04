@@ -9,6 +9,7 @@
         public string FilePath { get; set; } = "";
         public string FileType { get; set; } = "";
         public string Data { get; set; } = "";
+        public string ObjectRef { get; set; } = "";
 
 
     }
