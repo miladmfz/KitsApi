@@ -22,4 +22,58 @@ namespace webapikits.Model
         public string AppPackCounter { get; set; } = "";
 
     }
+    public class FactorwebDto
+    {
+
+
+        public string StartDateTarget { get; set; } = "";
+        public string EndDateTarget { get; set; } = "";
+        public string SearchTarget { get; set; } = "";
+        public string isShopFactor { get; set; } = "";
+
+        public string Nvarchar15 { get; set; } = "";
+        public string Nvarchar14 { get; set; } = "";
+        public string Nvarchar9 { get; set; } = "";
+        public string int1 { get; set; } = "";
+
+        public string starttime { get; set; } = "";
+        public string Endtime { get; set; } = "";
+        public string worktime { get; set; } = "";
+        public string Barbary { get; set; } = "";
+
+
+
+        public string AppNumber { get; set; } = "";
+        public string DatabaseNumber { get; set; } = "";
+        public string LockNumber { get; set; } = "";
+
+
+        public string Explain { get; set; } = "";
+
+        public string ObjectRef { get; set; } = "";
+
+
+
+    }
+
+
+    public class CustomerWebDto
+    {
+
+
+        public string AppNumber { get; set; } = "";
+        public string DatabaseNumber { get; set; } = "";
+        public string LockNumber { get; set; } = "";
+
+
+        public string Explain { get; set; } = "";
+        public string CustomerCode { get; set; } = "";
+
+        public string ObjectRef { get; set; } = "";
+
+
+
+    }
+
+
 }

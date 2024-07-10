@@ -679,6 +679,71 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpPost]
+        [Route("GetFactor")]
+        public string GetFactor([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.isShopFactor}'";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+
+
+        [HttpPost]
+        [Route("EditFactorProperty")]
+        public string EditFactorProperty([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"spWeb_EditFactorProperty '{factorwebDto.starttime}','{factorwebDto.Endtime}','{factorwebDto.worktime}','{factorwebDto.Barbary}',{factorwebDto.ObjectRef} ";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+
+
+
+
+        [HttpPost]
+        [Route("EditCustomerProperty")]
+        public string EditCustomerProperty([FromBody] CustomerWebDto customerWebDto)
+        {
+
+            string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.LockNumber}',{customerWebDto.ObjectRef}";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+
+
+        }
+
+
+        [HttpPost]
+        [Route("EditCustomerExplain")]
+        public string EditCustomerExplain([FromBody] CustomerWebDto customerWebDto)
+        {
+
+            string query = $"Update Customer set Explain ='{customerWebDto.Explain}' where CustomerCode={customerWebDto.ObjectRef}";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+
+
+        }
+
 
 
 
