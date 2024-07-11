@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Data.SqlClient;
 using static webapikits.Controllers.OcrController;
 using System.Data.Entity.Core.Objects;
+using static webapikits.Controllers.BrokerController;
 
 namespace webapikits.Controllers
 {
@@ -743,6 +744,120 @@ namespace webapikits.Controllers
 
 
         }
+
+
+        [HttpGet]
+        [Route("GetWebFactorSupport")]
+        public string GetWebFactorSupport(string FactorCode )
+        {
+
+            string query = $" select FactorCode, FactorDate, CustName, CustomerCode, Explain, BrokerRef, BrokerName from vwFactor where FactorCode = {FactorCode}";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+        [HttpGet]
+        [Route("GetWebFactorRowsSupport")]
+        public string GetWebFactorRowsSupport(string FactorCode)
+        {
+
+            string query = $" select FactorRowCode,GoodName from vwFactorRows where Factorref= {FactorCode}";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+
+
+        [HttpGet]
+        [Route("DeleteWebFactorRowsSupport")]
+        public string DeleteWebFactorRowsSupport(string FactorRowCode)
+        {
+
+            string query = $" delete from  FactorRows where FactorRowCode= {FactorRowCode}";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+
+
+
+        [HttpPost]
+        [Route("GetGoodListSupport")]
+        public string GetGoodListSupport([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+            string query = $"select GoodCode, GoodName from Good where GoodName like '%{searchTargetDto.SearchTarget}%'";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+
+        }
+
+
+
+
+
+
+
+
+        [HttpPost]
+        [Route("WebFactorInsert")]
+        public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"spWeb_Factor_Insert  @ClassName ='Factor',@StackRef =1,@UserId =29,@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = 0";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+
+        [HttpPost]
+        [Route("WebFactorInsertRow")]
+        public string WebFactorInsertRow([FromBody] FactorRow factorRow)
+        {
+
+            string query = $"spWeb_Factor_InsertRow  @ClassName ='Factor', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount =1,@Price =0,@UserId =29,@MustHasAmount =0, @MergeFlag =1 ";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
