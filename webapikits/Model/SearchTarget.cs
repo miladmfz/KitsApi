@@ -13,4 +13,18 @@
         public string? SearchTarget { get; set; }
     }
 
+
+    public class SearchTargetLetterDto
+    {
+
+        public string? SearchTarget { get; set; }
+        public string? CentralRef { get; set; }
+        public string? CreationDate { get; set; }
+        public string? OwnCentralRef { get; set; }
+    }
+
+
+
+
+
 }

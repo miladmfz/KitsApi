@@ -3,9 +3,6 @@ using System.Data;
 using webapikits.Model;
 using System.IO.Compression;
 using System.Data.SqlClient;
-using static webapikits.Controllers.OcrController;
-using System.Data.Entity.Core.Objects;
-using static webapikits.Controllers.BrokerController;
 
 namespace webapikits.Controllers
 {
@@ -37,6 +34,9 @@ namespace webapikits.Controllers
         [Route("GetTodeyFromServer")]
         public string GetTodeyFromServer()
         {
+
+
+
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
@@ -200,45 +200,45 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
+        [HttpPost]
         [Route("GetLetterList")]
-        public string GetLetterList(string SearchTarget = null, string CentralRef = null, string CreationDate = null)
+        public string GetLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
         {
 
 
             string Where = "";
 
-            if (!string.IsNullOrEmpty(SearchTarget))
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.SearchTarget))
             {
-                Where = $"(LetterTitle like ''%{SearchTarget}%'' or LetterDescription like ''%{SearchTarget}%'' or ds.RowExecutorName like ''%{SearchTarget}%'')";
+                Where = $"(LetterTitle like ''%{searchTargetLetterDto.SearchTarget}%'' or LetterDescription like ''%{searchTargetLetterDto.SearchTarget}%'' or ds.RowExecutorName like ''%{searchTargetLetterDto.SearchTarget}%'')";
             }
 
-            if (!string.IsNullOrEmpty(CentralRef))
-            {
-                if (!string.IsNullOrEmpty(Where))
-                {
-                    Where += $" And (CreatorCentralRef={CentralRef} or OwnerCentralRef={CentralRef} or RowExecutorCentralRef={CentralRef})";
-                }
-                else
-                {
-                    Where = $"(CreatorCentralRef={CentralRef} or OwnerCentralRef={CentralRef} or RowExecutorCentralRef={CentralRef})";
-                }
-            }
-
-            if (!string.IsNullOrEmpty(CreationDate))
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.CentralRef))
             {
                 if (!string.IsNullOrEmpty(Where))
                 {
-                    Where += $" And LetterDate>''{CreationDate}''";
+                    Where += $" And (CreatorCentralRef={searchTargetLetterDto.CentralRef} or OwnerCentralRef={searchTargetLetterDto.CentralRef} or RowExecutorCentralRef={searchTargetLetterDto.CentralRef})";
                 }
                 else
                 {
-                    Where = $"LetterDate>''{CreationDate}''";
+                    Where = $"(CreatorCentralRef={searchTargetLetterDto.CentralRef} or OwnerCentralRef={searchTargetLetterDto.CentralRef} or RowExecutorCentralRef={searchTargetLetterDto.CentralRef})";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.CreationDate))
+            {
+                if (!string.IsNullOrEmpty(Where))
+                {
+                    Where += $" And LetterDate>=''{searchTargetLetterDto.CreationDate}''";
+                }
+                else
+                {
+                    Where = $"LetterDate>=''{searchTargetLetterDto.CreationDate}''";
                 }
             }
 
 
-            string query = $"Exec spWeb_AutLetterList '{Where}'";
+            string query = $"Exec spWeb_AutLetterList '{Where}',{searchTargetLetterDto.OwnCentralRef}";
 
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
@@ -259,7 +259,7 @@ namespace webapikits.Controllers
             string CreatorCentral = _configuration.GetConnectionString("Support_CreatorCentral");
 
 
-            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=2,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral ={CreatorCentral}, @OwnerCentral ={letterInsert.CentralRef} ";
+            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=2,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
 
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
@@ -325,14 +325,11 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
+        [HttpPost]
         [Route("SetAlarmOff")]
-        public string SetAlarmOff(
-             string LetterRowCode
-            )
-        {
+        public string SetAlarmOff([FromBody] AlarmOffDto alarmOffDto )        {
 
-            string query = $" Update AutLetterRow Set AlarmActive=0 Where LetterRowCode={LetterRowCode} ";
+            string query = $"spWeb_SetAlarmOff {alarmOffDto.LetterRef},{alarmOffDto.CentralRef}";
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
 
@@ -685,16 +682,33 @@ namespace webapikits.Controllers
         public string GetFactor([FromBody] FactorwebDto factorwebDto)
         {
 
-            string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.isShopFactor}'";
+            string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
 
 
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
-
+            
 
 
         }
+
+
+        
+
+
+
+        [HttpGet]
+        [Route("GetNotification")]
+        public string GetNotification(string PersonInfoCode)
+        {
+            string query = $"spWeb_GetNotification {PersonInfoCode}";
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "users", "");
+
+
+        }
+
 
 
 
@@ -791,6 +805,20 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("DeleteWebFactorSupport")]
+        public string DeleteWebFactorSupport(string FactorCode)
+        {
+
+            string query = $" delete from  Factor where FactorCode= {FactorCode}";
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
 
 
         [HttpPost]
@@ -818,7 +846,9 @@ namespace webapikits.Controllers
         public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
         {
 
-            string query = $"spWeb_Factor_Insert  @ClassName ='Factor',@StackRef =1,@UserId =29,@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = 0";
+            string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_Insert  @ClassName ='Factor',@StackRef =1,@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = 0";
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");

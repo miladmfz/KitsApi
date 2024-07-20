@@ -26,4 +26,12 @@
     }
 
 
+    public class AlarmOffDto
+    {
+        public string? LetterRef { get; set; }
+        public string? LetterRowCode { get; set; }
+        public string? CentralRef { get; set; }
+    }
+
+
 }
