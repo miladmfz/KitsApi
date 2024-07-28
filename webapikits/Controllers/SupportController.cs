@@ -765,7 +765,7 @@ namespace webapikits.Controllers
         public string GetWebFactorSupport(string FactorCode )
         {
 
-            string query = $" select FactorCode, FactorDate, CustName, CustomerCode, Explain, BrokerRef, BrokerName from vwFactor where FactorCode = {FactorCode}";
+            string query = $" select FactorCode, FactorDate, CustName, CustomerCode, Explain, BrokerRef, BrokerName ,starttime,Endtime,worktime,Barbary from vwFactor where FactorCode = {FactorCode}";
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
@@ -826,7 +826,8 @@ namespace webapikits.Controllers
         public string GetGoodListSupport([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query = $"select GoodCode, GoodName from Good where GoodName like '%{searchTargetDto.SearchTarget}%'";
+
+            string query = $"spWeb_GetGoodListSupport '{searchTargetDto.SearchTarget}'";
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
