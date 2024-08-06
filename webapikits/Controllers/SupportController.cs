@@ -3,6 +3,8 @@ using System.Data;
 using webapikits.Model;
 using System.IO.Compression;
 using System.Data.SqlClient;
+using static System.Data.Entity.Infrastructure.Design.Executor;
+using System.Collections.Generic;
 
 namespace webapikits.Controllers
 {
@@ -732,6 +734,13 @@ namespace webapikits.Controllers
 
 
 
+
+
+
+
+
+
+
         [HttpPost]
         [Route("EditCustomerProperty")]
         public string EditCustomerProperty([FromBody] CustomerWebDto customerWebDto)
@@ -868,6 +877,63 @@ namespace webapikits.Controllers
 
             DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+        }
+
+
+
+
+
+        
+
+
+
+
+
+        [HttpPost]
+        [Route("Support_StartFactorTime")]
+        public string StartFactorTime([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"Update PropertyValue Set Nvarchar15 = '{factorwebDto.starttime}'  where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+        [HttpPost]
+        [Route("Support_EndFactorTime")]
+        public string EndFactorTime([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"Update PropertyValue Set Nvarchar9 = '{factorwebDto.Endtime}', int1 = {factorwebDto.worktime} where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+
+        [HttpPost]
+        [Route("Support_ExplainFactor")]
+        public string Support_ExplainFactor([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"Update PropertyValue Set Nvarchar14 = '{factorwebDto.Explain}' where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
 
 
         }
@@ -878,11 +944,7 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
-
+        
 
 
 
