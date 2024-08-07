@@ -927,7 +927,7 @@ namespace webapikits.Controllers
         public string Support_ExplainFactor([FromBody] FactorwebDto factorwebDto)
         {
 
-            string query = $"Update PropertyValue Set Nvarchar14 = '{factorwebDto.Explain}' where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
+            string query = $"Update PropertyValue Set Nvarchar14 = '{factorwebDto.Barbary}' where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
 
 
 
