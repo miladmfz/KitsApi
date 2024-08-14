@@ -20,15 +20,18 @@ internal class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        builder.Services.AddHttpContextAccessor();
 
 
         builder.Services.AddCors(options =>
         {
             options.AddDefaultPolicy(builder =>
             {
-                builder.AllowAnyOrigin() 
+                builder.AllowAnyOrigin()
                        .AllowAnyHeader()
-                       .AllowAnyMethod();
+                       .AllowAnyMethod()
+                       .WithExposedHeaders("PersonInfoRef");// Allow this header to be exposed to the frontend
+
 
             });
         });

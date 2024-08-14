@@ -38,7 +38,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -52,7 +52,7 @@ namespace webapikits.Controllers
 
             string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
 
@@ -68,7 +68,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},0";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -80,7 +80,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},1";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -93,7 +93,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},2";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -108,7 +108,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},3";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -125,7 +125,7 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},4";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -152,7 +152,7 @@ namespace webapikits.Controllers
 
             string query = $"select GoodGroupCode,GroupCode, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode\r\n where Goodref = {GoodCode}  ";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -166,7 +166,7 @@ namespace webapikits.Controllers
 
             string query = $"select GoodStackCode,GoodRef,StackRef,Amount,ReservedAmount,Name,ActiveStack  from vwGoodStack where goodref= {GoodCode}  ";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
         }
 

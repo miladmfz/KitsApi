@@ -80,7 +80,7 @@ namespace webapikits.Controllers
             string query = $"select Explain,RelationType,BrokerCode , CentralRef,BrokerNameWithoutType from vwSellBroker where active=0";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -96,7 +96,7 @@ namespace webapikits.Controllers
             string query = $"spWeb_BrokerDetail {BrokerCode} ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -114,7 +114,7 @@ namespace webapikits.Controllers
             string query = $"Declare @D varchar(10)= dbo.fnDate_ConvertToShamsi(dateadd(d, -{Days}, getdate())) Select CustName,sum(RowsCount) RowsCount, Sum(SumAmount) SumAmount, Sum(SumPrice) SumPrice From vwPreFactor Where BrokerRef={BrokerCode} And PreFactorDate >= @D Group By CustName order by RowsCount desc";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -133,7 +133,7 @@ namespace webapikits.Controllers
             string query = $"spWeb_GetBrokerChartData {BrokerCode} ,  {Days} , 'CustName ' ,'CustName, '''' PreFactorDate' ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -155,7 +155,7 @@ namespace webapikits.Controllers
             string query = $"spWeb_GetBrokerChartData {BrokerCode} ,  {Days} , 'PreFactorDate ' ,'PreFactorDate, '''' CustName' ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -168,12 +168,12 @@ namespace webapikits.Controllers
         public string CreateAppBroker(string KowsarDb, string KowsarImage)
         {
 
-            db.Broker_ExecQuery(Request.Path, "DROP DATABASE IF EXISTS Appbroker");
+            db.Broker_ExecQuery(HttpContext, "DROP DATABASE IF EXISTS Appbroker");
 
             string query = $"{KowsarDb}..spApp_BrokerRep 'Appbroker','{KowsarImage}'";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return TestImport();
 
@@ -190,7 +190,7 @@ namespace webapikits.Controllers
 
             db.TestImportedit();
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, "select  count (*) count from Good");
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, "select  count (*) count from Good");
             return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
@@ -203,7 +203,7 @@ namespace webapikits.Controllers
                 " Select BrokerCode, CustomerCode,1, GetDate(),1, GetDate() From Customer c Join SellBroker b on 1=1" +
                 " Where c.Active<2 And b.Active<2 And Not Exists(Select 1 from BrokerCustomer s where s.BrokerRef=b.BrokerCode and s.CustomerRef=c.CustomerCode)";
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -244,7 +244,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -265,7 +265,7 @@ namespace webapikits.Controllers
             
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -310,7 +310,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -323,7 +323,7 @@ namespace webapikits.Controllers
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -339,7 +339,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -355,7 +355,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -382,7 +382,7 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -403,7 +403,7 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -421,7 +421,7 @@ namespace webapikits.Controllers
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -451,7 +451,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Broker_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -465,7 +465,7 @@ namespace webapikits.Controllers
             string query = $"Select * From(select * , rwn=row_Number() over (partition by gpsdate order by gpsdate)From GpsLocation Where Brokerref = {BrokerCode} And GpsDate between '{StartDate}' And '{EndDate}' ) ds where rwn=1 order by GpsDate ";
 
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 

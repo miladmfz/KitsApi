@@ -36,7 +36,7 @@ namespace webapikits.Controllers
         {
             string query = $"Exec dbo.spApp_ocrFactorList 4 , '{conditionDto.SearchTarget}' ,' ',50 ,0 , ' order by o.AppTcPrintRef desc' ,0,'{_configuration.GetConnectionString("OcrSecond_Db")}',{conditionDto.SourceFlag} ";
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -48,7 +48,7 @@ namespace webapikits.Controllers
         {
 
             string query = $"Exec spApp_ocrGetFactorDetail {AppOCRFactorCode}  ";
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -61,7 +61,7 @@ namespace webapikits.Controllers
         {
 
             string query = $"update AppOCRFactor set HasSignature = 0, AppIsDelivered = 0 where AppOCRFactorCode = {AppOCRFactorCode}  ";
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 
@@ -102,7 +102,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -123,7 +123,7 @@ namespace webapikits.Controllers
            
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -147,7 +147,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -160,7 +160,7 @@ namespace webapikits.Controllers
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
@@ -177,7 +177,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -194,7 +194,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -221,7 +221,7 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -242,7 +242,7 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -260,7 +260,7 @@ namespace webapikits.Controllers
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -290,7 +290,7 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
 

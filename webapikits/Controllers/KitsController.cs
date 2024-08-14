@@ -87,7 +87,7 @@ namespace webapikits.Controllers
 
 
            
-            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
@@ -102,7 +102,7 @@ namespace webapikits.Controllers
         public string KowsarQuery(string str)
         {
             string query = str;
-            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Data", "");
         }
 
@@ -116,7 +116,7 @@ namespace webapikits.Controllers
             
             string query = "select * from AppBrokerCustomer Where ActivationCode = '" + ActivationCode + "'";
 
-            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");
 
         }
@@ -130,7 +130,7 @@ namespace webapikits.Controllers
             
             string query = "select * from AppBrokerCustomer Where ActivationCode = '" + Code + "'";
 
-            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
             string filePath = dataTable.Rows[0]["SQLiteURL"] + "";
 
@@ -259,7 +259,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
         }
@@ -285,7 +285,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kits_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 

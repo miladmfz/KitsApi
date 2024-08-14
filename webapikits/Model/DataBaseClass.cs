@@ -44,11 +44,11 @@ namespace webapikits.Model
 
 
 
-        public DataTable Support_ExecQuery(String FunctionName, String query)
+        public DataTable Support_ExecQuery( HttpContext httpContext, String query)
         {
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Support_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -63,11 +63,11 @@ namespace webapikits.Model
         }
 
 
-        public DataTable SupportApp_ExecQuery(String FunctionName, String query)
+        public DataTable SupportApp_ExecQuery( HttpContext httpContext, String query)
         {
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("SupportApp_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -81,11 +81,11 @@ namespace webapikits.Model
             }
         }
 
-        public DataTable Web_ExecQuery(String FunctionName, String query)
+        public DataTable Web_ExecQuery( HttpContext httpContext, String query)
         {
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Web_Connection"); 
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -99,11 +99,11 @@ namespace webapikits.Model
             }
         }
 
-        public DataTable Kowsar_ExecQuery(String FunctionName, String query)
+        public DataTable Kowsar_ExecQuery( HttpContext httpContext, String query)
         {
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Kowsar_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -152,13 +152,13 @@ namespace webapikits.Model
 
 
 
-        public DataTable Broker_ExecQuery(String FunctionName,String query)
+        public DataTable Broker_ExecQuery( HttpContext httpContext, String query)
         {
 
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
                 // Log the route and function name
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Broker_Connection"); 
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -173,13 +173,13 @@ namespace webapikits.Model
         }
 
 
-        public DataTable Ocr_ExecQuery(String FunctionName, String query)
+        public DataTable Ocr_ExecQuery(HttpContext httpContext, String query)
         {
 
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
                 // Log the route and function name
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Ocr_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -195,13 +195,13 @@ namespace webapikits.Model
 
 
 
-        public DataTable Order_ExecQuery(String FunctionName, String query)
+        public DataTable Order_ExecQuery( HttpContext httpContext, String query)
         {
 
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
                 // Log the route and function name
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Order_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -216,13 +216,13 @@ namespace webapikits.Model
         }
 
 
-        public DataTable Company_ExecQuery(String FunctionName, String query)
+        public DataTable Company_ExecQuery( HttpContext httpContext, String query)
         {
 
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
                 // Log the route and function name
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Company_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -239,13 +239,13 @@ namespace webapikits.Model
 
 
 
-        public DataTable Kits_ExecQuery(String FunctionName, String query)
+        public DataTable Kits_ExecQuery( HttpContext httpContext, String query)
         {
 
-            if (FunctionName != "/api/Web/GetWebLog")
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
                 // Log the route and function name
-                LogQuery(FunctionName, query);
+                LogQuery(httpContext, query);
             }
             string connectionString = _configuration.GetConnectionString("Kits_Connection");
             using (SqlConnection con = new SqlConnection(connectionString))
@@ -262,13 +262,37 @@ namespace webapikits.Model
 
 
 
-        public void LogQuery(String FunctionName, String query)
+        public void LogQuery(HttpContext httpContext, String query)
         {
+
+
+            var headersDictionary = new Dictionary<string, string>();
+
+            var agent = "";
+            var PersonInfoRef = "";
+            var Referer = "";
+
+            foreach (var header in httpContext.Request.Headers)
+            {
+                if (header.Key == "User-Agent") {
+                    agent = header.Value;
+                }
+                if (header.Key == "PersonInfoRef")
+                {
+                    PersonInfoRef = header.Value;
+                }
+                if (header.Key == "Referer")
+                {
+                    Referer = header.Value;
+
+                }
+            }
+
 
             query = query.Replace("'", "''");
 
-            string Log = $"exec sp_WebLogInsert @ClassName='{FunctionName}',@TagName='',@LogValue='{query}' ,@IpAddress='',@UserAgent='',@SessionId=''";
-
+            string Log = $"exec sp_WebLogInsert @ClassName='{httpContext.Request.Path}',@TagName='',@LogValue='{query}' ,@IpAddress='{Referer}',@UserAgent='{agent}',@SessionId='{PersonInfoRef}'";
+            Console.WriteLine(Log);
 
             string connectionString = _configuration.GetConnectionString("Web_Connection"); // استفاده از IConfiguration برای خواندن connection string
             using (SqlConnection con = new SqlConnection(connectionString))

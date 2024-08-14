@@ -86,7 +86,7 @@ namespace webapikits.Controllers
             string where = ocrModel.StackCategory;
             string sender = ocrModel.Sender;
 
-            DataTable Table_print = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable Table_print = db.Ocr_ExecQuery(HttpContext, query);
 
             List<Printer> Printers = new List<Printer>();
 
@@ -126,7 +126,7 @@ namespace webapikits.Controllers
 
 
                     query = $"select CustName,FactorCode,FactorPrivateCode,AppPackCount,AppDeliverer from vwfactor where factorcode = {ocrModel.FactorCode} ";
-                    DataTable dataTable_factor = db.Ocr_ExecQuery(Request.Path, query);
+                    DataTable dataTable_factor = db.Ocr_ExecQuery(HttpContext, query);
 
                     List<Factor> factorHeader = new List<Factor>();
                     Factor factor = new Factor();
@@ -186,7 +186,7 @@ namespace webapikits.Controllers
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.Order_ExecQuery(Request.Path, query11);
+            DataTable dataTable = db.Order_ExecQuery(HttpContext, query11);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
 
@@ -207,7 +207,7 @@ namespace webapikits.Controllers
             string where = ocrModel.StackCategory;
             string sender = ocrModel.Sender;
 
-            DataTable Table_print = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable Table_print = db.Ocr_ExecQuery(HttpContext, query);
 
             List<Printer> Printers = new List<Printer>();
 
@@ -247,7 +247,7 @@ namespace webapikits.Controllers
 
 
                     query = $"select CustName,FactorCode,FactorPrivateCode,AppPackCount,AppDeliverer from vwfactor where factorcode = {ocrModel.FactorCode} ";
-                    DataTable dataTable_factor = db.Ocr_ExecQuery(Request.Path, query);
+                    DataTable dataTable_factor = db.Ocr_ExecQuery(HttpContext, query);
 
                     List<Factor> factorHeader = new List<Factor>();
                     Factor factor = new Factor();
@@ -318,7 +318,7 @@ namespace webapikits.Controllers
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.Order_ExecQuery(Request.Path, query11);
+            DataTable dataTable = db.Order_ExecQuery(HttpContext, query11);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
 
@@ -337,7 +337,7 @@ namespace webapikits.Controllers
             string query = $"Exec dbo.spApp_ocrGetFactor '{ocrModel.barcode}',1,{ocrModel.Step},'{ocrModel.orderby}'";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
 
 
@@ -470,7 +470,7 @@ namespace webapikits.Controllers
             string query = "Exec dbo.spApp_ocrSetDelivery " + AppOCRCode + ", " + State + ",'" + Deliverer + "'";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -489,7 +489,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -507,7 +507,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -590,7 +590,7 @@ namespace webapikits.Controllers
             string sq = $"Exec dbo.spApp_ocrFactorList {ocrModel.State}, '{ocrModel.SearchTarget}', '{where}', {ocrModel.Row}, {ocrModel.PageNo} {order} {countflag} {dbname}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, sq);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, sq);
 
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
         }
@@ -606,7 +606,7 @@ namespace webapikits.Controllers
             string query = $"Exec dbo.spApp_ocrSetPackDetail {ocrModel.OcrFactorCode},'{ocrModel.Reader}','{ocrModel.Controler}','{ocrModel.Packer} - {ocrModel.AppDeliverDate}','{ocrModel.PackDeliverDate}',{ocrModel.PackCount}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -622,7 +622,7 @@ namespace webapikits.Controllers
             string query = $"select cast(s.Amount as Int) TotalAvailable ,size,CoverType,cast(PageNo as Int) PageNo from vwGood with(nolock) Join GoodStack s with(nolock) on GoodCode = GoodRef where StackRef = {Stackref} And Goodcode={GoodCode}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
@@ -638,7 +638,7 @@ namespace webapikits.Controllers
 
             string query = " update AppOCRFactor set HasSignature=0,AppIsDelivered=0 where AppOCRFactorCode= " + Where;
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -654,7 +654,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Jobs", "");
 
@@ -672,7 +672,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "JobPersons", "");
 
@@ -689,7 +689,7 @@ namespace webapikits.Controllers
         {
 
             string query = "[dbo].[spApp_ocrGetFactorDetail] " + OCRFactorCode;
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "AppOcrFactors", "");
 
@@ -703,7 +703,7 @@ namespace webapikits.Controllers
         {
 
             string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_CustomerPath") + " , '') " + _configuration.GetConnectionString("Ocr_CustomerPath_Lible") + " From PropertyValue Where ClassName= 'TCustomer'";
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
         }
@@ -715,7 +715,7 @@ namespace webapikits.Controllers
         {
 
             string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + " , '') " + _configuration.GetConnectionString("Ocr_StackCategory") + " From good";
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -732,7 +732,7 @@ namespace webapikits.Controllers
             string image_base64 = ocrModel.ImageStr;
             string query = $"Exec dbo.spApp_ocrGetFactor '{ocrModel.barcode}', 0 ";
 
-            DataTable dataTable = db.Ocr_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             string dbname = Convert.ToString(dataTable.Rows[0]["dbname"]);
             string FactorRef = Convert.ToString(dataTable.Rows[0]["FactorRef"]);
@@ -803,11 +803,11 @@ namespace webapikits.Controllers
 
 
             string query4 = $"UPDATE AppOCRFactor SET HasSignature = 1 WHERE AppTcPrintRef = {TcPrintRef} ";
-            DataTable dataTable4 = db.Order_ExecQuery(Request.Path, query4);
+            DataTable dataTable4 = db.Order_ExecQuery(HttpContext, query4);
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable2 = db.Order_ExecQuery(Request.Path, query11);
+            DataTable dataTable2 = db.Order_ExecQuery(HttpContext, query11);
 
             return jsonClass.JsonResult_Str(dataTable2, "Text", "TodeyFromServer");
         }

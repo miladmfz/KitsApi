@@ -21,13 +21,38 @@ namespace webapikits.Controllers
         Response response = new();
         JsonClass jsonClass = new JsonClass();
         Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private string _requestCode;
 
-        public SupportController(IConfiguration configuration)
+        public SupportController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _configuration = configuration;
             db = new DataBaseClass(_configuration);
+            _httpContextAccessor = httpContextAccessor;
+
 
         }
+
+
+
+
+
+        [HttpGet]
+        [Route("GetApplicationForMenu")]
+        public string GetApplicationForMenu()
+        {
+
+            string query = $"select KeyValue,Description,DataValue,KeyId from dbsetup where KeyValue in ('AppBroker_ActivationCode','AppOcr_ActivationCode','AppOrder_ActivationCode') and DataValue <> '0'";
+
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "applications", "");
+
+
+        }
+
+
+
 
 
 
@@ -42,25 +67,13 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
         }
 
-        [HttpGet]
-        [Route("GetApplicationForMenu")]
-        public string GetApplicationForMenu()
-        {
-
-            string query = $"select KeyValue,Description,DataValue,KeyId from dbsetup where KeyValue in ('AppBroker_ActivationCode','AppOcr_ActivationCode','AppOrder_ActivationCode') and DataValue <> '0'";
-
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
-            return jsonClass.JsonResult_Str(dataTable, "applications", "");
-
-
-        }
 
 
 
@@ -75,7 +88,7 @@ namespace webapikits.Controllers
 
 
             string query = $"Exec [dbo].[spWeb_UpdatePersonInfo] {personInfoDto.PersonInfoCode} ,'{personInfoDto.PhFirstName}','{personInfoDto.PhLastName}','{personInfoDto.PhCompanyName}','{personInfoDto.PhAddress1}','{personInfoDto.PhTel1}','{personInfoDto.PhMobile1}','{personInfoDto.PhEmail}'";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "users", "");
         }
@@ -89,7 +102,7 @@ namespace webapikits.Controllers
 
 
             string query = $"Exec [dbo].[spWeb_GetKowsarPersonInfo] {PersonInfoCode}";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "users", "");
         }
@@ -102,7 +115,7 @@ namespace webapikits.Controllers
 
 
             string query = $"Exec [dbo].[spWeb_IsXUser] '{loginUserDto.UName}','{loginUserDto.UPass}'";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "users", "");
         }
@@ -162,7 +175,7 @@ namespace webapikits.Controllers
 
 
             string query = $"select CentralCode,Title,Name,FName,Manager,Delegacy,CentralName from vwcentral where CentralCode={CentralCode}";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
         }
@@ -175,7 +188,7 @@ namespace webapikits.Controllers
 
 
             string query = $"Exec [dbo].[spWeb_GetKowsarCentral] '{searchTargetDto.SearchTarget}'";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
         }
@@ -193,7 +206,7 @@ namespace webapikits.Controllers
 
 
             string query = $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");
         }
@@ -243,7 +256,7 @@ namespace webapikits.Controllers
             string query = $"Exec spWeb_AutLetterList '{Where}',{searchTargetLetterDto.OwnCentralRef}";
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -264,7 +277,7 @@ namespace webapikits.Controllers
             string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=2,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -280,7 +293,7 @@ namespace webapikits.Controllers
             string query = $"select  LetterRowCode,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -297,7 +310,7 @@ namespace webapikits.Controllers
             string query = $"select CentralCode,CentralName from vwCentralUser ";
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -314,7 +327,7 @@ namespace webapikits.Controllers
                 $", @Description = '{autLetterRowInsert.Description}', @State = 'درحال انجام', @Priority = 'عادي'" +
                 $", @CreatorCentral = {autLetterRowInsert.CreatorCentral}, @ExecuterCentral = {autLetterRowInsert.ExecuterCentral}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -333,7 +346,7 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_SetAlarmOff {alarmOffDto.LetterRef},{alarmOffDto.CentralRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -351,7 +364,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spWeb_GetAutConversation  {LetterRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -369,7 +382,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={letterdto.LetterRef}, @CentralRef={letterdto.CentralRef}, @ConversationText='{letterdto.ConversationText}'";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -389,7 +402,7 @@ namespace webapikits.Controllers
             string query = $"spWeb_AutLetterListByPerson {PersonInfoCode}";
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -404,7 +417,7 @@ namespace webapikits.Controllers
             {
                 string query1 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='Image'";
 
-                DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
+                DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
                 string Conversationref = dataTable1.Rows[0]["ConversationCode"]+"";
                 byte[] decodedImage = Convert.FromBase64String(data.image);
 
@@ -437,7 +450,7 @@ namespace webapikits.Controllers
         {
             string query = $"spWeb_SearchAttachFile {searchTarget.SearchTarget}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -449,7 +462,7 @@ namespace webapikits.Controllers
         {
             string query = $"spWeb_SearchAttachFile '{searchTarget.SearchTarget}' ,'URL'";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -468,7 +481,7 @@ namespace webapikits.Controllers
 
                 string query = $"exec spWeb_AttachFile '{attachFile.Title}','{attachFile.FileName}','{attachFile.ClassName}','{attachFile.Type}','{attachFile.FilePath}',''";
 
-                DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+                DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
                 return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -531,7 +544,7 @@ namespace webapikits.Controllers
 
                     }
 
-                    DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
+                    DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
                     dbname = dataTable1.Rows[0]["dbname"] + "";
 
                     string sqlCommandText = @" INSERT INTO " + dbname + @".dbo.AttachedFiles
@@ -567,7 +580,7 @@ namespace webapikits.Controllers
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable2 = db.Support_ExecQuery(Request.Path, query11);
+            DataTable dataTable2 = db.Support_ExecQuery(HttpContext, query11);
 
             return jsonClass.JsonResult_Str(dataTable2, "Text", "TodeyFromServer");
 
@@ -604,11 +617,11 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
+            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
             dbname = dataTable1.Rows[0]["dbname"] + "";
 
             string query = $"select * from {dbname}..AttachedFiles where ClassName = '{attachFile.ClassName}' And ObjectRef = {attachFile.ObjectRef} ";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
 
@@ -644,7 +657,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable4 = db.Support_ExecQuery(Request.Path, query11);
+            DataTable dataTable4 = db.Support_ExecQuery(HttpContext, query11);
             dbname = dataTable4.Rows[0]["dbname"] + "";
 
 
@@ -654,7 +667,7 @@ namespace webapikits.Controllers
 
 
             string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
-            DataTable dataTable1 = db.Support_ExecQuery(Request.Path, query1);
+            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
             string base64File = dataTable1.Rows[0]["SourceFile"] + "";
             byte[] fileBytes = Convert.FromBase64String(base64File);
 
@@ -688,7 +701,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
             
 
@@ -705,7 +718,7 @@ namespace webapikits.Controllers
         public string GetNotification(string PersonInfoCode)
         {
             string query = $"spWeb_GetNotification {PersonInfoCode}";
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "users", "");
 
 
@@ -723,7 +736,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -748,7 +761,7 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.LockNumber}',{customerWebDto.ObjectRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");
 
 
@@ -762,7 +775,7 @@ namespace webapikits.Controllers
 
             string query = $"Update Customer set Explain ='{customerWebDto.Explain}' where CustomerCode={customerWebDto.ObjectRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");
 
 
@@ -776,7 +789,7 @@ namespace webapikits.Controllers
 
             string query = $" select FactorCode, FactorDate, CustName, CustomerCode, Explain, BrokerRef, BrokerName ,starttime,Endtime,worktime,Barbary from vwFactor where FactorCode = {FactorCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -790,7 +803,7 @@ namespace webapikits.Controllers
 
             string query = $" select FactorRowCode,GoodName from vwFactorRows where Factorref= {FactorCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -806,7 +819,7 @@ namespace webapikits.Controllers
 
             string query = $" delete from  FactorRows where FactorRowCode= {FactorRowCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -821,7 +834,7 @@ namespace webapikits.Controllers
 
             string query = $" delete from  Factor where FactorCode= {FactorCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -838,7 +851,7 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_GetGoodListSupport '{searchTargetDto.SearchTarget}'";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 
@@ -860,7 +873,7 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_Factor_Insert  @ClassName ='Factor',@StackRef =1,@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = 0";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -875,7 +888,7 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_Factor_InsertRow  @ClassName ='Factor', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount =1,@Price =0,@UserId =29,@MustHasAmount =0, @MergeFlag =1 ";
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
         }
 
@@ -898,7 +911,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -914,7 +927,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
@@ -931,7 +944,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 

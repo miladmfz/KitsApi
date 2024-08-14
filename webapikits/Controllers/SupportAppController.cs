@@ -31,7 +31,7 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.SupportApp_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -50,7 +50,7 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppBrokerCustomer";
 
-            DataTable dataTable = db.SupportApp_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -65,7 +65,7 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppBrokerCustomer Where AppBrokerCustomerCode = '{AppBrokerCustomerCode}'";
 
-            DataTable dataTable = db.SupportApp_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
 
 
@@ -91,7 +91,7 @@ namespace webapikits.Controllers
                 $" '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', {brokercustomerdto.AppType} ";
 
 
-            DataTable dataTable = db.SupportApp_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -111,7 +111,7 @@ namespace webapikits.Controllers
                 $"'{brokercustomerdto.ServerURL}', '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', {brokercustomerdto.AppType} ";
 
 
-            DataTable dataTable = db.SupportApp_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -129,7 +129,7 @@ namespace webapikits.Controllers
             string query = $"Select Server_Name, STRING_AGG([Broker],',') within group (order by case when isnumeric([Broker])=1 then cast([Broker] as decimal) else 0 end, [Broker] ) as BrokerStr From (select Server_Name, Device_Id, [Broker] from app_info where DATEDIFF(m,Updatedate,GETDATE())<{Filter} group by Server_Name, Device_Id, [Broker]) ds group by Server_Name";
 
 
-            DataTable dataTable = db.SupportApp_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 
@@ -146,7 +146,7 @@ namespace webapikits.Controllers
             string query = $"select top 50 * from WebLog order by 1 desc";
 
 
-            DataTable dataTable = db.Web_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResultWithout_Str(dataTable);
 

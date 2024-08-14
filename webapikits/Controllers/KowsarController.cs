@@ -50,7 +50,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
 
@@ -85,7 +85,7 @@ namespace webapikits.Controllers
 
             string query = " select * from AppPrinter ";
 
-            DataTable Table_print = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable Table_print = db.Kowsar_ExecQuery(HttpContext, query);
 
             List<Printer> Printers = new();
 
@@ -134,7 +134,7 @@ namespace webapikits.Controllers
 
 
                 query = "select top 2 GoodCode, GoodName, GoodExplain1 from good ";
-                DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+                DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
                 List<Good> goods = new ();
 
 
@@ -202,7 +202,7 @@ namespace webapikits.Controllers
             
             string query = "select top 2 GoodCode,GoodName,GoodExplain1 from good ";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             // Log the result to the console
             Debug.WriteLine("Check action result: " );
 
@@ -227,7 +227,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             
             return jsonClass.JsonResult_Str(dataTable, "Text", "VerNo");
 
@@ -249,7 +249,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
@@ -297,7 +297,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             
             return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
@@ -320,7 +320,7 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Values", "");
 
         }
@@ -337,7 +337,7 @@ namespace webapikits.Controllers
             string query= "Select brokerCode,BrokerNameWithoutType,CentralRef,Active From vwSellBroker";
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(Request.Path, query);
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
 
         }
