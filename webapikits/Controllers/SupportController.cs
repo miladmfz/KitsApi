@@ -5,6 +5,7 @@ using System.IO.Compression;
 using System.Data.SqlClient;
 using static System.Data.Entity.Infrastructure.Design.Executor;
 using System.Collections.Generic;
+using System.Data.Entity.Core.Objects;
 
 namespace webapikits.Controllers
 {
@@ -123,7 +124,18 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("GetObjectTypeFromDbSetup")]
+        public string GetObjectTypeFromDbSetup(string ObjectType)
+        {
 
+            string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
+
+        }
 
 
 
@@ -274,7 +286,7 @@ namespace webapikits.Controllers
             string CreatorCentral = _configuration.GetConnectionString("Support_CreatorCentral");
 
 
-            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=2,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='درحال انجام',@Priority ='عادي', @ReceiveType ='دستي', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
+            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=2,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
 
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
@@ -324,7 +336,7 @@ namespace webapikits.Controllers
         {
 
             string query = $"spAutLetterRow_Insert @LetterRef = {autLetterRowInsert.LetterRef}, @LetterDate = '{autLetterRowInsert.LetterDate}'" +
-                $", @Description = '{autLetterRowInsert.Description}', @State = 'درحال انجام', @Priority = 'عادي'" +
+                $", @Description = '{autLetterRowInsert.Description}', @State = '{autLetterRowInsert.LetterState}', @Priority = '{autLetterRowInsert.LetterPriority}'" +
                 $", @CreatorCentral = {autLetterRowInsert.CreatorCentral}, @ExecuterCentral = {autLetterRowInsert.ExecuterCentral}";
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
@@ -372,6 +384,21 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("GetAutletterById")]
+        public string GetAutletterById(string LetterCode)
+        {
+
+            string query = $"select LetterCode,LetterTitle,LetterDate,LetterDescription,LetterState,LetterPriority,OwnerName,CreatorName,ExecutorName,RowsCount from vwautletter  where LetterCode={LetterCode}";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
+
+
 
 
 
@@ -381,6 +408,25 @@ namespace webapikits.Controllers
         {
 
             string query = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={letterdto.LetterRef}, @CentralRef={letterdto.CentralRef}, @ConversationText='{letterdto.ConversationText}'";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
+
+       
+
+
+
+
+        [HttpPost]
+        [Route("Update_AutletterRow")]
+        public string Update_AutletterRow([FromBody] AutLetterRowInsert letterRowdto)
+        {
+
+            string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterState}' , AlarmActive = 0 Where LetterRowCode = {letterRowdto.ObjectRef}";
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
@@ -503,8 +549,7 @@ namespace webapikits.Controllers
                 string dataName_zip = $"{attachFile.FileName}.zip"; // Constructing the image name
                 string dataPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName}"; // Provide the path where you want to save the image
                 string data_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName_zip}"; // Provide the path where you want to save the zip file
-                Console.WriteLine(dataPath);
-                Console.WriteLine(data_zipPath);
+
 
                 System.IO.File.WriteAllBytes(dataPath, data_Bytes);
 
