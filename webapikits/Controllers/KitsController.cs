@@ -6,6 +6,7 @@ using System.Text;
 using SmsIrRestful;
 using IPE.SmsIrClient.Models.Requests;
 using IPE.SmsIrClient;
+using FastReport;
 
 namespace webapikits.Controllers
 {
@@ -265,26 +266,12 @@ namespace webapikits.Controllers
         }
 
 
-
-        
-        
-        [HttpGet]
+        [HttpPost]
         [Route("LogReport")]
-        public string LogReport(
-            string Device_Id,
-            string Address_Ip,
-            string Server_Name,
-            string Factor_Code,
-            string StrDate,
-            string Broker,
-            string Explain
-            )
+        public string LogReport([FromBody] LogReportDto logReportDto)
         {
 
-            string query = "exec spApp_appinfo '"+ Device_Id + "','"+ Address_Ip + "','"+ Server_Name + "','"+ Factor_Code + "','"+ StrDate + "','"+ Broker + "','"+ Explain + "'";
-
-
-
+            string query = $"exec spApp_appinfo '{logReportDto.Device_Id}','{logReportDto.Address_Ip}','{logReportDto.Server_Name}','{logReportDto.Factor_Code}','{logReportDto.StrDate}','{logReportDto.Broker}','{logReportDto.Explain}'";
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
