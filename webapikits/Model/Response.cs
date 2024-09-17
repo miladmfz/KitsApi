@@ -18,6 +18,9 @@
         public string StrDate { get; set; }
         public string Broker { get; set; }
         public string Explain { get; set; }
+        public string DeviceAgant { get; set; }
+        public string SdkVersion { get; set; }
+        public string DeviceIp { get; set; }
     }
 
 
