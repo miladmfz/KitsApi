@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Data;
+using System.Net.Sockets;
 using webapikits.Model;
 
 namespace webapikits.Controllers
@@ -40,7 +41,24 @@ namespace webapikits.Controllers
 
 
 
+        [HttpPost]
+        [Route("CheckPort")]
 
+        public IActionResult CheckPort([FromBody] PortCheckRequest request)
+        {
+            using (var client = new TcpClient())
+            {
+                try
+                {
+                    client.Connect(request.Ip, Convert.ToInt32(request.Port));
+                    return Ok(new { Status = "open" });
+                }
+                catch
+                {
+                    return Ok(new { Status = "closed" });
+                }
+            }
+        }
 
 
         [HttpGet]
