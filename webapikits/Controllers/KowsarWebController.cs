@@ -57,8 +57,23 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
 
         }
+        
 
 
+
+
+
+        [HttpGet]
+        [Route("GetLastGoodData")]
+        public string GetLastGoodData()
+        {
+
+            string query = $"  declare @ss int  select  @ss=max(GoodCode) from good exec spWeb_GetGoodById @ss,0";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
 
 
         [HttpGet]

@@ -56,8 +56,12 @@ namespace webapikits.Controllers
     public async Task<string> SendSms(string RandomCode, string NumberPhone)
     {
 
+            string sms_api_key = _configuration.GetConnectionString("sms_api_key");
+
             HttpClient httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("x-api-key", "me8CfaoTR0rLZEpRWQqdvtCnzcsRwpPtVz9mmwYdbWv5kBEjtSJKZG3wMYCvEndd");
+            //httpClient.DefaultRequestHeaders.Add("x-api-key", "me8CfaoTR0rLZEpRWQqdvtCnzcsRwpPtVz9mmwYdbWv5kBEjtSJKZG3wMYCvEndd");
+            httpClient.DefaultRequestHeaders.Add("x-api-key", sms_api_key);
+
             var payload = @"{" + "\n" +
             @"  ""mobile"": """+ NumberPhone + @"""," + "\n" +
             @"  ""templateId"": 100000," + "\n" +
