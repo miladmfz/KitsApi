@@ -189,6 +189,36 @@ namespace webapikits.Controllers
 
 
 
+        
+
+
+        [HttpPost]
+        [Route("GoodCrudService")]
+        public string GoodCrudService([FromBody] JsonModelDto jsonModelDto)
+        {
+
+            string query = $"Exec spGood_AddNew '{jsonModelDto.JsonData}' ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("GetGoodList")]
+        public string GetGoodList()
+        {
+
+            string query = $"select top 100 * from vwgood order by 1 desc";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+        }
+
+
 
 
 
