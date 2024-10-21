@@ -165,7 +165,7 @@ namespace webapikits.Controllers
         public string GetGoodGroups(string GoodCode)
         {
 
-            string query = $"select GoodGroupCode,GroupCode, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode\r\n where Goodref = {GoodCode}  ";
+            string query = $"select GoodGroupCode,GroupCode, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode  where Goodref = {GoodCode}  ";
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
@@ -212,11 +212,40 @@ namespace webapikits.Controllers
         public string GetGoodList()
         {
 
-            string query = $"select top 100 * from vwgood order by 1 desc";
+            string query = $"Select top 100 * from vwgood order by 1 desc";
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
         }
+
+
+
+        [HttpGet]
+        [Route("GetStacks")]
+        public string GetStacks()
+        {
+
+            string query = $"Select StackCode,L1,L2,L3,L4,L5,Name from Stacks";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Stacks", "");
+        }
+
+
+        [HttpGet]
+        [Route("GetGoodsGrp")]
+        public string GetGoodsGrp()
+        {
+
+            string query = $"select GroupCode,L1,L2,L3,L4,L5,Name from GoodsGrp";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "GoodsGrps", "");
+        }
+
+
+
+
 
 
 
