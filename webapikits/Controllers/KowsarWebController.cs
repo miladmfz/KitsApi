@@ -243,7 +243,35 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "GoodsGrps", "");
         }
 
+        
 
+
+
+        [HttpPost]
+        [Route("GetProperty")]
+        public string GetProperty([FromBody] PropertyDto propertyDto)
+        {
+
+            string query = $"select dbo.NodeValue(PropertySchema, 'DisplayName') DisplayName, PropertySchemaCode,ClassName,ObjectType,PropertyName,PropertySequence,PropertyType,PropertyValueMap From PropertySchema p where  p.ObjectType ='{propertyDto.ObjectType}' order by PropertySequence";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Propertys", "");
+        }
+
+
+
+        [HttpPost]
+        [Route("GetPropertyChoiess")]
+        public string GetPropertyChoiess([FromBody] PropertyDto propertyDto)
+        {
+
+            string query = $"Select x.value('text()[1]', 'nvarchar(100)') choice, ds.* " +
+                $"From(Select cast(PropertySchema as xml) xschema, PropertySchemaCode, ClassName,ObjectType,PropertyName,PropertySequence,PropertyType,PropertyValueMap ," +
+                $" dbo.NodeValue(PropertySchema, 'DisplayName') dispname  From PropertySchema where PropertyType = 'Choice' And ClassName='{propertyDto.ClassName}') ds cross apply ds.xschema.nodes('/Fields/CHOICES/ *') AS R(x)";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "GetPropertyChoiess", "");
+        }
 
 
 
