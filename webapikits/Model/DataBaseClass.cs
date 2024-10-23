@@ -22,7 +22,7 @@ namespace webapikits.Model
         {
             byte[] imageData = null;
             Console.WriteLine(query);
-            DataTable dataTableImg = Web_ImageExecQuery(query);
+            DataTable dataTableImg = Web_ImageExecQuery( query);
             if (dataTableImg.Rows.Count > 0)
             {
                 if (!Convert.IsDBNull(dataTableImg.Rows[0][0]))

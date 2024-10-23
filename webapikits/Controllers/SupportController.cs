@@ -166,7 +166,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable = db.Support_ImageExecQuery(query);
+                DataTable dataTable = db.Support_ImageExecQuery( query);
 
                 return "\"Ok\"";
             }
@@ -467,10 +467,21 @@ namespace webapikits.Controllers
                 string Conversationref = dataTable1.Rows[0]["ConversationCode"]+"";
                 byte[] decodedImage = Convert.FromBase64String(data.image);
 
+
+
+
+
+
+
+
+
+
+
+
                 string filePath = _configuration.GetConnectionString("web_imagePath") + $"{Conversationref}.jpg"; // Provide the path where you want to save the image
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
                 string query = $"Exec spImageImport  '{data.ClassName}',{Conversationref},'{filePath}' ;select @@IDENTITY KsrImageCode";
-                DataTable dataTable = db.Support_ImageExecQuery(query);
+                DataTable dataTable = db.Support_ImageExecQuery( query);
                 return jsonClass.JsonResultWithout_Str(dataTable);
             }
             catch (Exception ex) 
@@ -485,7 +496,7 @@ namespace webapikits.Controllers
         public string GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
         {
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
-            DataTable dataTable = db.Support_ImageExecQuery(query);
+            DataTable dataTable = db.Support_ImageExecQuery( query);
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
 
         }

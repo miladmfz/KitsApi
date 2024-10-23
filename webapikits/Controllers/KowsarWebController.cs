@@ -6,6 +6,9 @@ using System.Reflection;
 using System.Xml.Linq;
 using webapikits.Model;
 using Microsoft.AspNetCore.Http;
+using Newtonsoft.Json;
+using System.Drawing;
+using System.Data.Entity.Core.Objects;
 
 namespace webapikits.Controllers
 {
@@ -29,20 +32,6 @@ namespace webapikits.Controllers
         }
 
 
-        [HttpGet]
-        [Route("GetProperty")]
-        public string GetProperty(string Where)
-        {
-
-            string query = $" Select  PropertySchema,PropertyValueMap,PropertyName  from PropertySchema Where ClassName = 'TGOOD' And  ObjectType = '{Where}'";
-
-
-
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
-
-
-        }
 
 
         [HttpGet]
@@ -152,9 +141,9 @@ namespace webapikits.Controllers
         public string GetGoodImages(string GoodCode)
         {
 
-            string query = $"  select top 10 KsrImageCode,ClassName,ObjectRef,IsDefaultImage,FileName from KsrImage where objectref={GoodCode}";
+            string query = $" select  KsrImageCode,ClassName,ObjectRef,IsDefaultImage,FileName ,IMG='' from KsrImage Where ClassName='TGood' And objectref={GoodCode}";
 
-            DataTable dataTable = db.Web_ImageExecQuery(query);
+            DataTable dataTable = db.Web_ImageExecQuery( query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
         }
@@ -252,11 +241,13 @@ namespace webapikits.Controllers
         public string GetProperty([FromBody] PropertyDto propertyDto)
         {
 
-            string query = $"select dbo.NodeValue(PropertySchema, 'DisplayName') DisplayName, PropertySchemaCode,ClassName,ObjectType,PropertyName,PropertySequence,PropertyType,PropertyValueMap From PropertySchema p where  p.ObjectType ='{propertyDto.ObjectType}' order by PropertySequence";
+            string query = $"select dbo.NodeValue(PropertySchema, 'DisplayName') DisplayName, PropertySchemaCode,PropertySchema,ClassName,ObjectType,PropertyName,PropertySequence,PropertyType,PropertyValueMap From PropertySchema p where  p.ObjectType ='{propertyDto.ObjectType}' order by PropertySequence";
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Propertys", "");
         }
+
+
 
 
 
@@ -273,6 +264,79 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "GetPropertyChoiess", "");
         }
 
+
+
+        /// <returns></returns>
+
+        [HttpPost]
+        [Route("UploadImage")]
+        public string UploadImage([FromBody] ksrImageModeldto data)
+        {
+
+
+            try
+            {
+
+
+                // Decode the base64 string to bytes
+                byte[] decodedImage = Convert.FromBase64String(data.image);
+
+                // Save the image bytes to a file
+
+                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{data.ObjectCode}.jpg"; // Provide the path where you want to save the image
+
+                System.IO.File.WriteAllBytes(filePath, decodedImage);
+
+
+                string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
+
+
+                DataTable dataTable = db.Web_ImageExecQuery( query);
+
+                return "\"Ok\"";
+            }
+            catch (Exception ex)
+            {
+                return $"{ex.Message}";
+
+            }
+        }
+
+
+        [HttpGet]
+        [Route("GetImageFromKsr")]
+        public string GetImageFromKsr(string Pixel,string KsrImageCode)
+        {
+
+            string query = $"SELECT IMG FROM KsrImage WHERE KsrImageCode = {KsrImageCode}";
+
+            DataTable dataTable = db.Web_ImageExecQuery( query);
+            return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(Pixel), dataTable);
+
+        }
+
+        [HttpGet]
+        [Route("DeleteGoodGroupCode")]
+        public string DeleteGoodGroupCode(string Where)
+        {
+
+            string query = $" delete from GoodGroup Where GoodGroupCode = {Where}  ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+        [HttpGet]
+        [Route("DeleteKsrImageCode")]
+        public string DeleteKsrImageCode(string Where)
+        {
+
+            string query = $" delete from KsrImage Where KsrImageCode = {Where}  ";
+
+            DataTable dataTable = db.Web_ImageExecQuery( query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
 
 
 
