@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.Drawing;
 using System.Data.Entity.Core.Objects;
+using System.Data.SqlClient;
 
 namespace webapikits.Controllers
 {
@@ -332,10 +333,90 @@ namespace webapikits.Controllers
         public string DeleteKsrImageCode(string Where)
         {
 
+
             string query = $" delete from KsrImage Where KsrImageCode = {Where}  ";
 
             DataTable dataTable = db.Web_ImageExecQuery( query);
             return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+        [HttpGet]
+        [Route("GetBarcodeList")]
+        public string GetBarcodeList(string Where)
+        {
+            Where = SanitizeInput(Where);
+
+            string query = $"Select BarCodeId,GoodRef,BarCode From Barcode where goodref={Where}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Barcodes", "");
+
+        }
+
+
+
+        [HttpGet]
+        [Route("GetSimilarGood")]
+        public string GetSimilarGood(string Where)
+        {
+            Where = SanitizeInput(Where);
+
+            string query = $"Select top 5 GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType,SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+        /*
+        [HttpGet]
+        [Route("GetBarcodeList")]
+        public string GetBarcodeList(string Where)
+        {
+            // Define the SQL query with parameters
+            string query = "SELECT BarCodeId, GoodRef, BarCode FROM Barcode WHERE GoodRef = @GoodRef";
+
+            // Create a parameterized command
+            var parameters = new SqlParameter[]
+            {
+        new SqlParameter("@GoodRef", SqlDbType.VarChar) { Value = Where }
+            };
+
+            // Execute the query with parameters
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query, parameters);
+
+            // Return the results in JSON format
+            return jsonClass.JsonResult_Str(dataTable, "Barcodes", "");
+        }
+
+        */
+
+        private string SanitizeInput(string input)
+        {
+            if (input == null)
+                return string.Empty;
+
+            // Prevent SQL Injection by replacing dangerous characters
+            input = input.Replace("'", "''");  // Escape single quotes for SQL
+            input = input.Replace(";", "");    // Remove semicolons
+            input = input.Replace("--", "");   // Remove SQL comments
+            input = input.Replace("/*", "");   // Remove SQL block comments
+            input = input.Replace("*/", "");   // Remove SQL block comments
+
+            // Prevent XSS by replacing HTML-sensitive characters with their HTML-encoded equivalents
+            input = input.Replace("<", "&lt;"); // < becomes &lt;
+            input = input.Replace(">", "&gt;"); // > becomes &gt;
+            input = input.Replace("&", "&amp;"); // & becomes &amp;
+            input = input.Replace("\"", "&quot;"); // " becomes &quot;
+            input = input.Replace("'", "&#x27;"); // ' becomes &#x27;
+            input = input.Replace("/", "&#x2F;"); // / becomes &#x2F;
+            input = input.Replace("\\", "&#x5C;"); // \ becomes &#x5C;
+
+            // Remove leading/trailing whitespace
+            input = input.Trim();
+
+            return input;
         }
 
 
