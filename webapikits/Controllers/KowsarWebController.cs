@@ -194,6 +194,34 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpPost]
+        [Route("GoodCrudService_safe")]
+        public IActionResult GoodCrudService_safe([FromBody] JsonModelDto jsonModelDto)
+        {
+            try
+            {
+                // استفاده از پارامترهای امن برای جلوگیری از SQL Injection
+                string query = "Exec spGood_AddNew @JsonData";
+
+                // ارسال پارامترها به Stored Procedure
+                var parameters = new[]
+                {
+            new SqlParameter("@JsonData", SqlDbType.NVarChar) { Value = jsonModelDto.JsonData ?? (object)DBNull.Value }
+        };
+
+                // اجرای کوئری و دریافت داده‌ها
+                DataTable dataTable = db.Kowsar_ExecQuery_safe(HttpContext, query, parameters);
+
+                // تبدیل داده به فرمت JSON و بازگرداندن نتیجه
+                return Ok(jsonClass.JsonResult_Str(dataTable, "Goods", ""));
+            }
+            catch (Exception ex)
+            {
+                // مدیریت خطا و بازگرداندن پیام مناسب
+                return StatusCode(500, new { Message = "An error occurred.", Details = ex.Message });
+            }
+        }
+
 
 
 
