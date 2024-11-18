@@ -194,33 +194,6 @@ namespace webapikits.Controllers
         }
 
 
-        [HttpPost]
-        [Route("GoodCrudService_safe")]
-        public IActionResult GoodCrudService_safe([FromBody] JsonModelDto jsonModelDto)
-        {
-            try
-            {
-                // استفاده از پارامترهای امن برای جلوگیری از SQL Injection
-                string query = "Exec spGood_AddNew @JsonData";
-
-                // ارسال پارامترها به Stored Procedure
-                var parameters = new[]
-                {
-            new SqlParameter("@JsonData", SqlDbType.NVarChar) { Value = jsonModelDto.JsonData ?? (object)DBNull.Value }
-        };
-
-                // اجرای کوئری و دریافت داده‌ها
-                DataTable dataTable = db.Kowsar_ExecQuery_safe(HttpContext, query, parameters);
-
-                // تبدیل داده به فرمت JSON و بازگرداندن نتیجه
-                return Ok(jsonClass.JsonResult_Str(dataTable, "Goods", ""));
-            }
-            catch (Exception ex)
-            {
-                // مدیریت خطا و بازگرداندن پیام مناسب
-                return StatusCode(500, new { Message = "An error occurred.", Details = ex.Message });
-            }
-        }
 
 
 
@@ -373,7 +346,6 @@ namespace webapikits.Controllers
         [Route("GetBarcodeList")]
         public string GetBarcodeList(string Where)
         {
-            Where = SanitizeInput(Where);
 
             string query = $"Select BarCodeId,GoodRef,BarCode From Barcode where goodref={Where}";
 
@@ -388,7 +360,7 @@ namespace webapikits.Controllers
         [Route("GetSimilarGood")]
         public string GetSimilarGood(string Where)
         {
-            Where = SanitizeInput(Where);
+           
 
             string query = $"Select top 5 GoodCode,GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType,SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
 
@@ -397,58 +369,7 @@ namespace webapikits.Controllers
 
         }
 
-        /*
-        [HttpGet]
-        [Route("GetBarcodeList")]
-        public string GetBarcodeList(string Where)
-        {
-            // Define the SQL query with parameters
-            string query = "SELECT BarCodeId, GoodRef, BarCode FROM Barcode WHERE GoodRef = @GoodRef";
-
-            // Create a parameterized command
-            var parameters = new SqlParameter[]
-            {
-        new SqlParameter("@GoodRef", SqlDbType.VarChar) { Value = Where }
-            };
-
-            // Execute the query with parameters
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query, parameters);
-
-            // Return the results in JSON format
-            return jsonClass.JsonResult_Str(dataTable, "Barcodes", "");
-        }
-
-        */
-
-        private string SanitizeInput(string input)
-        {
-            if (input == null)
-                return string.Empty;
-
-            // Prevent SQL Injection by replacing dangerous characters
-            input = input.Replace("'", "''");  // Escape single quotes for SQL
-            input = input.Replace(";", "");    // Remove semicolons
-            input = input.Replace("--", "");   // Remove SQL comments
-            input = input.Replace("/*", "");   // Remove SQL block comments
-            input = input.Replace("*/", "");   // Remove SQL block comments
-
-            // Prevent XSS by replacing HTML-sensitive characters with their HTML-encoded equivalents
-            input = input.Replace("<", "&lt;"); // < becomes &lt;
-            input = input.Replace(">", "&gt;"); // > becomes &gt;
-            input = input.Replace("&", "&amp;"); // & becomes &amp;
-            input = input.Replace("\"", "&quot;"); // " becomes &quot;
-            input = input.Replace("'", "&#x27;"); // ' becomes &#x27;
-            input = input.Replace("/", "&#x2F;"); // / becomes &#x2F;
-            input = input.Replace("\\", "&#x5C;"); // \ becomes &#x5C;
-
-            // Remove leading/trailing whitespace
-            input = input.Trim();
-
-            return input;
-        }
-
-
-
+       
 
 
 

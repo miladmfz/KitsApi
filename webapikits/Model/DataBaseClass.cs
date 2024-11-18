@@ -116,8 +116,8 @@ namespace webapikits.Model
                 return dataTable;
             }
         }
-/*
-        public DataTable Kowsar_ExecQuery(HttpContext httpContext, string query, SqlParameter[] parameters = null)
+
+        public DataTable Kowsar_ExecQuery1(HttpContext httpContext, string query, SqlParameter[] parameters = null)
         {
             if (httpContext.Request.Path != "/api/Web/GetWebLog")
             {
@@ -145,7 +145,7 @@ namespace webapikits.Model
                 }
             }
         }
-*/
+
 
 
         public DataTable Support_ImageExecQuery(String query)
