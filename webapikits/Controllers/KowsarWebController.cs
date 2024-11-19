@@ -369,7 +369,21 @@ namespace webapikits.Controllers
 
         }
 
-       
+
+
+            [HttpPost]
+            [Route("IsbnToBarcode")]
+            public string IsbnToBarcode([FromBody] IsbnToBarcodeDto isbnToBarcodeDto)
+            {
+
+
+                string query = $" spGood_IsbnToBarcode  '{isbnToBarcodeDto.Isbn}' , {isbnToBarcodeDto.GoodCode} ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
 
 
 
