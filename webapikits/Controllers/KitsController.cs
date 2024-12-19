@@ -87,7 +87,7 @@ namespace webapikits.Controllers
         public string kowsar_info(string Where)
         {
 
-            string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
+            string query = $"select top 1 DataValue from dbsetup where KeyValue = '{Where}'";
 
 
 
@@ -116,10 +116,10 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("Activation")]
-        public string Activation(string ActivationCode)
+        public string Activation(string ActivationCode, string Flag)
         {
             
-            string query = "spApp_GetActivation '" + ActivationCode + "'";
+            string query = $"spApp_GetActivation '{ActivationCode}' , '{Flag}'";
 
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");
@@ -133,7 +133,7 @@ namespace webapikits.Controllers
         {
 
             
-            string query = "select * from AppBrokerCustomer Where ActivationCode = '" + Code + "'";
+            string query = $"select * from AppBrokerCustomer Where ActivationCode = '{Code}'";
 
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
@@ -260,7 +260,7 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = " Insert into ErrorLogReport([ErrorLogText], [Broker], [DeviceId], [ServerName], [VersionName], [StrDate])values ('"+ ErrorLog + "','"+Broker + "','"+ DeviceId + "','"+ ServerName + "','"+ VersionName + "','"+ StrDate + "')";
+            string query = $" Insert into ErrorLogReport([ErrorLogText], [Broker], [DeviceId], [ServerName], [VersionName], [StrDate])values ('{ErrorLog}','{Broker}','{DeviceId}','{ServerName}','{VersionName}','{StrDate}')";
 
 
 

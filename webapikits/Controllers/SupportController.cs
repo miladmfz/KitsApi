@@ -7,6 +7,7 @@ using static System.Data.Entity.Infrastructure.Design.Executor;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Objects;
 using System.Net.Sockets;
+using System;
 
 namespace webapikits.Controllers
 {
@@ -815,7 +816,7 @@ namespace webapikits.Controllers
         public string EditCustomerProperty([FromBody] CustomerWebDto customerWebDto)
         {
 
-            string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.LockNumber}',{customerWebDto.ObjectRef}";
+            string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.Delegacy}',{customerWebDto.ObjectRef}";
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");

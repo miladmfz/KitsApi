@@ -174,8 +174,8 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec spApp_GetInfo " + reptype + ", " + table + ", " + code + ", @RowCount=" + Reprow + ", @CountFlag=1";
-
+            string query = $"Exec spApp_GetInfo {reptype}, {table}, {code}, @RowCount={Reprow} , @CountFlag=1";
+             
 
             DataTable dataTable;
             if (table.Equals("KsrImage"))
