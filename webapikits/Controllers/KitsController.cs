@@ -103,11 +103,8 @@ namespace webapikits.Controllers
         public string Activation(string ActivationCode, string Flag)
         {
             
-<<<<<<< HEAD
-            string query = $"select * from AppBrokerCustomer Where ActivationCode = '{ActivationCode}'";
-=======
+
             string query = $"spApp_GetActivation '{ActivationCode}' , '{Flag}'";
->>>>>>> 78da553c4d505feaec0ce50022ee7d86901c6722
 
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");
