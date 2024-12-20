@@ -35,43 +35,7 @@ namespace webapikits.Controllers
 
 
 
-        public class OcrModel
-        {
-            public string barcode { get; set; } = "";
-            public string Step { get; set; } = "0";
-            public string orderby { get; set; } = "Goodname";
 
-
-
-            public string State { get; set; } = "";
-            public string SearchTarget { get; set; } = "";
-            public string Stack { get; set; } = "";
-            public string path { get; set; } = "";
-            public string Row { get; set; } = "";
-            public string PageNo { get; set; } = "";
-            public string HasShortage { get; set; } = "";
-            public string IsEdited { get; set; } = "";
-
-            public string CountFlag { get; set; } = "";
-            public string DbName { get; set; } = "";
-
-
-            public string OcrFactorCode { get; set; } = "";
-            public string Reader { get; set; } = "";
-            public string Controler { get; set; } = "";
-            public string Packer { get; set; } = "";
-            public string PackDeliverDate { get; set; } = "";
-            public string PackCount { get; set; } = "";
-            public string AppDeliverDate { get; set; } = "";
-            public string FactorCode { get; set; } = "";
-            public string StackCategory { get; set; } = "";
-            public string Sender { get; set; } = "";
-            public string ImageStr { get; set; } = "";
-
-
-
-        }
-        
 
 
         [HttpPost]
@@ -467,7 +431,7 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec dbo.spApp_ocrSetDelivery " + AppOCRCode + ", " + State + ",'" + Deliverer + "'";
+            string query = $"Exec dbo.spApp_ocrSetDelivery {AppOCRCode}, {State},'{Deliverer}'";
 
 
             DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
@@ -485,7 +449,7 @@ namespace webapikits.Controllers
     )
         {
 
-            string query = "Exec dbo.spApp_ocrSetControlled " + AppOCRCode + " ," + State + " ," + JobPersonRef;
+            string query = $"Exec dbo.spApp_ocrSetControlled {AppOCRCode} ,{State} ,{JobPersonRef}"  ;
 
 
 
@@ -503,7 +467,7 @@ namespace webapikits.Controllers
     )
         {
 
-            string query = "Exec dbo.spApp_ocrSetShortage " + OCRFactorRowCode + ", " + Shortage;
+            string query = $"Exec dbo.spApp_ocrSetShortage {OCRFactorRowCode}, {Shortage}"  ;
 
 
 
@@ -636,7 +600,7 @@ namespace webapikits.Controllers
         public string ExitDelivery(string Where)
         {
 
-            string query = " update AppOCRFactor set HasSignature=0,AppIsDelivered=0 where AppOCRFactorCode= " + Where;
+            string query = $" update AppOCRFactor set HasSignature=0,AppIsDelivered=0 where AppOCRFactorCode= {Where}"  ;
 
             DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
@@ -650,7 +614,7 @@ namespace webapikits.Controllers
         public string GetJob(string Where)
         {
 
-            string query = "select JobCode,Title,Explain from job where Explain='" + Where + "'";
+            string query = $"select JobCode,Title,Explain from job where Explain='{Where}'";
 
 
 
@@ -668,7 +632,7 @@ namespace webapikits.Controllers
         public string GetJobPerson(string Where)
         {
 
-            string query = "select j.JobCode,jp.JobPersonCode,j.Title,c.Name,c.FName from JobPerson jp  join job j on j.JobCode=jp.JobRef  join Central c on c.CentralCode=jp.CentralRef  where j.Title='" + Where + "'";
+            string query = $"select j.JobCode,jp.JobPersonCode,j.Title,c.Name,c.FName from JobPerson jp  join job j on j.JobCode=jp.JobRef  join Central c on c.CentralCode=jp.CentralRef  where j.Title='{Where}'";
 
 
 
@@ -688,7 +652,7 @@ namespace webapikits.Controllers
         public string GetOcrFactorDetail(string OCRFactorCode)
         {
 
-            string query = "[dbo].[spApp_ocrGetFactorDetail] " + OCRFactorCode;
+            string query = $"[dbo].[spApp_ocrGetFactorDetail] {OCRFactorCode}";
             DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "AppOcrFactors", "");
@@ -702,7 +666,7 @@ namespace webapikits.Controllers
         public string GetCustomerPath()
         {
 
-            string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_CustomerPath") + " , '') " + _configuration.GetConnectionString("Ocr_CustomerPath_Lible") + " From PropertyValue Where ClassName= 'TCustomer'";
+            string query = $"Select Distinct IsNull({_configuration.GetConnectionString("Ocr_CustomerPath")} , '') {_configuration.GetConnectionString("Ocr_CustomerPath_Lible")} From PropertyValue Where ClassName= 'TCustomer'";
             DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
@@ -714,7 +678,7 @@ namespace webapikits.Controllers
         public string GetStackCategory()
         {
 
-            string query = "Select Distinct IsNull(" + _configuration.GetConnectionString("Ocr_StackCategory") + " , '') " + _configuration.GetConnectionString("Ocr_StackCategory") + " From good";
+            string query = $"Select Distinct IsNull({_configuration.GetConnectionString("Ocr_StackCategory")} , '') {_configuration.GetConnectionString("Ocr_StackCategory")} From good";
             DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 

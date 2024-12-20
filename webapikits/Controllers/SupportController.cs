@@ -129,7 +129,7 @@ namespace webapikits.Controllers
         public string GetObjectTypeFromDbSetup(string ObjectType)
         {
 
-            string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
+            string query = $"select * from dbo.fnObjectType('{ObjectType}') ";
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
 

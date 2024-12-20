@@ -32,47 +32,6 @@ namespace webapikits.Controllers
 
 
 
-        public class BrokerOrderClass
-        {
-            public List<HeaderDetail> HeaderDetails { get; set; }
-            public List<RowDetail> RowDetails { get; set; }
-        }
-
-        public class HeaderDetail
-        {
-            public string PreFactorCode { get; set; }
-            public string PreFactorDate { get; set; }
-            public string PreFactorExplain { get; set; }
-            public string CustomerRef { get; set; }
-            public string BrokerRef { get; set; }
-            public string RwCount { get; set; }
-        }
-
-        public class RowDetail
-        {
-            public string GoodRef { get; set; }
-            public string FactorAmount { get; set; }
-            public string Price { get; set; }
-        }
-
-        public class GpsLocation
-        {
-            public String Longitude { get; set; }
-            public String Latitude { get; set; }
-            public String BrokerRef { get; set; }
-            public String GpsDate { get; set; }
-        }
-
-        public class PrintRequest
-        {
-            public string Image { get; set; }
-            public string Code { get; set; }
-            public string PrinterName { get; set; }
-            public int PrintCount { get; set; }
-        }
-
-
-
         [HttpGet]
         [Route("GetColumnList")]
         public string GetColumnList(
@@ -95,7 +54,7 @@ namespace webapikits.Controllers
                 IncludeZero = "0";
             }
 
-            string query = "Exec [spApp_GetColumn]  0  ,'', " + Type + "," + AppType + "," + IncludeZero;
+            string query = $"Exec [spApp_GetColumn]  0  ,'', {Type},{AppType}, {IncludeZero}";
 
 
             DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
@@ -113,7 +72,7 @@ namespace webapikits.Controllers
                 BrokerRef = "0";
             }
 
-            string query = "exec spApp_GetBrokerStack " + BrokerRef;
+            string query = $"exec spApp_GetBrokerStack {BrokerRef}" ;
             DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
@@ -126,7 +85,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = "Exec spApp_GetInfo 1, 'KsrImage', " + code + " , @RowCount=200, @CountFlag=1 ";
+            string query = $"Exec spApp_GetInfo 1, 'KsrImage', {code} , @RowCount=200, @CountFlag=1 ";
 
             DataTable dataTable = db.Web_ImageExecQuery(query);
 
@@ -140,7 +99,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = "select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
+            string query = $"select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
 
             DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
@@ -155,7 +114,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = "Select top 1 * from RepLogData order by 1 desc";
+            string query = $"Select top 1 * from RepLogData order by 1 desc";
 
             DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
@@ -174,7 +133,7 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec spApp_GetInfo " + reptype + ", " + table + ", " + code + ", @RowCount=" + Reprow + ", @CountFlag=1";
+            string query = $"Exec spApp_GetInfo {reptype}, {table} , {table}, @RowCount= {Reprow} , @CountFlag=1";
 
 
             DataTable dataTable;
@@ -231,7 +190,7 @@ namespace webapikits.Controllers
             CountRows = Convert.ToInt32(headerDetails[0].RwCount);
 
 
-                string sq = "IF Exists(Select 1 From DbSetup Where KeyValue = 'App_FactorTypeInKowsar' And DataValue='1')" +
+                string sq = $"IF Exists(Select 1 From DbSetup Where KeyValue = 'App_FactorTypeInKowsar' And DataValue='1')" +
                             " Select ClassName = 'Factor' Else Select ClassName = 'PreFactor' ";
                 var ClassResult = db.Broker_ExecQuery(HttpContext, sq);
                 if (ClassResult != null)
@@ -366,13 +325,13 @@ namespace webapikits.Controllers
                 DateTime dateObj = DateTime.ParseExact(gpsDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
                 string formattedDate = dateObj.ToString("yyyy/MM/dd HH:mm:ss");
 
-                Query = "INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('" + longitude + "', '" + latitude + "', " + brokerRef + ", '" + formattedDate + "'); SELECT SCOPE_IDENTITY();";
+                Query = $"INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('{longitude}', '{latitude}', {brokerRef}, '{formattedDate}'); SELECT SCOPE_IDENTITY();";
                 DataTable = db.Broker_ExecQuery(HttpContext, Query);
 
             }
 
 
-            Query = "select top 1 * from GpsLocation order by 1 desc  ";
+            Query = $"select top 1 * from GpsLocation order by 1 desc  ";
             DataTable dataTable = db.Broker_ExecQuery(HttpContext, Query);
 
 
@@ -401,71 +360,71 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "EXEC spApp_CustomerIns ";
+            string query = $"EXEC spApp_CustomerIns ";
 
             if (!string.IsNullOrEmpty(BrokerRef))
             {
-                query += "@BrokerRef = " + BrokerRef + " ";
+                query += $" , @BrokerRef = {BrokerRef} ";
             }
 
             if (!string.IsNullOrEmpty(CityCode))
             {
-                query += "@CityCode = " + CityCode + " ";
+                query += $" , @CityCode = {CityCode} ";
             }
 
             if (!string.IsNullOrEmpty(KodeMelli))
             {
-                query += "@KodeMelli = '" + KodeMelli + "' ";
+                query += $" , @KodeMelli = '{KodeMelli}' ";
             }
 
             if (!string.IsNullOrEmpty(FName))
             {
-                query += "@FName = '" + FName + "' ";
+                query += $" , @FName = '{FName}' ";
             }
 
             if (!string.IsNullOrEmpty(LName))
             {
-                query += "@LName = '" + LName + "' ";
+                query += $" , @LName = '{LName}' ";
             }
 
             if (!string.IsNullOrEmpty(Address))
             {
-                query += "@Address = '" + Address + "' ";
+                query += $" , @Address = '{Address}' ";
             }
 
             if (!string.IsNullOrEmpty(Phone))
             {
-                query += "@Phone = '" + Phone + "' ";
+                query += $" , @Phone = '{Phone}' ";
             }
 
             if (!string.IsNullOrEmpty(Mobile))
             {
-                query += "@Mobile = '" + Mobile + "' ";
+                query += $" , @Mobile = '{Mobile}' ";
             }
 
             if (!string.IsNullOrEmpty(Fax))
             {
-                query += "@Fax = '" + Fax + "' ";
+                query += $" , @Fax = '{Fax}' ";
             }
 
             if (!string.IsNullOrEmpty(EMail))
             {
-                query += "@EMail = '" + EMail + "' ";
+                query += $" , @EMail = '{EMail}' ";
             }
 
             if (!string.IsNullOrEmpty(PostCode))
             {
-                query += "@PostCode = '" + PostCode + "' ";
+                query += $" , @PostCode = '{PostCode}' ";
             }
 
             if (!string.IsNullOrEmpty(ZipCode))
             {
-                query += "@ZipCode = '" + ZipCode + "' ";
+                query += $" , @ZipCode = '{ZipCode}' ";
             }
 
             if (!string.IsNullOrEmpty(UserId))
             {
-                query += "@UserId = '" + UserId + "' ";
+                query += $" , @UserId = '{UserId}' ";
             }
 
 

@@ -34,22 +34,6 @@ namespace webapikits.Controllers
 
 
 
-        public class PrintRequest
-        {
-            public string Image { get; set; }
-            public string Code { get; set; }
-            public string PrinterName { get; set; }
-            public int PrintCount { get; set; }
-        }
-
-
-        public class ApiCredentials
-    {
-        public string UserApiKey { get; set; }
-        public string SecretKey { get; set; }
-    }
-
-
 
     [HttpPost]
     [Route("SendSms")]
@@ -87,7 +71,7 @@ namespace webapikits.Controllers
         public string kowsar_info(string Where)
         {
 
-            string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
+            string query = $"select top 1 DataValue from dbsetup where KeyValue = '{Where}'";
 
 
 
@@ -119,7 +103,7 @@ namespace webapikits.Controllers
         public string Activation(string ActivationCode)
         {
             
-            string query = "select * from AppBrokerCustomer Where ActivationCode = '" + ActivationCode + "'";
+            string query = $"select * from AppBrokerCustomer Where ActivationCode = '{ActivationCode}'";
 
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");
@@ -133,7 +117,7 @@ namespace webapikits.Controllers
         {
 
             
-            string query = "select * from AppBrokerCustomer Where ActivationCode = '" + Code + "'";
+            string query = $"select * from AppBrokerCustomer Where ActivationCode = '{Code}'";
 
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
@@ -260,7 +244,7 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = " Insert into ErrorLogReport([ErrorLogText], [Broker], [DeviceId], [ServerName], [VersionName], [StrDate])values ('"+ ErrorLog + "','"+Broker + "','"+ DeviceId + "','"+ ServerName + "','"+ VersionName + "','"+ StrDate + "')";
+            string query = $" Insert into ErrorLogReport([ErrorLogText], [Broker], [DeviceId], [ServerName], [VersionName], [StrDate])values ('{ErrorLog}','{Broker}','{DeviceId}','{ServerName}','{VersionName}','{StrDate}')";
 
 
 

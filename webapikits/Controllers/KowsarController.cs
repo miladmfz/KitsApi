@@ -46,7 +46,7 @@ namespace webapikits.Controllers
         public string DbSetupvalue(string Where)
         {
 
-            string query = "select top 1 DataValue from dbsetup where KeyValue = '" + Where + "'";
+            string query = $"select top 1 DataValue from dbsetup where KeyValue = '{Where}'";
 
 
 
@@ -289,10 +289,10 @@ namespace webapikits.Controllers
 
             string query;
             if (AppType == "1") {
-                query = "Exec [spApp_GetColumn] "+GoodCode + " ,'', "+ Type + ","+ AppType + ","+ IncludeZero;
+                query = $"Exec [spApp_GetColumn] {GoodCode} ,'', {Type}, {AppType},{IncludeZero}";
             } else
             {
-                query = "Exec [spApp_GetColumn] "+GoodCode + " ,'"+ GoodType + "', "+ Type + ","+ AppType + "," + IncludeZero;
+                query = $"Exec [spApp_GetColumn] {GoodCode} ,'{GoodType}', {Type},{AppType}, {IncludeZero}" ;
             }
 
 
@@ -314,7 +314,7 @@ namespace webapikits.Controllers
             )
         {
 
-            string query= "Exec spAppGetDistinctValues '"+ TableName + "','"+ FieldNames + " Value','"+ WhereClause + "' ";
+            string query= $"Exec spAppGetDistinctValues '{TableName}','{FieldNames} Value','{WhereClause}' ";
 
 
 
@@ -432,7 +432,7 @@ namespace webapikits.Controllers
 
             int sScale = 500;
 
-            string sq = "Exec dbo.spApp_GetKsrImage "+ KsrImageCode;
+            string sq = $"Exec dbo.spApp_GetKsrImage {KsrImageCode}" ;
 
             byte[] imageBytes = db.Web_GetImageData(sq);
 

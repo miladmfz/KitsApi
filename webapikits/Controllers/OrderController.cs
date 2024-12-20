@@ -27,59 +27,12 @@ namespace webapikits.Controllers
         }
 
 
-
-
-        public class OrderModel
-        {
-            public string MizType { get; set; } = "";
-            public string InfoState { get; set; } = "0";
-
-
-
-            public string GroupCode { get; set; } = "0";
-            public string RowCount { get; set; } = "100";
-            public string Where { get; set; } = "";
-            public string AppBasketInfoRef { get; set; } = "0";
-
-
-
-
-            public string Broker { get; set; } = "0";
-            public string Miz { get; set; } = "0";
-            public string PersonName { get; set; } = "";
-            public string Mobile { get; set; } = "";
-            public string InfoExplain { get; set; } = "";
-            public string Prepayed { get; set; } = "0";
-            public string ReserveStartTime { get; set; } = "";
-            public string ReserveEndTime { get; set; } = "";
-            public string Date { get; set; } = "";
-            public string State { get; set; } = "0";
-            public string InfoCode { get; set; } = "0";
-
-
-
-            public string GoodRef { get; set; } = "0";
-            public string FacAmount { get; set; } = "0";
-            public string Price { get; set; } = "0";
-            public string bUnitRef { get; set; } = "0";
-            public string bRatio { get; set; } = "0";
-            public string Explain { get; set; } = "";
-            public string UserId { get; set; } = "-3000";
-            public string InfoRef { get; set; } = "0";
-            public string RowCode { get; set; } = "0";
-
-            public string AppBasketInfoCode { get; set; } = "0";
-
-
-        }
-
-
         [HttpGet]
         [Route("GetObjectTypeFromDbSetup")]
         public string GetObjectTypeFromDbSetup(string ObjectType)
         {
 
-            string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
+            string query = $"select * from dbo.fnObjectType('{ObjectType}') ";
 
             DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 
@@ -568,7 +521,7 @@ namespace webapikits.Controllers
         public string OrderReserveList(string MizRef)
         {
 
-            string query = "exec spApp_OrderReserveList " + MizRef;
+            string query = $"exec spApp_OrderReserveList {MizRef}"  ;
 
             DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 
@@ -612,7 +565,7 @@ namespace webapikits.Controllers
         public string GetOrderSum(string AppBasketInfoRef)
         {
 
-            string query = "Exec spApp_OrderGetSummmary " + AppBasketInfoRef;
+            string query = $"Exec spApp_OrderGetSummmary {AppBasketInfoRef}" ;
 
             DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 
@@ -740,7 +693,7 @@ namespace webapikits.Controllers
         public string GetGoodFromGroup(string GroupCode)
         {
 
-            string query = "select GoodCode,GoodName,MaxSellPrice,'' ImageName from vwGood where  GoodCode in(Select GoodRef From GoodGroup p Join GoodsGrp s on p.GoodGroupRef = s.GroupCode Where s.GroupCode = " + GroupCode + " or s.L1 = " + GroupCode + " or s.L2 = " + GroupCode + " or s.L3 = " + GroupCode + " )";
+            string query = $"select GoodCode,GoodName,MaxSellPrice,'' ImageName from vwGood where  GoodCode in(Select GoodRef From GoodGroup p Join GoodsGrp s on p.GoodGroupRef = s.GroupCode Where s.GroupCode = {GroupCode} or s.L1 = {GroupCode} or s.L2 = {GroupCode} or s.L3 = {GroupCode} )";
 
             DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 

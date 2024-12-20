@@ -67,7 +67,7 @@ namespace webapikits.Controllers
         public string BasketGet(string Mobile)
         {
 
-            string query = "Exec [dbo].[spApp_BasketGet] '"+ Mobile + "'";
+            string query = $"Exec [dbo].[spApp_BasketGet] '{Mobile}'";
 
 
             DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
@@ -84,7 +84,7 @@ namespace webapikits.Controllers
         public string BasketHistory(string Mobile,string Code, string ReservedRows)
         {
 
-            string query = "Exec [dbo].[spApp_BasketPreFactors] '"+ Mobile + "',"+ Code + ","+ ReservedRows ;
+            string query = $"Exec [dbo].[spApp_BasketPreFactors] '{Mobile}',{Code},{ReservedRows}" ;
 
 
             DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
@@ -99,7 +99,7 @@ namespace webapikits.Controllers
         public string BasketToPreFactor(string Mobile, string Explain)
         {
 
-            string query = "Exec [dbo].[spApp_BasketToPreFactor] '"+ Mobile + "', -2000 , '"+Explain+"'";
+            string query = $"Exec [dbo].[spApp_BasketToPreFactor] '{Mobile}', -2000 , '{Explain}'";
 
 
             DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
@@ -115,7 +115,7 @@ namespace webapikits.Controllers
         public string BasketSum(string Mobile)
         {
 
-            string query = "Exec dbo.spApp_BasketSummary '"+ Mobile + "'";
+            string query = $"Exec dbo.spApp_BasketSummary '{Mobile}'";
 
 
             DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
@@ -130,7 +130,7 @@ namespace webapikits.Controllers
         public string Basketdeleteall(string Mobile)
         {
 
-            string query = "  set nocount on Update AppBasket set ProcessStatus = 10 where MobileNo = '"+ Mobile + "' and ProcessStatus = 0 select 1";
+            string query = $"  set nocount on Update AppBasket set ProcessStatus = 10 where MobileNo = '{Mobile}' and ProcessStatus = 0 select 1";
 
 
 
@@ -157,7 +157,7 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec [dbo].[spApp_BasketDelete] '"+ DeviceCode + "', "+GoodRef + ", "+UserId + " , '"+ Mobile + "'";
+            string query = $"Exec [dbo].[spApp_BasketDelete] '{DeviceCode}' , {GoodRef} , {UserId} , '{Mobile}'";
 
 
 
@@ -180,7 +180,7 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec [dbo].[spApp_FavoriteInsert] '"+ Mobile + "',"+ GoodRef + ","+DeleteFlag;
+            string query = $"Exec [dbo].[spApp_FavoriteInsert] '{Mobile}',{GoodRef},{DeleteFlag} ";
 
 
 
@@ -196,7 +196,7 @@ namespace webapikits.Controllers
         public string GoodGroupInfo_Default()
         {
 
-            string query = "Exec [dbo].[spApp_GetGoodGroups_Default] ";
+            string query = $"Exec [dbo].[spApp_GetGoodGroups_Default] ";
 
 
             DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
@@ -212,7 +212,7 @@ namespace webapikits.Controllers
         public string GoodGroupInfo_DefaultImage()
         {
 
-            string query = "Exec [dbo].[spApp_GetGoodGroups_DefaultImage]  ";
+            string query = $"Exec [dbo].[spApp_GetGoodGroups_DefaultImage]  ";
 
 
             DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
@@ -244,68 +244,68 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "exec spApp_GetGoods2 ";
+            string query = $"exec spApp_GetGoods2 ";
 
             if (!string.IsNullOrEmpty(RowCount))
             {
-                query += "@RowCount = " + RowCount + " ";
+                query += $"@RowCount = {RowCount} ";
             }else { 
-                query += "@RowCount = 10"; 
+                query += $"@RowCount = 10"; 
             }
 
             if (!string.IsNullOrEmpty(SearchTarget))
             {
-                query += "@SearchTarget =  N'" + SearchTarget + "' ";
+                query += $"@SearchTarget =  N'{SearchTarget}' ";
             }
 
             if (!string.IsNullOrEmpty(OrderBy))
             {
-                query += "@OrderBy = N'" + OrderBy + "' ";
+                query += $"@OrderBy = N'{OrderBy}' ";
             }
 
             if (!string.IsNullOrEmpty(OnlyActive))
             {
-                query += "@OnlyActive = " + OnlyActive + " ";
+                query += $"@OnlyActive = {OnlyActive} ";
             }
 
             if (!string.IsNullOrEmpty(OnlyAvailable))
             {
-                query += "@OnlyAvailable = " + OnlyAvailable + " ";
+                query += $"@OnlyAvailable = {OnlyAvailable} ";
             }
 
             if (!string.IsNullOrEmpty(GroupCode))
             {
-                query += "@GroupCode = " + GroupCode + " ";
+                query += $"@GroupCode = {GroupCode} ";
             }
 
             if (!string.IsNullOrEmpty(Where))
             {
-                query += "@Where = N'" + Where + "' ";
+                query += $"@Where = N'{Where}' ";
             }
 
             if (!string.IsNullOrEmpty(LikeGood))
             {
-                query += "@LikeGoodRef = " + LikeGood + " ";
+                query += $"@LikeGoodRef = {LikeGood} ";
             }
 
             if (!string.IsNullOrEmpty(PageNo))
             {
-                query += "@PageNo = " + PageNo + " ";
+                query += $"@PageNo = {PageNo} ";
             }
 
             if (!string.IsNullOrEmpty(MobileNo))
             {
-                query += "@MobileNo = '" + MobileNo + "' ";
+                query += $"@MobileNo = '{MobileNo}' ";
             }
 
             if (!string.IsNullOrEmpty(OnlyFavorite))
             {
-                query += "@OnlyFavorite = " + OnlyFavorite + " ";
+                query += $"@OnlyFavorite = {OnlyFavorite} ";
             }
 
             if (!string.IsNullOrEmpty(GoodCode))
             {
-                query += "@GoodCode = " + GoodCode + " ";
+                query += $"@GoodCode = {GoodCode} ";
             }
 
 
@@ -326,16 +326,16 @@ namespace webapikits.Controllers
             )
         {
 
-            string query = "Exec [dbo].[spApp_GetGoodGroups] ";
+            string query = $"Exec [dbo].[spApp_GetGoodGroups] ";
 
             if (!string.IsNullOrEmpty(GroupName))
             {
-                query += "@GroupName = N'" + GroupName + "' ";
+                query += $"@GroupName = N'{GroupName}' ";
             }
 
             if (!string.IsNullOrEmpty(GroupCode))
             {
-                query += "@GroupCode = " + GroupCode + " ";
+                query += $"@GroupCode = {GroupCode} ";
             }
 
 
@@ -369,7 +369,7 @@ namespace webapikits.Controllers
 
 
 
-            string query = "Exec [dbo].[spApp_XUserCreate] '"+UName + "','"+ UPass + "','"+ NewPass+"','"+ FName + "','"+ LName + "','"+ mobile + "','"+ company + "','"+address + "','"+PostalCode + "','"+ email + "',-2000,"+ Flag  ;
+            string query = $"Exec [dbo].[spApp_XUserCreate] '{UName}','{UPass}','{NewPass}','{FName}','{LName}','{mobile}','{company}','{address}','{PostalCode}','{email}',-2000,{Flag}"  ;
 
 
             DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
