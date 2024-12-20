@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.Drawing;
 using System.Data.Entity.Core.Objects;
+using System.Data.SqlClient;
 
 namespace webapikits.Controllers
 {
@@ -196,6 +197,7 @@ namespace webapikits.Controllers
 
 
 
+
         [HttpGet]
         [Route("GetGoodList")]
         public string GetGoodList()
@@ -332,6 +334,7 @@ namespace webapikits.Controllers
         public string DeleteKsrImageCode(string Where)
         {
 
+
             string query = $" delete from KsrImage Where KsrImageCode = {Where}  ";
 
             DataTable dataTable = db.Web_ImageExecQuery( query);
@@ -339,6 +342,47 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetBarcodeList")]
+        public string GetBarcodeList(string Where)
+        {
+
+            string query = $"Select BarCodeId,GoodRef,BarCode From Barcode where goodref={Where}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Barcodes", "");
+
+        }
+
+
+
+        [HttpGet]
+        [Route("GetSimilarGood")]
+        public string GetSimilarGood(string Where)
+        {
+           
+
+            string query = $"Select top 5 GoodCode,GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType,SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
+
+            [HttpPost]
+            [Route("IsbnToBarcode")]
+            public string IsbnToBarcode([FromBody] IsbnToBarcodeDto isbnToBarcodeDto)
+            {
+
+
+                string query = $" spGood_IsbnToBarcode  '{isbnToBarcodeDto.Isbn}' , {isbnToBarcodeDto.GoodCode} ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
 
 
 

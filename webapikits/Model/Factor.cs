@@ -1,3 +1,5 @@
+using System;
+
 namespace webapikits.Model
 {
 	public class Factor
@@ -69,7 +71,7 @@ namespace webapikits.Model
 
         public string AppNumber { get; set; } = "";
         public string DatabaseNumber { get; set; } = "";
-        public string LockNumber { get; set; } = "";
+        public string Delegacy { get; set; } = "";
 
 
         public string Explain { get; set; } = "";

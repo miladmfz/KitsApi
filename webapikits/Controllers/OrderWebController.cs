@@ -237,6 +237,7 @@ namespace webapikits.Controllers
         public string GetProperty(string Where)
         {
 
+
             string query = $" Select  PropertySchema,PropertyValueMap,PropertyName  from PropertySchema Where ClassName = 'TGOOD' And  ObjectType = '{Where}'";
 
 

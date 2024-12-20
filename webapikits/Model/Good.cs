@@ -23,4 +23,11 @@
 
     }
 
+    public class IsbnToBarcodeDto
+    {
+        public string? Isbn { get; set; }
+        public string? GoodCode { get; set; }
+
+    }
+
 }

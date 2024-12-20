@@ -7,6 +7,7 @@ using static System.Data.Entity.Infrastructure.Design.Executor;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Objects;
 using System.Net.Sockets;
+using System;
 
 namespace webapikits.Controllers
 {
@@ -815,7 +816,7 @@ namespace webapikits.Controllers
         public string EditCustomerProperty([FromBody] CustomerWebDto customerWebDto)
         {
 
-            string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.LockNumber}',{customerWebDto.ObjectRef}";
+            string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.Delegacy}',{customerWebDto.ObjectRef}";
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");
@@ -903,9 +904,10 @@ namespace webapikits.Controllers
         [Route("GetGoodListSupport")]
         public string GetGoodListSupport([FromBody] SearchTargetDto searchTargetDto)
         {
+            
 
 
-            string query = $"spWeb_GetGoodListSupport '{searchTargetDto.SearchTarget}'";
+            string query = $"spWeb_GetGoodListSupport '{SanitizeInput(searchTargetDto.SearchTarget)}'";
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
@@ -996,7 +998,27 @@ namespace webapikits.Controllers
         public string Support_ExplainFactor([FromBody] FactorwebDto factorwebDto)
         {
 
-            string query = $"Update PropertyValue Set Nvarchar14 = '{factorwebDto.Barbary}' where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
+
+            string query = $"Update PropertyValue Set Nvarchar14 = '{SanitizeInput(factorwebDto.Barbary)}' where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+
+
+
+        [HttpPost]
+        [Route("Support_Count")]
+        public string Support_Count([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $" Declare @S nvarchar(20)=dbo.fnDate_AddDays(dbo.fnDate_Today(),-365) select BrokerCode, BrokerName, sum(worktime)/60 worktime,cast(sum(SumAmount) as int) SumAmount,Count(*) FactorCount from vwFactor where FactorDate>@S group by BrokerName, BrokerCode ";
 
 
 
@@ -1013,7 +1035,36 @@ namespace webapikits.Controllers
 
 
 
-        
+       
+        private string SanitizeInput(string input)
+        {
+            if (input == null)
+                return string.Empty;
+
+            // Prevent SQL Injection by replacing dangerous characters
+            input = input.Replace("'", "''");  // Escape single quotes for SQL
+            input = input.Replace(";", "");    // Remove semicolons
+            input = input.Replace("--", "");   // Remove SQL comments
+            input = input.Replace("/*", "");   // Remove SQL block comments
+            input = input.Replace("*/", "");   // Remove SQL block comments
+
+            // Prevent XSS by replacing HTML-sensitive characters with their HTML-encoded equivalents
+            input = input.Replace("<", "&lt;"); // < becomes &lt;
+            input = input.Replace(">", "&gt;"); // > becomes &gt;
+            input = input.Replace("&", "&amp;"); // & becomes &amp;
+            input = input.Replace("\"", "&quot;"); // " becomes &quot;
+            input = input.Replace("'", "&#x27;"); // ' becomes &#x27;
+            input = input.Replace("/", "&#x2F;"); // / becomes &#x2F;
+            input = input.Replace("\\", "&#x5C;"); // \ becomes &#x5C;
+
+            // Remove leading/trailing whitespace
+            input = input.Trim();
+
+            return input;
+        }
+
+
+
 
 
 

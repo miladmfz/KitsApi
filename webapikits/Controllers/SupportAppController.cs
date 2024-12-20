@@ -78,10 +78,10 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAppBrokerCustomerByCode")]
-        public string GetAppBrokerCustomerByCode(string AppBrokerCustomerCode)
+        public string GetAppBrokerCustomerByCode(string ActivationCode)
         {
 
-            string query = $"select * from AppBrokerCustomer Where AppBrokerCustomerCode = '{AppBrokerCustomerCode}'";
+            string query = $"select * from AppBrokerCustomer Where ActivationCode = '{ActivationCode}'";
 
             DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
@@ -97,16 +97,17 @@ namespace webapikits.Controllers
 
 
 
-
+        
 
 
         [HttpPost]
-        [Route("InsertAppBrokerCustomer")]
-        public string InsertAppBrokerCustomer([FromBody] BrokerCustomerDto brokercustomerdto)
+        [Route("CrudAppBrokerCustomer")]
+        public string CrudAppBrokerCustomer([FromBody] BrokerCustomerDto brokercustomerdto)
         {
 
-            string query = $"exec [spApp_InsertAppBrokerCustomer] '{brokercustomerdto.ActivationCode}', '{brokercustomerdto.EnglishCompanyName}', '{brokercustomerdto.PersianCompanyName}', '{brokercustomerdto.ServerURL}'," +
-                $" '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', {brokercustomerdto.AppType} ";
+            string query = $"exec [spApp_CrudAppBrokerCustomer]  '{brokercustomerdto.ActivationCode}','{brokercustomerdto.EnglishCompanyName}', '{brokercustomerdto.PersianCompanyName}', '{brokercustomerdto.ServerURL}', " +
+                $" '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.UsedDevice}, {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', '{brokercustomerdto.DbImageName}', " +
+                $"{brokercustomerdto.AppType} , '{brokercustomerdto.ServerIp}', '{brokercustomerdto.ServerPort}', '{brokercustomerdto.ServerPathApi}'";
 
 
             DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
@@ -116,24 +117,6 @@ namespace webapikits.Controllers
         }
 
 
-
-
-
-
-        [HttpPost]
-        [Route("UpdateAppBrokerCustomer")]
-        public string UpdateAppBrokerCustomer([FromBody] BrokerCustomerDto brokercustomerdto)
-        {
-
-            string query = $"exec [spApp_UpdateAppBrokerCustomer] '{brokercustomerdto.ActivationCode}', '{brokercustomerdto.EnglishCompanyName}', '{brokercustomerdto.PersianCompanyName}', " +
-                $"'{brokercustomerdto.ServerURL}', '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', {brokercustomerdto.AppType} ";
-
-
-            DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
-
-            return jsonClass.JsonResultWithout_Str(dataTable);
-
-        }
 
 
 
