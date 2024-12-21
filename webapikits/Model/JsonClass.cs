@@ -272,13 +272,26 @@ namespace webapikits.Model
             }
             else
             {
-                response.StatusCode = "1000";
-                response.Errormessage = "No Data Found";
 
-                // Construct the custom JSON string for the error case
-                string json = "{\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}}";
+                if (textValue == "Done" && keyResponse == "Text")
+                {
+                    string json = "{\"Text\":";
+                    json += "\"Done\"";
+                    json += "}";
 
-                return json;
+                    return json;
+
+                }
+                else {
+                    response.StatusCode = "1000";
+                    response.Errormessage = "No Data Found";
+
+                    // Construct the custom JSON string for the error case
+                    string json = "{\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}}";
+
+                    return json;
+                }
+
             }
         }
 

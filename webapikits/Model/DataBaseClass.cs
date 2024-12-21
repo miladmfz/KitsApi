@@ -117,6 +117,24 @@ namespace webapikits.Model
             }
         }
 
+        public DataTable Search_ExecQuery(HttpContext httpContext, String query)
+        {
+            if (httpContext.Request.Path != "/api/Web/GetWebLog")
+            {
+                LogQuery(httpContext, query);
+            }
+            string connectionString = _configuration.GetConnectionString("Search_Connection");
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                con.Open();
+                SqlDataAdapter ad = new SqlDataAdapter(query, con);
+                DataTable dataTable = new DataTable();
+                ad.Fill(dataTable);
+                con.Close();
+                return dataTable;
+            }
+        }
+
         public DataTable Kowsar_ExecQuery1(HttpContext httpContext, string query, SqlParameter[] parameters = null)
         {
             if (httpContext.Request.Path != "/api/Web/GetWebLog")

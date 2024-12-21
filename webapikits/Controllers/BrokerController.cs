@@ -154,24 +154,21 @@ namespace webapikits.Controllers
 
 
 
-    [HttpPost]
-    [Route("BrokerOrder")]
-    public string BrokerOrder([FromBody] BrokerOrderClass brokerOrderrequest)
-    {
+        [HttpPost]
+        [Route("BrokerOrder")]
+        public string BrokerOrder([FromBody] BrokerOrderClass brokerOrderrequest)
+        {
 
             List<HeaderDetail> headerDetails = brokerOrderrequest.HeaderDetails;
             List<RowDetail> rowDetails = brokerOrderrequest.RowDetails;
             
 
-            string Explain = _configuration.GetConnectionString("BrokerOrder_Explain");
-            string Stk = _configuration.GetConnectionString("BrokerOrder_Stack");
-            string HasMustAmount = _configuration.GetConnectionString("BrokerOrder_HasMustAmount");
+            string Explain = "BazaryabApp";
 
             var NotAmount = new List<Dictionary<string, object>>();
 
             string MobFDate = "";
             string factordate = "";
-            string ClassName = "";
 
             int UserId = -1000;
             int factorcode = 0;
@@ -180,26 +177,56 @@ namespace webapikits.Controllers
             int MobFCode = 0;
             int ExistFlag = 0;
             int CountRows = 0;
-            int z = 0;
+           
+            string appBrokerFactorType = "";
+            string appBrokerIsShopFactor = "";
+            string appBrokerDefaultStackCode = "";
+            string appBrokerMustHasAmount = "";
 
+            MobFDate = headerDetails[0].PreFactorDate;
+            Explain = headerDetails[0].PreFactorExplain;
 
             MobFCode = Convert.ToInt32(headerDetails[0].PreFactorCode);
-            MobFDate=headerDetails[0].PreFactorDate;
             Customer = Convert.ToInt32(headerDetails[0].CustomerRef);
             Broker = Convert.ToInt32(headerDetails[0].BrokerRef);
-            Explain = headerDetails[0].PreFactorExplain;
             CountRows = Convert.ToInt32(headerDetails[0].RwCount);
 
 
-                string sq = $"IF Exists(Select 1 From DbSetup Where KeyValue = 'App_FactorTypeInKowsar' And DataValue='1')" +
-                            " Select ClassName = 'Factor' Else Select ClassName = 'PreFactor' ";
-                var ClassResult = db.Broker_ExecQuery(HttpContext, sq);
-                if (ClassResult != null)
-                {
-                    ClassName = ClassResult.Rows[0]["ClassName"].ToString();
-                }
+            string query_dbsetup = "SELECT KeyValue, DataValue FROM DbSetup WHERE KeyValue IN ('AppBroker_FactorType', 'AppBroker_IsShopFactor', 'AppBroker_DefaultStackCode', 'AppBroker_MustHasAmount')";
 
-                 sq = $"Exec [dbo].[spPreFactor_Insert] '{ClassName}', {Stk}, {UserId}, 0, '', {Customer}, '{Explain}', {Broker}, {MobFCode}, '{MobFDate}'";
+            // اجرای کوئری و دریافت نتیجه به صورت DataTable
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query_dbsetup);
+
+            // بررسی نتیجه
+            if (dataTable != null && dataTable.Rows.Count > 0)
+            {
+                foreach (DataRow row in dataTable.Rows)
+                {
+                    string keyValue = row["KeyValue"].ToString();
+                    string dataValue = row["DataValue"].ToString();
+
+                    // مقداردهی بر اساس KeyValue
+                    switch (keyValue)
+                    {
+                        case "AppBroker_FactorType":
+                            appBrokerFactorType = dataValue;
+                            break;
+                        case "AppBroker_IsShopFactor":
+                            appBrokerIsShopFactor = dataValue;
+                            break;
+                        case "AppBroker_DefaultStackCode":
+                            appBrokerDefaultStackCode = dataValue;
+                            break;
+                        case "AppBroker_MustHasAmount":
+                            appBrokerMustHasAmount = dataValue;
+                            break;
+                    }
+                }
+            }
+
+
+
+            string sq = $"Exec [dbo].[spPreFactor_Insert] '{appBrokerFactorType}', {appBrokerDefaultStackCode}, {UserId}, 0, '', {Customer}, '{Explain}', {Broker}, {MobFCode}, '{MobFDate}'";
 
             var result = db.Broker_ExecQuery(HttpContext, sq);
             if (result != null)
@@ -219,82 +246,79 @@ namespace webapikits.Controllers
 
 
 
-         if (ExistFlag == 0)
-        {
+            if (ExistFlag == 0){
 
 
-                // Create a DataTable with two columns: GoodCode and Flag
-                DataTable notAmountTable = new DataTable();
-                notAmountTable.Columns.Add("GoodCode", typeof(int));
-                notAmountTable.Columns.Add("Flag", typeof(int));
+            
+                   DataTable notAmountTable = new DataTable();
+                   notAmountTable.Columns.Add("GoodCode", typeof(int));
+                   notAmountTable.Columns.Add("Flag", typeof(int));
 
-                foreach (RowDetail rowDetail_single in rowDetails)
-                {
-                    z++;
-                    int Code = Convert.ToInt32(rowDetail_single.GoodRef);
-                    int Amount = Convert.ToInt32(rowDetail_single.FactorAmount);
-                    int Price = Convert.ToInt32(rowDetail_single.Price);
+                   foreach (RowDetail rowDetail_single in rowDetails)
+                   {
+              
+                       int Code = Convert.ToInt32(rowDetail_single.GoodRef);
+                       int Amount = Convert.ToInt32(rowDetail_single.FactorAmount);
+                       int Price = Convert.ToInt32(rowDetail_single.Price);
 
-                    string sqrow = $"Exec [dbo].[spPreFactor_InsertRow] '{ClassName}', {factorcode}, {Code}, {Amount}, 0, {UserId}, '', {HasMustAmount}, 0, {Price}";
-                    var res = db.Broker_ExecQuery(HttpContext, sqrow);
-                    if (res != null)
-                    {
-                        int rowCode = Convert.ToInt32(res.Rows[0]["RowCode"]);
-                        // Add rows to the DataTable based on the result
-                        if (rowCode == -1 || rowCode == -2)
-                        {
-                            notAmountTable.Rows.Add(Code, rowCode);
-                        }
-                    }
-                }
+                       string sqrow = $"Exec [dbo].[spPreFactor_InsertRow] '{appBrokerFactorType}', {factorcode}, {Code}, {Amount}, 0, {UserId}, '', {appBrokerMustHasAmount}, 0, {Price}";
+                       var res = db.Broker_ExecQuery(HttpContext, sqrow);
+                       if (res != null)
+                       {
+                           int rowCode = Convert.ToInt32(res.Rows[0]["RowCode"]);
+                           // Add rows to the DataTable based on the result
+                           if (rowCode == -1 || rowCode == -2)
+                           {
+                               notAmountTable.Rows.Add(Code, rowCode);
+                           }
+                       }
+                   }
 
 
 
             
 
-            if (notAmountTable.Rows.Count < 1)
-            {
-                string sq1 = $"Select Sum(FacAmount) rcount From {ClassName}Rows Where {ClassName}Ref = {factorcode}";
+                   if (notAmountTable.Rows.Count < 1){
+                           string sq1 = $"Select Sum(FacAmount) rcount From {appBrokerFactorType}Rows Where {appBrokerFactorType}Ref = {factorcode}";
 
 
-                var res1 = db.Broker_ExecQuery(HttpContext, sq1);
-                int rcount = Convert.ToInt32(res1.Rows[0]["rcount"]);
+                           var res1 = db.Broker_ExecQuery(HttpContext, sq1);
+                           int rcount = Convert.ToInt32(res1.Rows[0]["rcount"]);
 
-                if (CountRows == rcount)
-                {
-                        string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
-                        return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(HttpContext, query), "Text", "");
+                           if (CountRows == rcount)    {
 
-                    }
-                    else
-                {
-                    string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
-                    string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
+                                   string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
+                                   return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(HttpContext, query), "Text", "");
 
 
-                    db.Broker_ExecQuery(HttpContext, temp1);
-                    db.Broker_ExecQuery(HttpContext, temp2);
-                }
+                           }else{
+
+                               string temp1 = $"Delete {appBrokerFactorType}Rows Where {appBrokerFactorType}Ref = {factorcode}";
+                               string temp2 = $"Delete {appBrokerFactorType} Where {appBrokerFactorType}Code = {factorcode}";
+
+
+                               db.Broker_ExecQuery(HttpContext, temp1);
+                               db.Broker_ExecQuery(HttpContext, temp2);
+                           }
+                   }else{
+                           string temp1 = $"Delete {appBrokerFactorType}Rows Where {appBrokerFactorType}Ref = {factorcode}";
+                           string temp2 = $"Delete {appBrokerFactorType} Where {appBrokerFactorType}Code = {factorcode}";
+                           db.Broker_ExecQuery(HttpContext, temp1);
+                           db.Broker_ExecQuery(HttpContext, temp2);
+                   }
+
+                   return jsonClass.JsonResult_Str1(notAmountTable, "Text", "");
+
+
+            }else{
+                   string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
+                   return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(HttpContext, query), "Text", "");
+
+
+
+
+
             }
-            else
-            {
-                string temp1 = $"Delete {ClassName}Rows Where {ClassName}Ref = {factorcode}";
-                string temp2 = $"Delete {ClassName} Where {ClassName}Code = {factorcode}";
-                db.Broker_ExecQuery(HttpContext, temp1);
-                db.Broker_ExecQuery(HttpContext, temp2);
-            }
-                return jsonClass.JsonResult_Str1(notAmountTable, "Text", "");
-
-
-        }
-        else
-        {
-                string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
-                return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(HttpContext, query), "Text", "");
-
-
-
-        }
 
 
         }
