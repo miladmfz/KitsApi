@@ -100,11 +100,18 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("Activation")]
-        public string Activation(string ActivationCode, string Flag)
+        public string Activation(string ActivationCode, string? Flag)
         {
             
 
-            string query = $"spApp_GetActivation '{ActivationCode}' , '{Flag}'";
+            string query = $"spApp_GetActivation '{ActivationCode}' ";
+
+
+
+            if (!string.IsNullOrEmpty(Flag))
+            {
+                query += $" , '{Flag}' ";
+            }
 
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Activations", "");

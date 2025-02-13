@@ -66,6 +66,28 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetOcrPanel")]
+        public string GetOcrPanel(string StartDate, string EndDate, string State)
+        {
+
+            string query = $" spWeb_GetOcrPanel '{StartDate}' ,'{EndDate}' ,{State} ";
+
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
+
+
+        [HttpGet]
+        [Route("GetTodeyFromServer")]
+        public string GetTodeyFromServer(string day)
+        {
+
+            string query = $"select dbo.fnDate_AddDays(dbo.fnDate_Today(),{day}) TodeyFromServer  ";
+
+            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+        }
 
 
 
