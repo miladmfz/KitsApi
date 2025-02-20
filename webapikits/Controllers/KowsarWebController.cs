@@ -371,13 +371,13 @@ namespace webapikits.Controllers
 
 
 
-            [HttpPost]
-            [Route("IsbnToBarcode")]
-            public string IsbnToBarcode([FromBody] IsbnToBarcodeDto isbnToBarcodeDto)
-            {
+        [HttpPost]
+        [Route("IsbnToBarcode")]
+        public string IsbnToBarcode([FromBody] IsbnToBarcodeDto isbnToBarcodeDto)
+        {
 
 
-                string query = $" spGood_IsbnToBarcode  '{isbnToBarcodeDto.Isbn}' , {isbnToBarcodeDto.GoodCode} ";
+            string query = $" spGood_IsbnToBarcode  '{isbnToBarcodeDto.Isbn}' , {isbnToBarcodeDto.GoodCode} ";
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");
@@ -385,6 +385,35 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetGridSchema")]
+        public string GetGridSchema(string Where)
+        {
+
+
+            string query = $"Select * From [dbo].[fnGetGridSchema]('{Where}')  where Visible = 1";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "GridSchemas", "");
+
+        }
+
+        [HttpPost]
+        [Route("GetGoods")]
+        public string GetGoods([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+            string query = $" Exec spWeb_GetGood";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
+
+        
 
 
     }

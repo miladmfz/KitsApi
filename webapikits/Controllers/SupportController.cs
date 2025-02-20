@@ -998,15 +998,10 @@ namespace webapikits.Controllers
         public string Support_ExplainFactor([FromBody] FactorwebDto factorwebDto)
         {
 
-
             string query = $"Update PropertyValue Set Nvarchar14 = '{SanitizeInput(factorwebDto.Barbary)}' where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
-
-
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
-
-
 
         }
 
