@@ -12,6 +12,9 @@
 
 
 
+        public string AppOCRFactorCode { get; set; } = "0";
+        public string AppPackDeliverDate { get; set; } = "";
+        public string AppPackCount { get; set; } = "0";
         public string State { get; set; } = "";
         public string SearchTarget { get; set; } = "";
         public string Stack { get; set; } = "";

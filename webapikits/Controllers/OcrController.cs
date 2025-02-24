@@ -43,9 +43,6 @@ namespace webapikits.Controllers
         public string OcrPrintControler([FromBody] OcrModel ocrModel)
         {
 
-
-
-
             string query = " select * from AppPrinter where Apptype = 2 ";
             string where = ocrModel.StackCategory;
             string sender = ocrModel.Sender;

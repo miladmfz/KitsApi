@@ -718,11 +718,6 @@ namespace webapikits.Controllers
             dbname = dataTable4.Rows[0]["dbname"] + "";
 
 
-
-
-
-
-
             string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
             DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
             string base64File = dataTable1.Rows[0]["SourceFile"] + "";
@@ -1024,13 +1019,39 @@ namespace webapikits.Controllers
 
         }
 
+        [HttpGet]
+        [Route("GetGridSchema")]
+        public string GetGridSchema(string Where)
+        {
+
+
+            string query = $"Select * From [dbo].[fnGetGridSchema]('{Where}')  where Visible = 1";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "GridSchemas", "");
+
+        }
+
+        [HttpPost]
+        [Route("GetFactors")]
+        public string GetFactors([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+            string query = $" Exec spWeb_GetFactor";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
 
 
 
 
 
 
-       
+
+
+
         private string SanitizeInput(string input)
         {
             if (input == null)

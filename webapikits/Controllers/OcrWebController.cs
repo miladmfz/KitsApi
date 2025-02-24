@@ -315,6 +315,121 @@ namespace webapikits.Controllers
             DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
         }
+        [HttpPost]
+        [Route("GetAttachFileList")]
+        public string GetAttachFileList([FromBody] AttachFile attachFile)
+        {
+
+
+            string dbname = "";
+            string query1 = "";
+            if (attachFile.ClassName == "AutLetter")
+            {
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {attachFile.ObjectRef}  Select @db dbname";
+
+            }
+            else if (attachFile.ClassName == "Factor")
+            {
+
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {attachFile.ObjectRef}  Select @db dbname";
+
+            }
+            else
+            {
+                query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+            }
+
+
+
+            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+            dbname = dataTable1.Rows[0]["dbname"] + "";
+
+            string query = $"select * from {dbname}..AttachedFiles where ClassName = '{attachFile.ClassName}' And ObjectRef = {attachFile.ObjectRef} ";
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
+
+
+        }
+
+
+
+        [HttpGet]
+        [Route("GetAttachFile")]
+        public IActionResult GetAttachFile(string AttachedFileCode, string ClassName, string ObjectRef)
+        {
+
+            string dbname = "";
+            string query11 = "";
+            if (ClassName == "AutLetter")
+            {
+                query11 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else if (ClassName == "Factor")
+            {
+
+                query11 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else
+            {
+                query11 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+            }
+
+
+
+            DataTable dataTable4 = db.Support_ExecQuery(HttpContext, query11);
+            dbname = dataTable4.Rows[0]["dbname"] + "";
+
+
+            string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
+            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+            string base64File = dataTable1.Rows[0]["SourceFile"] + "";
+            byte[] fileBytes = Convert.FromBase64String(base64File);
+
+
+            string FileName = dataTable1.Rows[0]["FileName"] + "";
+
+
+
+
+            string dataName_zip = $"{FileName}.zip"; // Constructing the image name
+            string data_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName_zip}";
+            string contentType = $"application/{dataTable1.Rows[0]["Type"]}";
+
+
+            System.IO.File.WriteAllBytes(data_zipPath, fileBytes);
+            return File(fileBytes, contentType, Path.GetFileName(data_zipPath));
+
+
+
+
+
+        }
+
+
+        [HttpPost]
+        [Route("EditPackDetail")]
+        public string EditPackDetail([FromBody] OcrModel ocrModel)
+        {
+
+
+            string query = $"update appocrfactor set AppPackCount = and AppPackDeliverDate'' where AppOCRFactorCode = {ocrModel.AppOc}" +
+                $"    Exec dbo.spApp_ocrSetPackDetail {ocrModel.OcrFactorCode},'{ocrModel.Reader}','{ocrModel.Controler}','{ocrModel.Packer} - {ocrModel.AppDeliverDate}','{ocrModel.PackDeliverDate}',{ocrModel.PackCount}";
+
+
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
 
 
 
