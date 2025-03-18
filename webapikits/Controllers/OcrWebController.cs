@@ -343,11 +343,11 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 = db.Ocr_ExecQuery(HttpContext, query1);
             dbname = dataTable1.Rows[0]["dbname"] + "";
 
             string query = $"select * from {dbname}..AttachedFiles where ClassName = '{attachFile.ClassName}' And ObjectRef = {attachFile.ObjectRef} ";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
 
@@ -383,12 +383,12 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable4 = db.Support_ExecQuery(HttpContext, query11);
+            DataTable dataTable4 = db.Ocr_ExecQuery(HttpContext, query11);
             dbname = dataTable4.Rows[0]["dbname"] + "";
 
 
             string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
-            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 = db.Ocr_ExecQuery(HttpContext, query1);
             string base64File = dataTable1.Rows[0]["SourceFile"] + "";
             byte[] fileBytes = Convert.FromBase64String(base64File);
 
@@ -419,18 +419,13 @@ namespace webapikits.Controllers
         {
 
 
-            string query = $"update appocrfactor set AppPackCount = and AppPackDeliverDate'' where AppOCRFactorCode = {ocrModel.AppOc}" +
-                $"    Exec dbo.spApp_ocrSetPackDetail {ocrModel.OcrFactorCode},'{ocrModel.Reader}','{ocrModel.Controler}','{ocrModel.Packer} - {ocrModel.AppDeliverDate}','{ocrModel.PackDeliverDate}',{ocrModel.PackCount}";
+            string query = $"Update AppOcrFactor Set AppPackCount ={ocrModel.AppPackCount} and AppPackDeliverDate='{ocrModel.AppPackDeliverDate}' where AppOCRFactorCode = {ocrModel.AppOCRFactorCode}";
 
 
             DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
-
-
-
 
 
     }
