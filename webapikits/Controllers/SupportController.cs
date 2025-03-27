@@ -918,8 +918,8 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("WebFactorInsert")]
-        public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
+        [Route("WebSupportFactorInsert")]
+        public string WebSupportFactorInsert([FromBody] FactorwebDto factorwebDto)
         {
 
             string UserId = _configuration.GetConnectionString("Support_UserId");
@@ -935,8 +935,8 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("WebFactorInsertRow")]
-        public string WebFactorInsertRow([FromBody] FactorRow factorRow)
+        [Route("WebSupportFactorInsertRow")]
+        public string WebSupportFactorInsertRow([FromBody] FactorRow factorRow)
         {
 
             string query = $"spWeb_Factor_InsertRow  @ClassName ='Factor', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount =1,@Price =0,@UserId =29,@MustHasAmount =0, @MergeFlag =1 ";
@@ -1043,6 +1043,42 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
         }
+
+
+
+        [HttpPost]
+        [Route("WebFactorInsert")]
+        public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
+        {
+            
+
+            string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.IsShopFactor}";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+
+        [HttpPost]
+        [Route("WebFactorInsertRow")]
+        public string WebFactorInsertRow([FromBody] FactorRow factorRow)
+        {
+
+            string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount},@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+        }
+
+
+
 
 
 

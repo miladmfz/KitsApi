@@ -32,6 +32,9 @@ namespace webapikits.Model
         public string? FactorDate { get; set; } = "";
         public string? CustomerRef { get; set; } = "";
         public string? CustomerCode { get; set; } = "";
+        public string? ClassName { get; set; } = "Factor";
+        public string? StackRef { get; set; } = "1";
+        public string? IsShopFactor { get; set; } = "0";
 
 
         public string? StartDateTarget { get; set; } = "";
