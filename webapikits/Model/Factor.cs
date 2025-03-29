@@ -34,16 +34,15 @@ namespace webapikits.Model
         public string? CustomerCode { get; set; } = "";
         public string? ClassName { get; set; } = "Factor";
         public string? StackRef { get; set; } = "1";
-        public string? IsShopFactor { get; set; } = "0";
+        public string? isShopFactor { get; set; } = "0";
 
 
         public string? StartDateTarget { get; set; } = "";
         public string? EndDateTarget { get; set; } = "";
         public string? SearchTarget { get; set; } = "";
-        public string? isShopFactor { get; set; } = "";
 
         public string? Nvarchar15 { get; set; } = "";
-        public string?   Nvarchar14 { get; set; } = "";
+        public string? Nvarchar14 { get; set; } = "";
         public string? Nvarchar9 { get; set; } = "";
         public string? int1 { get; set; } = "";
 
@@ -59,7 +58,7 @@ namespace webapikits.Model
         public string?   LockNumber { get; set; } = "";
 
 
-        public string?        Explain { get; set; } = "";
+        public string?  Explain { get; set; } = "";
 
         public string? ObjectRef { get; set; } = "";
 

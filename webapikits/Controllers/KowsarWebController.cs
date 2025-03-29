@@ -398,6 +398,7 @@ namespace webapikits.Controllers
 
         }
 
+
         [HttpPost]
         [Route("GetGoods")]
         public string GetGoods([FromBody] SearchTargetDto searchTargetDto)
@@ -411,8 +412,190 @@ namespace webapikits.Controllers
         }
 
 
+        /// <summary>
+        /// ///////////////////////////////////////////////////////////////////////////////////////////
+        /// </summary>
+        /// <param name="factorwebDto"></param>
+        /// <returns></returns>
 
-        
+
+
+
+
+
+        [HttpPost]
+        [Route("GetKowsarCustomer")]
+        public string GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+        }
+
+
+
+
+        [HttpPost]
+        [Route("GetGoodListSupport")]
+        public string GetGoodListSupport([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+
+            string query = $"spWeb_GetGoodListSupport '{SanitizeInput(searchTargetDto.SearchTarget)}'";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+
+        }
+
+
+
+
+
+        [HttpPost]
+        [Route("GetFactor")]
+        public string GetFactor([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
+
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+
+
+
+
+
+
+        [HttpPost]
+        [Route("EditFactorProperty")]
+        public string EditFactorProperty([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"spWeb_EditFactorProperty '{factorwebDto.starttime}','{factorwebDto.Endtime}','{factorwebDto.worktime}','{factorwebDto.Barbary}',{factorwebDto.ObjectRef} ";
+
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+
+
+        [HttpPost]
+        [Route("WebFactorInsert")]
+        public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
+        {
+
+
+            string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.isShopFactor}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+
+        [HttpPost]
+        [Route("WebFactorInsertRow")]
+        public string WebFactorInsertRow([FromBody] FactorRow factorRow)
+        {
+
+            string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount},@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+        }
+
+
+
+        [HttpGet]
+        [Route("DeleteWebFactorRows")]
+        public string DeleteWebFactorRows(string FactorRowCode)
+        {
+
+            string query = $" delete from  FactorRows where FactorRowCode= {FactorRowCode}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+        [HttpGet]
+        [Route("DeleteWebFactor")]
+        public string DeleteWebFactor(string FactorCode)
+        {
+
+            string query = $" delete from  Factor where FactorCode= {FactorCode}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+
+
+        [HttpGet]
+        [Route("GetTodeyFromServer")]
+        public string GetTodeyFromServer()
+        {
+
+            string query = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+        }
+
+        [HttpPost]
+        [Route("GetFactors")]
+        public string GetFactors([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+            string query = $" Exec spWeb_GetFactor";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
     }
