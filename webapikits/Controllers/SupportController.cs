@@ -744,21 +744,7 @@ namespace webapikits.Controllers
         }
 
 
-        [HttpPost]
-        [Route("GetFactor")]
-        public string GetFactor([FromBody] FactorwebDto factorwebDto)
-        {
 
-            string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
-
-
-
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
-            
-
-
-        }
 
 
         
@@ -1044,6 +1030,41 @@ namespace webapikits.Controllers
 
         }
 
+        /*
+        [HttpPost]
+        [Route("GetFactor")]
+        public string GetFactor([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
+        */
+
+        [HttpPost]
+        [Route("GetSupportFactors")]
+        public string GetSupportFactors([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"Exec spWeb_GetSupportFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
+
+
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+        }
+
 
 
         [HttpPost]
@@ -1080,12 +1101,35 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("GetCustomerFactor")]
+        public string GetCustomerFactor(string Where)
+        {
+    
+
+            string query = $"spWeb_GetCustomerFactor {Where}";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
+
+
+        [HttpGet]
+        [Route("GetSupportPanel")]
+        public string GetSupportPanel()
+        {
+
+            string query = $"spWeb_supportpanel ";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Panels", "");
+
+        }
 
 
 
-
-
-
+        
 
 
         private string SanitizeInput(string input)
