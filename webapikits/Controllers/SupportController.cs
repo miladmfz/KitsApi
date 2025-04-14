@@ -167,7 +167,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable = db.Support_ImageExecQuery( query);
+                DataTable dataTable = db.Support_ImageExecQuery(query);
 
                 return "\"Ok\"";
             }
@@ -355,7 +355,8 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("SetAlarmOff")]
-        public string SetAlarmOff([FromBody] AlarmOffDto alarmOffDto )        {
+        public string SetAlarmOff([FromBody] AlarmOffDto alarmOffDto)
+        {
 
             string query = $"spWeb_SetAlarmOff {alarmOffDto.LetterRef},{alarmOffDto.CentralRef}";
 
@@ -417,7 +418,7 @@ namespace webapikits.Controllers
         }
 
 
-       
+
 
 
 
@@ -465,7 +466,7 @@ namespace webapikits.Controllers
                 string query1 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='Image'";
 
                 DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
-                string Conversationref = dataTable1.Rows[0]["ConversationCode"]+"";
+                string Conversationref = dataTable1.Rows[0]["ConversationCode"] + "";
                 byte[] decodedImage = Convert.FromBase64String(data.image);
 
 
@@ -482,11 +483,11 @@ namespace webapikits.Controllers
                 string filePath = _configuration.GetConnectionString("web_imagePath") + $"{Conversationref}.jpg"; // Provide the path where you want to save the image
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
                 string query = $"Exec spImageImport  '{data.ClassName}',{Conversationref},'{filePath}' ;select @@IDENTITY KsrImageCode";
-                DataTable dataTable = db.Support_ImageExecQuery( query);
+                DataTable dataTable = db.Support_ImageExecQuery(query);
                 return jsonClass.JsonResultWithout_Str(dataTable);
             }
-            catch (Exception ex) 
-            { return $"{ex.Message}";  }
+            catch (Exception ex)
+            { return $"{ex.Message}"; }
         }
 
 
@@ -497,7 +498,7 @@ namespace webapikits.Controllers
         public string GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
         {
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
-            DataTable dataTable = db.Support_ImageExecQuery( query);
+            DataTable dataTable = db.Support_ImageExecQuery(query);
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
 
         }
@@ -548,7 +549,8 @@ namespace webapikits.Controllers
 
 
             }
-            else {
+            else
+            {
 
 
 
@@ -585,10 +587,12 @@ namespace webapikits.Controllers
                     dbConnection.Open();
                     string dbname = "";
                     string query1 = "";
-                    if (attachFile.ClassName == "AutLetter") {
-                         query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {attachFile.ObjectRef}  Select @db dbname";
+                    if (attachFile.ClassName == "AutLetter")
+                    {
+                        query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {attachFile.ObjectRef}  Select @db dbname";
 
-                    }else if (attachFile.ClassName == "Factor")
+                    }
+                    else if (attachFile.ClassName == "Factor")
                     {
 
                         query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {attachFile.ObjectRef}  Select @db dbname";
@@ -627,8 +631,8 @@ namespace webapikits.Controllers
 
                 }
 
-               System.IO.File.Delete(dataPath);
-               System.IO.File.Delete(data_zipPath);
+                System.IO.File.Delete(dataPath);
+                System.IO.File.Delete(data_zipPath);
 
             }
 
@@ -747,7 +751,7 @@ namespace webapikits.Controllers
 
 
 
-        
+
 
 
 
@@ -822,7 +826,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetWebFactorSupport")]
-        public string GetWebFactorSupport(string FactorCode )
+        public string GetWebFactorSupport(string FactorCode)
         {
 
             string query = $" select FactorCode, FactorDate, CustName, CustomerCode, Explain, BrokerRef, BrokerName ,starttime,Endtime,worktime,Barbary from vwFactor where FactorCode = {FactorCode}";
@@ -885,7 +889,7 @@ namespace webapikits.Controllers
         [Route("GetGoodListSupport")]
         public string GetGoodListSupport([FromBody] SearchTargetDto searchTargetDto)
         {
-            
+
 
 
             string query = $"spWeb_GetGoodListSupport '{SanitizeInput(searchTargetDto.SearchTarget)}'";
@@ -935,7 +939,7 @@ namespace webapikits.Controllers
 
 
 
-        
+
 
 
 
@@ -1071,7 +1075,7 @@ namespace webapikits.Controllers
         [Route("WebFactorInsert")]
         public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
         {
-            
+
 
             string UserId = _configuration.GetConnectionString("Support_UserId");
 
@@ -1105,7 +1109,7 @@ namespace webapikits.Controllers
         [Route("GetCustomerFactor")]
         public string GetCustomerFactor(string Where)
         {
-    
+
 
             string query = $"spWeb_GetCustomerFactor {Where}";
 
@@ -1129,7 +1133,54 @@ namespace webapikits.Controllers
 
 
 
-        
+
+
+
+
+        [HttpPost]
+        [Route("ManualAttendance")]
+        public string ManualAttendance([FromBody] ManualAttendance manualAttendance)
+            
+        {
+            // 0 ghayeb 
+            // 1 hozor
+            // 2 mashghol
+
+            string userId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Attendance_ManualInsert @CentralRef = {manualAttendance.CentralRef}, @Status = {manualAttendance.Status}";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+        }
+
+
+
+        [HttpGet]
+        [Route("AttendanceDashboard")]
+        public string AttendanceDashboard()
+        {
+            string query = "spWeb_Attendance_Dashboard";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+        }
+
+
+        [HttpGet]
+        [Route("AttendanceHistory")]
+        public string AttendanceHistory(string CentralRef)
+        {
+            string query = $"spWeb_Attendance_History @CentralRef = {CentralRef}";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+        }
+
+
+       
+
+
 
 
         private string SanitizeInput(string input)
