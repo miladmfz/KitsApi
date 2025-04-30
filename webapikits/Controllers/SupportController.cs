@@ -39,24 +39,6 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
-        [Route("GetApplicationForMenu")]
-        public string GetApplicationForMenu()
-        {
-
-            string query = $"select KeyValue,Description,DataValue,KeyId from dbsetup where KeyValue in ('AppBroker_ActivationCode','AppOcr_ActivationCode','AppOrder_ActivationCode') and DataValue <> '0'";
-
-
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "applications", "");
-
-
-        }
-
-
-
-
-
 
 
         [HttpGet]
@@ -1119,18 +1101,21 @@ namespace webapikits.Controllers
         }
 
 
-        [HttpGet]
-        [Route("GetSupportPanel")]
-        public string GetSupportPanel()
-        {
 
-            string query = $"spWeb_supportpanel ";
+        [HttpPost]
+        [Route("GetSupportData")]
+        public string GetSupportData([FromBody] SupportDto supportDto)
+
+        {
+            // 1 support panel
+            // 2 EmptyEndTimeCount
+
+
+            string query = $"   spWeb_SupportData @DateTarget = '{supportDto.DateTarget}', @BrokerCode = {supportDto.BrokerCode}, @Flag = {supportDto.Flag}";
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Panels", "");
-
+            return jsonClass.JsonResult_Str(dataTable, "SupportDatas", "");
         }
-
 
 
 
@@ -1178,7 +1163,9 @@ namespace webapikits.Controllers
         }
 
 
-       
+
+
+
 
 
 

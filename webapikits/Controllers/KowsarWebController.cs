@@ -33,6 +33,19 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetApplicationForMenu")]
+        public string GetApplicationForMenu()
+        {
+
+            string query = $"select KeyValue,Description,DataValue,KeyId from dbsetup where KeyValue in ('AppBroker_ActivationCode','AppOcr_ActivationCode','AppOrder_ActivationCode') and DataValue <> '0'";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "applications", "");
+
+
+        }
 
 
         [HttpGet]
