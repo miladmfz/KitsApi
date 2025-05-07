@@ -458,16 +458,18 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
-        [Route("Gettracker")]
-        public string Gettracker(string BrokerCode, string StartDate, string EndDate)
+        [Route("GetGpstracker")]
+        public string GetGpstracker(string BrokerCode, string StartDate, string EndDate)
         {
 
-            string query = $"Select * From(select * , rwn=row_Number() over (partition by gpsdate order by gpsdate)From GpsLocation Where Brokerref = {BrokerCode} And GpsDate between '{StartDate}' And '{EndDate}' ) ds where rwn=1 order by GpsDate ";
+            string query = $" Exec spWeb_GetGpstracker  '{StartDate}' , '{EndDate}',{BrokerCode}  ";
 
 
-            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            return jsonClass.JsonResult_Str(dataTable, "Gpstrackers", "");
+
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
 
