@@ -269,7 +269,7 @@ namespace webapikits.Controllers
             string CreatorCentral = _configuration.GetConnectionString("Support_CreatorCentral");
 
 
-            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag=2,@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
+            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag={letterInsert.InOutFlag},@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
 
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
@@ -285,7 +285,7 @@ namespace webapikits.Controllers
         public string GetLetterRowList(string LetterRef)
         {
 
-            string query = $"select  LetterRowCode,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
+            string query = $"select  LetterRowCode,AutLetterRow_PropDescription1,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
 
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
@@ -409,8 +409,22 @@ namespace webapikits.Controllers
         [Route("Update_AutletterRow")]
         public string Update_AutletterRow([FromBody] AutLetterRowInsert letterRowdto)
         {
+            string query2 = "";
+            string query3 = "";
 
-            string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterState}' , AlarmActive = 0 Where LetterRowCode = {letterRowdto.ObjectRef}";
+            if (!string.IsNullOrEmpty(letterRowdto.AutLetterRow_PropDescription1))
+            {
+                query2 = $" spPropertyValue 'TAutLetterRow' , {letterRowdto.ObjectRef} ";
+                DataTable dataTable2 = db.Support_ExecQuery(HttpContext, query2);
+
+
+                query3 = $"Update PropertyValue Set Nvarchar1 = '{letterRowdto.AutLetterRow_PropDescription1}' Where ObjectRef = {letterRowdto.ObjectRef}  And ClassName ='TAutLetterRow'";
+                DataTable dataTable3 = db.Support_ExecQuery(HttpContext, query3);
+            }
+
+           
+
+            string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterRowState}' , LetterDescription = '{letterRowdto.LetterRowDescription}' , AlarmActive = 0 Where LetterRowCode = {letterRowdto.ObjectRef}";
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
@@ -437,6 +451,59 @@ namespace webapikits.Controllers
             return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
+        
+
+
+        [HttpPost]
+        [Route("GetAutLetterListByPerson")]
+        public string GetAutLetterListByPerson([FromBody] SearchTargetLetterDto searchTargetLetterDto)
+        {
+
+
+            string Where = "";
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.SearchTarget))
+            {
+                Where = $"(LetterTitle like ''%{searchTargetLetterDto.SearchTarget}%'' or LetterDescription like ''%{searchTargetLetterDto.SearchTarget}%'' or ds.RowExecutorName like ''%{searchTargetLetterDto.SearchTarget}%'')";
+            }
+
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.CreationDate))
+            {
+                if (!string.IsNullOrEmpty(Where))
+                {
+                    Where += $" And LetterDate>=''{searchTargetLetterDto.CreationDate}''";
+                }
+                else
+                {
+                    Where = $"LetterDate>=''{searchTargetLetterDto.CreationDate}''";
+                }
+            }
+
+
+
+            string query = $"spWeb_AutLetterListByPersontest '{Where}','{searchTargetLetterDto.PersonInfoCode}'";
+
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         [HttpPost]
