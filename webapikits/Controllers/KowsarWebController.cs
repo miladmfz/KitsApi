@@ -417,7 +417,7 @@ namespace webapikits.Controllers
         public string GetGoods([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query = $" Exec spWeb_GetGood";
+            string query = $" Exec spWeb_GetGood '{searchTargetDto.SearchTarget}'";
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Goods", "");

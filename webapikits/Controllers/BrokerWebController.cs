@@ -162,7 +162,7 @@ namespace webapikits.Controllers
         }
 
 
-
+        /*
         [HttpGet]
         [Route("CreateAppBroker")]
         public string CreateAppBroker(string KowsarDb, string KowsarImage)
@@ -180,7 +180,7 @@ namespace webapikits.Controllers
         }
 
 
-
+        */
 
 
         [HttpGet]

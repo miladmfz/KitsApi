@@ -285,7 +285,7 @@ namespace webapikits.Controllers
         public string GetLetterRowList(string LetterRef)
         {
 
-            string query = $"select  LetterRowCode,AutLetterRow_PropDescription1,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
+            string query = $"select  LetterRowCode,CreatorCentralRef,AutLetterRow_PropDescription1,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
 
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
@@ -1227,6 +1227,35 @@ namespace webapikits.Controllers
 
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+        }
+
+
+        [HttpGet]
+        [Route("DeleteAutLetterRows")]
+        public string DeleteAutLetterRows(string LetterRowCode)
+        {
+
+            string query = $" Delete From  AutLetterRow where LetterRowCode= {LetterRowCode}";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
+
+        }
+
+
+
+        [HttpGet]
+        [Route("DeleteAutLetter")]
+        public string DeleteAutLetter(string LetterCode)
+        {
+
+            string query = $" Delete From  AutLetter where LetterCode= {LetterCode}";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
+
         }
 
 
