@@ -106,12 +106,55 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
-        [Route("GetPrefactorBroker")]
-        public string GetPrefactorBroker(string BrokerCode, string Days)
+
+
+        [HttpPost]
+        [Route("GetAppBrokerReport")]
+        public string GetAppBrokerReport([FromBody] BrokerWebDto brokerWebDto)
         {
 
-            string query = $"Declare @D varchar(10)= dbo.fnDate_ConvertToShamsi(dateadd(d, -{Days}, getdate())) Select CustName,sum(RowsCount) RowsCount, Sum(SumAmount) SumAmount, Sum(SumPrice) SumPrice From vwPreFactor Where BrokerRef={BrokerCode} And PreFactorDate >= @D Group By CustName order by RowsCount desc";
+            // flag report
+            //   
+            //  1- GetCDPreFactorDate
+            //  2- GetCDCustName
+            //  3- GetPrefactorBroker
+            //  4-
+
+            string query1 = $"select DataValue From DBSetup with(nolock) Where KeyValue = 'AppBroker_FactorType'";
+            DataTable dataTable1 = db.Broker_ExecQuery(HttpContext, query1);
+            string FactorType = dataTable1.Rows[0]["DataValue"] + "";
+
+
+
+            if (brokerWebDto.Flag == "1")
+            {
+
+                brokerWebDto.GroupField = FactorType+"Date";
+                brokerWebDto.Columns = FactorType+ "Date as ReportDate, '''' CustName";
+            }
+            else if (brokerWebDto.Flag == "2")
+            {
+                brokerWebDto.GroupField = "CustName";
+                brokerWebDto.Columns = "CustName, '''' ReportDate";
+            }
+            else if (brokerWebDto.Flag == "3")
+            {
+                brokerWebDto.GroupField = "";
+                brokerWebDto.Columns = "";
+            }
+            else if (brokerWebDto.Flag == "4")
+            {
+                brokerWebDto.GroupField = "";
+                brokerWebDto.Columns = "";
+            }
+            else {
+                brokerWebDto.GroupField = "";
+                brokerWebDto.Columns = "";
+            }
+
+
+                string query = $"spWeb_GetAppBrokerReport @BrokerRef={brokerWebDto.BrokerRef}, @GroupField='{brokerWebDto.GroupField}', " +
+                        $"@Columns='{brokerWebDto.Columns}', @startDate='{brokerWebDto.StartDate}', @endDate='{brokerWebDto.EndDate}', @Flag ={brokerWebDto.Flag}";
 
 
             DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
@@ -125,19 +168,6 @@ namespace webapikits.Controllers
 
 
 
-        [HttpGet]
-        [Route("GetCDCustName")]
-        public string GetCDCustName(string BrokerCode, string Days)
-        {
-
-            string query = $"spWeb_GetBrokerChartData {BrokerCode} ,  {Days} , 'CustName ' ,'CustName, '''' PreFactorDate' ";
-
-
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-
-            return jsonClass.JsonResultWithout_Str(dataTable);
-
-        }
 
 
 
@@ -146,20 +176,6 @@ namespace webapikits.Controllers
 
 
 
-
-        [HttpGet]
-        [Route("GetCDPreFactorDate")]
-        public string GetCDPreFactorDate(string BrokerCode, string Days)
-        {
-
-            string query = $"spWeb_GetBrokerChartData {BrokerCode} ,  {Days} , 'PreFactorDate ' ,'PreFactorDate, '''' CustName' ";
-
-
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-
-            return jsonClass.JsonResultWithout_Str(dataTable);
-
-        }
 
 
         /*
@@ -472,6 +488,24 @@ namespace webapikits.Controllers
             //return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
+
+
+        [HttpGet]
+        [Route("GetBrokerCustomer")]
+        public string GetBrokerCustomer(string BrokerCode, string FactorDate)
+        {
+
+            string query = $" Exec GetBrokerCustomer  '{FactorDate}',{BrokerCode}  ";
+
+
+            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResult_Str(dataTable, "BrokerCustomer", "");
+
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
 
 
 
