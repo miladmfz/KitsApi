@@ -1259,8 +1259,58 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("GetGoodBase")]
+        public string GetGoodBase(string GoodCode)
+        {
+
+            string query = $"  spWeb_GetGoodById {GoodCode},0";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
 
 
+        [HttpGet]
+        [Route("GetLastGoodData")]
+        public string GetLastGoodData()
+        {
+
+            string query = $"  declare @ss int  select  @ss=max(GoodCode) from good exec spWeb_GetGoodById @ss,0";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
+
+
+
+
+        [HttpPost]
+        [Route("GoodCrudService")]
+        public string GoodCrudService([FromBody] JsonModelDto jsonModelDto)
+        {
+
+            string query = $"Exec spGood_AddNew '{jsonModelDto.JsonData}' ";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+        }
+
+
+        [HttpGet]
+        [Route("GetSimilarGood")]
+        public string GetSimilarGood(string Where)
+        {
+
+
+            string query = $"Select top 5 GoodCode,GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType,SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
+
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+        }
 
 
 
