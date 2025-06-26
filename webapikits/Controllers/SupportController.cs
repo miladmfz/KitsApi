@@ -40,7 +40,6 @@ namespace webapikits.Controllers
 
 
 
-
         [HttpGet]
         [Route("GetTodeyFromServer")]
         public string GetTodeyFromServer()
@@ -62,9 +61,6 @@ namespace webapikits.Controllers
 
 
 
-
-
-
         [HttpPost]
         [Route("UpdatePersonInfo")]
         public string UpdatePersonInfo([FromBody] PersonInfoDto personInfoDto)
@@ -76,7 +72,6 @@ namespace webapikits.Controllers
 
             return jsonClass.JsonResult_Str(dataTable, "users", "");
         }
-
 
 
         [HttpGet]
@@ -92,6 +87,9 @@ namespace webapikits.Controllers
         }
 
 
+
+
+
         [HttpPost]
         [Route("IsUser")]
         public string IsUser([FromBody] LoginUserDto loginUserDto)
@@ -104,9 +102,6 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "users", "");
         }
 
-
-
-
         [HttpGet]
         [Route("GetObjectTypeFromDbSetup")]
         public string GetObjectTypeFromDbSetup(string ObjectType)
@@ -114,17 +109,13 @@ namespace webapikits.Controllers
 
             string query = $"select * from dbo.fnObjectType('{ObjectType}') ";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
 
         }
 
 
-
-
-
-        /// <returns></returns>
 
         [HttpPost]
         [Route("UploadImage")]
@@ -176,6 +167,9 @@ namespace webapikits.Controllers
         }
 
 
+
+
+
         [HttpPost]
         [Route("GetKowsarCentral")]
         public string GetKowsarCentral([FromBody] SearchTargetDto searchTargetDto)
@@ -187,9 +181,6 @@ namespace webapikits.Controllers
 
             return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
         }
-
-
-
 
 
 
@@ -329,12 +320,6 @@ namespace webapikits.Controllers
         }
 
 
-
-
-
-
-
-
         [HttpPost]
         [Route("SetAlarmOff")]
         public string SetAlarmOff([FromBody] AlarmOffDto alarmOffDto)
@@ -365,7 +350,6 @@ namespace webapikits.Controllers
             return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
-
 
 
         [HttpGet]
@@ -403,8 +387,6 @@ namespace webapikits.Controllers
 
 
 
-
-
         [HttpPost]
         [Route("Update_AutletterRow")]
         public string Update_AutletterRow([FromBody] AutLetterRowInsert letterRowdto)
@@ -422,7 +404,7 @@ namespace webapikits.Controllers
                 DataTable dataTable3 = db.Support_ExecQuery(HttpContext, query3);
             }
 
-           
+
 
             string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterRowState}' , LetterDescription = '{letterRowdto.LetterRowDescription}' , AlarmActive = 0 Where LetterRowCode = {letterRowdto.ObjectRef}";
 
@@ -451,7 +433,7 @@ namespace webapikits.Controllers
             return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
-        
+
 
 
         [HttpPost]
@@ -520,15 +502,6 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
-
-
-
-
-
                 string filePath = _configuration.GetConnectionString("web_imagePath") + $"{Conversationref}.jpg"; // Provide the path where you want to save the image
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
                 string query = $"Exec spImageImport  '{data.ClassName}',{Conversationref},'{filePath}' ;select @@IDENTITY KsrImageCode";
@@ -538,7 +511,6 @@ namespace webapikits.Controllers
             catch (Exception ex)
             { return $"{ex.Message}"; }
         }
-
 
 
 
@@ -564,6 +536,9 @@ namespace webapikits.Controllers
 
         }
 
+
+
+
         [HttpPost]
         [Route("KowsarAttachUrl")]
         public string KowsarAttachUrl([FromBody] SearchTargetDto searchTarget)
@@ -575,6 +550,8 @@ namespace webapikits.Controllers
             return jsonClass.JsonResultWithout_Str(dataTable);
 
         }
+
+
 
 
 
@@ -699,6 +676,7 @@ namespace webapikits.Controllers
 
 
 
+
         [HttpPost]
         [Route("GetAttachFileList")]
         public string GetAttachFileList([FromBody] AttachFile attachFile)
@@ -739,6 +717,7 @@ namespace webapikits.Controllers
         }
 
 
+        
 
         [HttpGet]
         [Route("GetAttachFile")]
@@ -799,11 +778,6 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
-
         [HttpGet]
         [Route("GetNotification")]
         public string GetNotification(string PersonInfoCode)
@@ -833,15 +807,6 @@ namespace webapikits.Controllers
 
 
         }
-
-
-
-
-
-
-
-
-
 
 
 
@@ -917,7 +882,6 @@ namespace webapikits.Controllers
         }
 
 
-
         [HttpGet]
         [Route("DeleteWebFactorSupport")]
         public string DeleteWebFactorSupport(string FactorCode)
@@ -985,15 +949,6 @@ namespace webapikits.Controllers
         }
 
 
-
-
-
-
-
-
-
-
-
         [HttpPost]
         [Route("Support_StartFactorTime")]
         public string StartFactorTime([FromBody] FactorwebDto factorwebDto)
@@ -1027,6 +982,8 @@ namespace webapikits.Controllers
         }
 
 
+
+
         [HttpPost]
         [Route("Support_ExplainFactor")]
         public string Support_ExplainFactor([FromBody] FactorwebDto factorwebDto)
@@ -1057,6 +1014,8 @@ namespace webapikits.Controllers
 
 
         }
+
+
 
         [HttpGet]
         [Route("GetGridSchema")]
@@ -1102,6 +1061,8 @@ namespace webapikits.Controllers
 
         */
 
+
+
         [HttpPost]
         [Route("GetSupportFactors")]
         public string GetSupportFactors([FromBody] FactorwebDto factorwebDto)
@@ -1136,8 +1097,6 @@ namespace webapikits.Controllers
 
         }
 
-
-
         [HttpPost]
         [Route("WebFactorInsertRow")]
         public string WebFactorInsertRow([FromBody] FactorRow factorRow)
@@ -1168,7 +1127,6 @@ namespace webapikits.Controllers
         }
 
 
-
         [HttpPost]
         [Route("GetSupportData")]
         public string GetSupportData([FromBody] SupportDto supportDto)
@@ -1187,12 +1145,10 @@ namespace webapikits.Controllers
 
 
 
-
-
         [HttpPost]
         [Route("ManualAttendance")]
         public string ManualAttendance([FromBody] ManualAttendance manualAttendance)
-            
+
         {
             // 0 ghayeb 
             // 1 hozor
@@ -1205,7 +1161,6 @@ namespace webapikits.Controllers
             DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
         }
-
 
 
         [HttpGet]
@@ -1242,7 +1197,6 @@ namespace webapikits.Controllers
 
 
         }
-
 
 
         [HttpGet]
@@ -1287,33 +1241,6 @@ namespace webapikits.Controllers
 
 
 
-        [HttpPost]
-        [Route("GoodCrudService")]
-        public string GoodCrudService([FromBody] JsonModelDto jsonModelDto)
-        {
-
-            string query = $"Exec spGood_AddNew '{jsonModelDto.JsonData}' ";
-
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
-        }
-
-
-        [HttpGet]
-        [Route("GetSimilarGood")]
-        public string GetSimilarGood(string Where)
-        {
-
-
-            string query = $"Select top 5 GoodCode,GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType,SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
-
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
-
-        }
-
-
-
 
 
         private string SanitizeInput(string input)
@@ -1342,14 +1269,6 @@ namespace webapikits.Controllers
 
             return input;
         }
-
-
-
-
-
-
-
-
 
 
 

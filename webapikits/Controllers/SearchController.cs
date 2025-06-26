@@ -9,85 +9,114 @@ namespace webapikits.Controllers
     public class SearchController : Controller
     {
 
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
-        JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+        private readonly IDbService _dbService;
+        private readonly IJsonFormatter _jsonFormatter;
+        private readonly ILogger<SearchController> _logger;
 
-
-        public SearchController(IConfiguration configuration)
+        public SearchController(IDbService dbService, IJsonFormatter jsonFormatter, ILogger<SearchController> logger)
         {
-            _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
+            _dbService = dbService;
+            _jsonFormatter = jsonFormatter;
+            _logger = logger;
         }
 
         [HttpPost]
         [Route("GetGoodList")]
-        public string GetGoodList([FromBody] SearchTargetDto searchTargetDto)
+        public async Task<IActionResult> GetGoodList([FromBody] SearchTargetDto searchTargetDto)
         {
+            if (string.IsNullOrWhiteSpace(searchTargetDto.SearchTarget))
+                return BadRequest("SearchTarget cannot be empty.");
 
-            //string query = "Exec spApp_GetGoods2 @RowCount = $RowCount,@Where = N'$Where',@AppBasketInfoRef=$AppBasketInfoRef, @GroupCode = $GroupCode ,@AppType=3 , @OrderBy = ' order by PrivateCodeForSort ' ";
-            string query = $"Exec spApp_GetGoods2 @RowCount = 100, @SearchTarget = N'{searchTargetDto.SearchTarget}', @AppType = 4";
+            string query = "Exec spApp_GetGoods2 @RowCount, @SearchTarget, @AppType";
+            var parameters = new Dictionary<string, object>
+            {
+                {"@RowCount", 100},
+                {"@SearchTarget", searchTargetDto.SearchTarget},
+                {"@AppType", 4}
+            };
 
-            DataTable dataTable = db.Search_ExecQuery(HttpContext, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
-
+            try
+            {
+                DataTable dataTable = await _dbService.ExecSearchQueryAsync(HttpContext, query, parameters);
+                var json = _jsonFormatter.JsonResult_Str(dataTable, "Goods");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                LogException(ex);
+                return StatusCode(500, "Internal server error.");
+            }
         }
+
+
 
 
         [HttpGet]
         [Route("BrokerStack")]
-        public string BrokerStack(string BrokerRef)
+        public async Task<IActionResult> BrokerStack(string BrokerRef)
         {
             if (string.IsNullOrEmpty(BrokerRef))
-            {
                 BrokerRef = "0";
+
+            string query = "exec spApp_GetBrokerStack @BrokerRef";
+            var parameters = new Dictionary<string, object>
+            {
+                {"@BrokerRef", BrokerRef}
+            };
+
+            try
+            {
+                DataTable dataTable = await _dbService.ExecSearchQueryAsync(HttpContext, query, parameters);
+                var json = _jsonFormatter.JsonResult_Str(dataTable, "Text", "BrokerStack");
+                return Content(json, "application/json");
             }
-
-            string query = $"exec spApp_GetBrokerStack {BrokerRef}";
-            DataTable dataTable = db.Search_ExecQuery(HttpContext, query);
-
-            return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
-
+            catch (Exception ex)
+            {
+                LogException(ex);
+                return StatusCode(500, "Internal server error.");
+            }
         }
+
+
+
 
 
         [HttpGet]
         [Route("GetColumnList")]
-        public string GetColumnList(
-            string Type,
-            string AppType,
-            string IncludeZero
-            )
+        public async Task<IActionResult> GetColumnList(string Type, string AppType, string IncludeZero)
         {
+            Type = string.IsNullOrEmpty(Type) ? "0" : Type;
+            AppType = string.IsNullOrEmpty(AppType) ? "0" : AppType;
+            IncludeZero = string.IsNullOrEmpty(IncludeZero) ? "0" : IncludeZero;
 
-            if (string.IsNullOrEmpty(Type))
+            string query = "Exec [spApp_GetColumn] @Param0, @Param1, @Type, @AppType, @IncludeZero";
+            var parameters = new Dictionary<string, object>
             {
-                Type = "0";
-            }
-            if (string.IsNullOrEmpty(AppType))
+                {"@Param0", 0},
+                {"@Param1", ""},
+                {"@Type", Type},
+                {"@AppType", AppType},
+                {"@IncludeZero", IncludeZero}
+            };
+
+            try
             {
-                AppType = "0";
+                DataTable dataTable = await _dbService.ExecSearchQueryAsync(HttpContext, query, parameters);
+                var json = _jsonFormatter.JsonResult_Str(dataTable, "Columns");
+                return Content(json, "application/json");
             }
-            if (string.IsNullOrEmpty(IncludeZero))
+            catch (Exception ex)
             {
-                IncludeZero = "0";
+                LogException(ex);
+
+                return StatusCode(500, "Internal server error.");
             }
-
-            string query = $"Exec [spApp_GetColumn]  0  ,'', {Type},{AppType}, {IncludeZero}";
-
-
-            DataTable dataTable = db.Search_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Columns", "");
-
-
         }
 
+        private void LogException(Exception ex, [System.Runtime.CompilerServices.CallerMemberName] string functionName = "")
+        {
+            _logger.LogError(ex, "Error occurred in {Function}", functionName);
+        }
 
     }
 }

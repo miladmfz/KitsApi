@@ -1,68 +1,96 @@
 ﻿
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
+using Serilog;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
 
-        var builder = WebApplication.CreateBuilder(args);
+        Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Debug() // سطح لاگ
+                    .WriteTo.Console()    // نمایش در کنسول
+                    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day) // لاگ به فایل (هر روز یک فایل جدید)
+                    .CreateLogger();
 
-        builder.Host.UseWindowsService();
-        builder.Services.AddWindowsService();
-
-        // Add services to the container.
-        builder.Services.AddControllers();
-        builder.Services.AddEndpointsApiExplorer();
-        builder.Services.AddSwaggerGen();
-
-        builder.Services.AddHttpContextAccessor();
-
-
-        builder.Services.AddCors(options =>
+        try
         {
-            options.AddDefaultPolicy(builder =>
+            Log.Information("Starting web host");
+
+
+
+
+            var builder = WebApplication.CreateBuilder(args);
+            builder.Host.UseSerilog();
+
+            builder.Host.UseWindowsService();
+            builder.Services.AddWindowsService();
+
+            // Add services to the container.
+            builder.Services.AddControllers();
+            builder.Services.AddEndpointsApiExplorer();
+            builder.Services.AddSwaggerGen();
+
+            builder.Services.AddHttpContextAccessor();
+            builder.Services.AddScoped<IDbService, DbService>();
+            builder.Services.AddScoped<IJsonFormatter, JsonFormatter>();
+
+
+            builder.Services.AddCors(options =>
             {
-                builder.AllowAnyOrigin()
-                       .AllowAnyHeader()
-                       .AllowAnyMethod()
-                       .WithExposedHeaders("PersonInfoRef");// Allow this header to be exposed to the frontend
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod()
+                           .WithExposedHeaders("PersonInfoRef");// Allow this header to be exposed to the frontend
 
 
+                });
             });
-        });
+
+            builder.Logging.ClearProviders();
+            builder.Logging.AddConsole();
 
 
-        var app = builder.Build();
+            var app = builder.Build();
 
-        // Configure the HTTP request pipeline.
-        if (app.Environment.IsDevelopment())
-        {
-            app.UseSwagger();
-            app.UseSwaggerUI();
+            // Configure the HTTP request pipeline.
+            if (app.Environment.IsDevelopment())
+            {
+                app.UseSwagger();
+                app.UseSwaggerUI();
+            }
+
+
+
+
+            app.UseRouting();
+            app.UseCors();
+            app.UseAuthorization();
+
+
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
+
+            app.Run();
+
         }
-
-
-
-
-        app.UseRouting();
-        app.UseCors();
-        app.UseAuthorization();
-
-
-
-        app.UseEndpoints(endpoints =>
+        catch (Exception ex)
         {
-            endpoints.MapControllers();
-        });
-
-        app.Run();
-
-        
+            Log.Fatal(ex, "Host terminated unexpectedly");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 }
 
