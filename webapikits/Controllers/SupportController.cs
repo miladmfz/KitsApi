@@ -1,13 +1,15 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Data;
-using webapikits.Model;
-using System.IO.Compression;
-using System.Data.SqlClient;
-using static System.Data.Entity.Infrastructure.Design.Executor;
-using System.Collections.Generic;
-using System.Data.Entity.Core.Objects;
-using System.Net.Sockets;
 using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Data.Entity.Core.Objects;
+using System.Data.SqlClient;
+using System.IO.Compression;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using webapikits.Model;
+using static System.Data.Entity.Infrastructure.Design.Executor;
 
 namespace webapikits.Controllers
 {
@@ -17,32 +19,76 @@ namespace webapikits.Controllers
     public class SupportController : ControllerBase
     {
 
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
-        private readonly IHttpContextAccessor _httpContextAccessor;
-        private string _requestCode;
 
-        public SupportController(IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+
+        //public SupportController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+
+        //}
+
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
+        public SupportController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration)
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-            _httpContextAccessor = httpContextAccessor;
-
-
         }
 
 
 
 
 
+        [HttpPost]
+        [Route("SendSmsAutLetter")]
+        public async Task<string> SendSmsAutLetter([FromBody] PersonInfoDto personInfoDto)
+        {
+
+            string sms_api_key = _configuration.GetConnectionString("sms_api_key");
+
+            HttpClient httpClient = new HttpClient();
+            //httpClient.DefaultRequestHeaders.Add("x-api-key", "me8CfaoTR0rLZEpRWQqdvtCnzcsRwpPtVz9mmwYdbWv5kBEjtSJKZG3wMYCvEndd");
+            httpClient.DefaultRequestHeaders.Add("x-api-key", sms_api_key);
+
+            var payload = @"{" + "\n" +
+            @"  ""mobile"": """ + personInfoDto.NumberPhone + @"""," + "\n" +
+            @"  ""templateId"": 959191," + "\n" +
+            @"  ""parameters"": [" + "\n" +
+            @"    {" + "\n" +
+            @"      ""name"": ""CONTACTS""," + "\n" +
+            @"      ""value"": """ + personInfoDto.CONTACTS + @"""" + "\n" +
+            @"    }" + "\n" +
+            @"  ]" + "\n" +
+            @"}";
+            HttpContent content = new StringContent(payload, Encoding.UTF8, "application/json");
+            var response = await httpClient.PostAsync("https://api.sms.ir/v1/send/verify", content);
+            var result = await response.Content.ReadAsStringAsync();
+
+
+
+            return result; // You may want to return an error message or handle this differently.
+        }
+
+
+
         [HttpGet]
         [Route("GetTodeyFromServer")]
-        public string GetTodeyFromServer()
+        public async Task<IActionResult> GetTodeyFromServer()
         {
 
 
@@ -50,9 +96,20 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdatePersonInfo));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
 
 
         }
@@ -63,27 +120,46 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UpdatePersonInfo")]
-        public string UpdatePersonInfo([FromBody] PersonInfoDto personInfoDto)
+        public async Task<IActionResult>     UpdatePersonInfo([FromBody] PersonInfoDto personInfoDto)
         {
 
 
             string query = $"Exec [dbo].[spWeb_UpdatePersonInfo] {personInfoDto.PersonInfoCode} ,'{personInfoDto.PhFirstName}','{personInfoDto.PhLastName}','{personInfoDto.PhCompanyName}','{personInfoDto.PhAddress1}','{personInfoDto.PhTel1}','{personInfoDto.PhMobile1}','{personInfoDto.PhEmail}'";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "users", "");
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "users", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdatePersonInfo));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpGet]
         [Route("GetKowsarPersonInfo")]
-        public string GetKowsarPersonInfo(String PersonInfoCode)
+        public async Task<IActionResult> GetKowsarPersonInfo(String PersonInfoCode)
         {
 
 
             string query = $"Exec [dbo].[spWeb_GetKowsarPersonInfo] {PersonInfoCode}";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "users", "");
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "users", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetKowsarPersonInfo));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
@@ -92,26 +168,48 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("IsUser")]
-        public string IsUser([FromBody] LoginUserDto loginUserDto)
+        public async Task<IActionResult>  IsUser([FromBody] LoginUserDto loginUserDto)
         {
 
 
             string query = $"Exec [dbo].[spWeb_IsXUser] '{loginUserDto.UName}','{loginUserDto.UPass}'";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "users", "");
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "users", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(IsUser));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
         }
 
         [HttpGet]
         [Route("GetObjectTypeFromDbSetup")]
-        public string GetObjectTypeFromDbSetup(string ObjectType)
+        public async Task<IActionResult>  GetObjectTypeFromDbSetup(string ObjectType)
         {
 
             string query = $"select * from dbo.fnObjectType('{ObjectType}') ";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetObjectTypeFromDbSetup));
+                return StatusCode(500, "Internal server error.");
+            }
 
-            return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
+
+
 
         }
 
@@ -119,7 +217,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UploadImage")]
-        public string UploadImage([FromBody] ksrImageModeldto data)
+        public async Task<string>  UploadImage([FromBody] ksrImageModeldto data)
         {
 
 
@@ -140,7 +238,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable = db.Support_ImageExecQuery(query);
+                DataTable dataTable =await  db.Support_ImageExecQuery(query);
 
                 return "\"Ok\"";
             }
@@ -156,14 +254,25 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetCentralById")]
-        public string GetCentralById(string CentralCode)
+        public async Task<IActionResult> GetCentralById(string CentralCode)
         {
 
 
             string query = $"select CentralCode,Title,Name,FName,Manager,Delegacy,CentralName from vwcentral where CentralCode={CentralCode}";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetCentralById));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
         }
 
 
@@ -172,30 +281,73 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetKowsarCentral")]
-        public string GetKowsarCentral([FromBody] SearchTargetDto searchTargetDto)
+        public async Task<IActionResult> GetKowsarCentral([FromBody] SearchTargetDto searchTargetDto)
         {
 
 
             string query = $"Exec [dbo].[spWeb_GetKowsarCentral] '{searchTargetDto.SearchTarget}'";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetKowsarCentral));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
 
-        [HttpPost]
-        [Route("GetKowsarCustomer")]
-        public string GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
+
+
+
+        [HttpPost("GetKowsarCustomer")]
+        public async Task<IActionResult>  GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
         {
 
+            string query =  $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
 
-            string query = $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Customers", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetKowsarCustomer));
+                return StatusCode(500, "Internal server error.");
+            }
         }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -203,7 +355,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetLetterList")]
-        public string GetLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
+        public async Task<IActionResult> GetLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
         {
 
 
@@ -242,9 +394,22 @@ namespace webapikits.Controllers
             string query = $"Exec spWeb_AutLetterList '{Where}',{searchTargetLetterDto.OwnCentralRef}";
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetLetterList));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
 
 
         }
@@ -255,7 +420,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("LetterInsert")]
-        public string LetterInsert([FromBody] LetterInsert letterInsert)
+        public async Task<IActionResult> LetterInsert([FromBody] LetterInsert letterInsert)
         {
             string CreatorCentral = _configuration.GetConnectionString("Support_CreatorCentral");
 
@@ -263,9 +428,20 @@ namespace webapikits.Controllers
             string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag={letterInsert.InOutFlag},@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(LetterInsert));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -273,15 +449,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetLetterRowList")]
-        public string GetLetterRowList(string LetterRef)
+        public async Task<IActionResult> GetLetterRowList(string LetterRef)
         {
 
             string query = $"select  LetterRowCode,CreatorCentralRef,AutLetterRow_PropDescription1,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetLetterRowList));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -290,15 +477,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetCentralUser")]
-        public string GetCentralUser()
+        public async Task<IActionResult> GetCentralUser()
         {
 
             string query = $"select CentralCode,CentralName from vwCentralUser ";
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetCentralUser));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
         }
 
@@ -306,30 +504,56 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("AutLetterRowInsert")]
-        public string AutLetterRowInsert([FromBody] AutLetterRowInsert autLetterRowInsert)
+        public async Task<IActionResult> AutLetterRowInsert([FromBody] AutLetterRowInsert autLetterRowInsert)
         {
 
             string query = $"spAutLetterRow_Insert @LetterRef = {autLetterRowInsert.LetterRef}, @LetterDate = '{autLetterRowInsert.LetterDate}'" +
                 $", @Description = '{autLetterRowInsert.Description}', @State = '{autLetterRowInsert.LetterState}', @Priority = '{autLetterRowInsert.LetterPriority}'" +
                 $", @CreatorCentral = {autLetterRowInsert.CreatorCentral}, @ExecuterCentral = {autLetterRowInsert.ExecuterCentral}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(AutLetterRowInsert));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
+
 
         }
 
 
         [HttpPost]
         [Route("SetAlarmOff")]
-        public string SetAlarmOff([FromBody] AlarmOffDto alarmOffDto)
+        public async Task<IActionResult> SetAlarmOff([FromBody] AlarmOffDto alarmOffDto)
         {
 
             string query = $"spWeb_SetAlarmOff {alarmOffDto.LetterRef},{alarmOffDto.CentralRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(SetAlarmOff));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -338,30 +562,54 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAutConversation")]
-        public string GetAutConversation(
+        public async Task<IActionResult> GetAutConversation(
            string LetterRef
             )
         {
 
             string query = $"Exec spWeb_GetAutConversation  {LetterRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutConversation));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
         [HttpGet]
         [Route("GetAutletterById")]
-        public string GetAutletterById(string LetterCode)
+        public async Task<IActionResult> GetAutletterById(string LetterCode)
         {
 
             string query = $"select LetterCode,LetterTitle,LetterDate,LetterDescription,LetterState,LetterPriority,OwnerName,CreatorName,ExecutorName,RowsCount from vwautletter  where LetterCode={LetterCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutletterById));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -372,14 +620,27 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("Conversation_Insert")]
-        public string Conversation_Insert([FromBody] LetterDto letterdto)
+        public async Task<IActionResult> Conversation_Insert([FromBody] LetterDto letterdto)
         {
 
             string query = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={letterdto.LetterRef}, @CentralRef={letterdto.CentralRef}, @ConversationText='{letterdto.ConversationText}'";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Conversation_Insert));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -389,7 +650,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("Update_AutletterRow")]
-        public string Update_AutletterRow([FromBody] AutLetterRowInsert letterRowdto)
+        public async Task<IActionResult> Update_AutletterRow([FromBody] AutLetterRowInsert letterRowdto)
         {
             string query2 = "";
             string query3 = "";
@@ -397,20 +658,32 @@ namespace webapikits.Controllers
             if (!string.IsNullOrEmpty(letterRowdto.AutLetterRow_PropDescription1))
             {
                 query2 = $" spPropertyValue 'TAutLetterRow' , {letterRowdto.ObjectRef} ";
-                DataTable dataTable2 = db.Support_ExecQuery(HttpContext, query2);
+                DataTable dataTable2 = await db.Support_ExecQuery(HttpContext, query2);
 
 
                 query3 = $"Update PropertyValue Set Nvarchar1 = '{letterRowdto.AutLetterRow_PropDescription1}' Where ObjectRef = {letterRowdto.ObjectRef}  And ClassName ='TAutLetterRow'";
-                DataTable dataTable3 = db.Support_ExecQuery(HttpContext, query3);
+                DataTable dataTable3 = await db.Support_ExecQuery(HttpContext, query3);
             }
 
 
 
             string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterRowState}' , LetterDescription = '{letterRowdto.LetterRowDescription}' , AlarmActive = 0 Where LetterRowCode = {letterRowdto.ObjectRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Update_AutletterRow));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -422,15 +695,27 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetLetterFromPersoninfo")]
-        public string GetLetterFromPersoninfo(string PersonInfoCode)
+        public async Task<IActionResult> GetLetterFromPersoninfo(string PersonInfoCode)
         {
 
             string query = $"spWeb_AutLetterListByPerson {PersonInfoCode}";
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetLetterFromPersoninfo));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -438,7 +723,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetAutLetterListByPerson")]
-        public string GetAutLetterListByPerson([FromBody] SearchTargetLetterDto searchTargetLetterDto)
+        public async Task<IActionResult> GetAutLetterListByPerson([FromBody] SearchTargetLetterDto searchTargetLetterDto)
         {
 
 
@@ -467,9 +752,21 @@ namespace webapikits.Controllers
             string query = $"spWeb_AutLetterListByPersontest '{Where}','{searchTargetLetterDto.PersonInfoCode}'";
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutLetterListByPerson));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -490,13 +787,13 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("Conversation_UploadImage")]
-        public string Conversation_UploadImage([FromBody] ksrImageModel data)
+        public async Task<string> Conversation_UploadImageAsync([FromBody] ksrImageModel data)
         {
             try
             {
                 string query1 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='Image'";
 
-                DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+                DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
                 string Conversationref = dataTable1.Rows[0]["ConversationCode"] + "";
                 byte[] decodedImage = Convert.FromBase64String(data.image);
 
@@ -505,7 +802,7 @@ namespace webapikits.Controllers
                 string filePath = _configuration.GetConnectionString("web_imagePath") + $"{Conversationref}.jpg"; // Provide the path where you want to save the image
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
                 string query = $"Exec spImageImport  '{data.ClassName}',{Conversationref},'{filePath}' ;select @@IDENTITY KsrImageCode";
-                DataTable dataTable = db.Support_ImageExecQuery(query);
+                DataTable dataTable = await db.Support_ImageExecQuery(query);
                 return jsonClass.JsonResultWithout_Str(dataTable);
             }
             catch (Exception ex)
@@ -516,23 +813,35 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetWebImagess")]
-        public string GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
+        public async Task<string> GetWebImagessAsync(string pixelScale, string ClassName, string ObjectRef)
         {
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
-            DataTable dataTable = db.Support_ImageExecQuery(query);
+            DataTable dataTable =await db.Support_ImageExecQuery(query);
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
 
         }
 
         [HttpPost]
         [Route("KowsarAttachFile")]
-        public string KowsarAttachFile([FromBody] SearchTargetDto searchTarget)
+        public async Task<IActionResult> KowsarAttachFile([FromBody] SearchTargetDto searchTarget)
         {
             string query = $"spWeb_SearchAttachFile {searchTarget.SearchTarget}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(KowsarAttachFile));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
         }
 
@@ -541,13 +850,25 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("KowsarAttachUrl")]
-        public string KowsarAttachUrl([FromBody] SearchTargetDto searchTarget)
+        public async Task<IActionResult> KowsarAttachUrl([FromBody] SearchTargetDto searchTarget)
         {
             string query = $"spWeb_SearchAttachFile '{searchTarget.SearchTarget}' ,'URL'";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(KowsarAttachUrl));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -557,7 +878,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("SetAttachFile")]
-        public string SetAttachFile([FromBody] AttachFile attachFile)
+        public async Task<IActionResult> SetAttachFile([FromBody] AttachFile attachFile)
         {
 
             if (attachFile.Type == "URL")
@@ -566,9 +887,21 @@ namespace webapikits.Controllers
 
                 string query = $"exec spWeb_AttachFile '{attachFile.Title}','{attachFile.FileName}','{attachFile.ClassName}','{attachFile.Type}','{attachFile.FilePath}',''";
 
-                DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-                return jsonClass.JsonResultWithout_Str(dataTable);
+
+                try
+                {
+                    DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                    //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                    string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                    return Content(json, "application/json");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred in {Function}", nameof(SetAttachFile));
+                    return StatusCode(500, "Internal server error.");
+                }
 
 
 
@@ -631,7 +964,7 @@ namespace webapikits.Controllers
 
                     }
 
-                    DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+                    DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
                     dbname = dataTable1.Rows[0]["dbname"] + "";
 
                     string sqlCommandText = @" INSERT INTO " + dbname + @".dbo.AttachedFiles
@@ -667,9 +1000,18 @@ namespace webapikits.Controllers
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable2 = db.Support_ExecQuery(HttpContext, query11);
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query11);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
 
-            return jsonClass.JsonResult_Str(dataTable2, "Text", "TodeyFromServer");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(SetAttachFile));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -679,7 +1021,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetAttachFileList")]
-        public string GetAttachFileList([FromBody] AttachFile attachFile)
+        public async Task<IActionResult> GetAttachFileList([FromBody] AttachFile attachFile)
         {
 
 
@@ -705,13 +1047,26 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
             dbname = dataTable1.Rows[0]["dbname"] + "";
 
             string query = $"select * from {dbname}..AttachedFiles where ClassName = '{attachFile.ClassName}' And ObjectRef = {attachFile.ObjectRef} ";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAttachFileList));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
 
 
         }
@@ -721,7 +1076,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAttachFile")]
-        public IActionResult GetAttachFile(string AttachedFileCode, string ClassName, string ObjectRef)
+        public async Task<IActionResult> GetAttachFileAsync(string AttachedFileCode, string ClassName, string ObjectRef)
         {
 
             string dbname = "";
@@ -746,12 +1101,12 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable4 = db.Support_ExecQuery(HttpContext, query11);
+            DataTable dataTable4 = await db.Support_ExecQuery(HttpContext, query11);
             dbname = dataTable4.Rows[0]["dbname"] + "";
 
 
             string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
-            DataTable dataTable1 = db.Support_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 = await  db.Support_ExecQuery(HttpContext, query1);
             string base64File = dataTable1.Rows[0]["SourceFile"] + "";
             byte[] fileBytes = Convert.FromBase64String(base64File);
 
@@ -780,12 +1135,21 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetNotification")]
-        public string GetNotification(string PersonInfoCode)
+        public async Task<IActionResult> GetNotification(string PersonInfoCode)
         {
             string query = $"spWeb_GetNotification {PersonInfoCode}";
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "users", "");
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "users", "");
 
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetNotification));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -794,17 +1158,25 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("EditFactorProperty")]
-        public string EditFactorProperty([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> EditFactorProperty([FromBody] FactorwebDto factorwebDto)
         {
 
             string query = $"spWeb_EditFactorProperty '{factorwebDto.starttime}','{factorwebDto.Endtime}','{factorwebDto.worktime}','{factorwebDto.Barbary}',{factorwebDto.ObjectRef} ";
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
-
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(EditFactorProperty));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -812,13 +1184,25 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("EditCustomerProperty")]
-        public string EditCustomerProperty([FromBody] CustomerWebDto customerWebDto)
+        public async Task<IActionResult> EditCustomerProperty([FromBody] CustomerWebDto customerWebDto)
         {
 
             string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.Delegacy}',{customerWebDto.ObjectRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Customers", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(EditCustomerProperty));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
 
         }
@@ -826,42 +1210,73 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("EditCustomerExplain")]
-        public string EditCustomerExplain([FromBody] CustomerWebDto customerWebDto)
+        public async Task<IActionResult> EditCustomerExplain([FromBody] CustomerWebDto customerWebDto)
         {
 
             string query = $"Update Customer set Explain ='{customerWebDto.Explain}' where CustomerCode={customerWebDto.ObjectRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
 
 
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Customers", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(EditCustomerExplain));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpGet]
         [Route("GetWebFactorSupport")]
-        public string GetWebFactorSupport(string FactorCode)
+        public async Task<IActionResult> GetWebFactorSupport(string FactorCode)
         {
 
             string query = $" select FactorCode, FactorDate, CustName, CustomerCode, Explain, BrokerRef, BrokerName ,starttime,Endtime,worktime,Barbary from vwFactor where FactorCode = {FactorCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetWebFactorSupport));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpGet]
         [Route("GetWebFactorRowsSupport")]
-        public string GetWebFactorRowsSupport(string FactorCode)
+        public async Task<IActionResult> GetWebFactorRowsSupport(string FactorCode)
         {
 
             string query = $" select FactorRowCode,GoodName from vwFactorRows where Factorref= {FactorCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetWebFactorRowsSupport));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -870,29 +1285,48 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("DeleteWebFactorRowsSupport")]
-        public string DeleteWebFactorRowsSupport(string FactorRowCode)
+        public async Task<IActionResult> DeleteWebFactorRowsSupport(string FactorRowCode)
         {
 
             string query = $" delete from  FactorRows where FactorRowCode= {FactorRowCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DeleteWebFactorRowsSupport));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpGet]
         [Route("DeleteWebFactorSupport")]
-        public string DeleteWebFactorSupport(string FactorCode)
+        public async Task<IActionResult> DeleteWebFactorSupport(string FactorCode)
         {
 
             string query = $" delete from  Factor where FactorCode= {FactorCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DeleteWebFactorSupport));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
@@ -900,17 +1334,27 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetGoodListSupport")]
-        public string GetGoodListSupport([FromBody] SearchTargetDto searchTargetDto)
+        public async Task<IActionResult> GetGoodListSupport([FromBody] SearchTargetDto searchTargetDto)
         {
 
 
 
             string query = $"spWeb_GetGoodListSupport '{SanitizeInput(searchTargetDto.SearchTarget)}'";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodListSupport));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
@@ -922,63 +1366,104 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("WebSupportFactorInsert")]
-        public string WebSupportFactorInsert([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> WebSupportFactorInsert([FromBody] FactorwebDto factorwebDto)
         {
 
             string UserId = _configuration.GetConnectionString("Support_UserId");
 
             string query = $"spWeb_Factor_Insert  @ClassName ='Factor',@StackRef =1,@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = 0";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(WebSupportFactorInsert));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
 
         [HttpPost]
         [Route("WebSupportFactorInsertRow")]
-        public string WebSupportFactorInsertRow([FromBody] FactorRow factorRow)
+        public async Task<IActionResult> WebSupportFactorInsertRow([FromBody] FactorRow factorRow)
         {
 
             string query = $"spWeb_Factor_InsertRow  @ClassName ='Factor', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount =1,@Price =0,@UserId =29,@MustHasAmount =0, @MergeFlag =1 ";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(WebSupportFactorInsertRow));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpPost]
         [Route("Support_StartFactorTime")]
-        public string StartFactorTime([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> StartFactorTime([FromBody] FactorwebDto factorwebDto)
         {
 
             string query = $"Update PropertyValue Set Nvarchar15 = '{factorwebDto.starttime}'  where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(StartFactorTime));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpPost]
         [Route("Support_EndFactorTime")]
-        public string EndFactorTime([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> EndFactorTime([FromBody] FactorwebDto factorwebDto)
         {
 
             string query = $"Update PropertyValue Set Nvarchar9 = '{factorwebDto.Endtime}', int1 = {factorwebDto.worktime} where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(EndFactorTime));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
@@ -986,13 +1471,27 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("Support_ExplainFactor")]
-        public string Support_ExplainFactor([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> Support_ExplainFactor([FromBody] FactorwebDto factorwebDto)
         {
 
             string query = $"Update PropertyValue Set Nvarchar14 = '{SanitizeInput(factorwebDto.Barbary)}' where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Support_ExplainFactor));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -1001,51 +1500,87 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("Support_Count")]
-        public string Support_Count([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> Support_Count([FromBody] FactorwebDto factorwebDto)
         {
 
             string query = $" Declare @S nvarchar(20)=dbo.fnDate_AddDays(dbo.fnDate_Today(),-365) select BrokerCode, BrokerName, sum(worktime)/60 worktime,cast(sum(SumAmount) as int) SumAmount,Count(*) FactorCount from vwFactor where FactorDate>@S group by BrokerName, BrokerCode ";
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
 
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Support_Count));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
 
         [HttpGet]
         [Route("GetGridSchema")]
-        public string GetGridSchema(string Where)
+        public async Task<IActionResult> GetGridSchema(string Where)
         {
 
 
             string query = $"Select * From [dbo].[fnGetGridSchema]('{Where}')  where Visible = 1";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "GridSchemas", "");
 
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "GridSchemas", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGridSchema));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpPost]
         [Route("GetFactors")]
-        public string GetFactors([FromBody] SearchTargetDto searchTargetDto)
+        public async Task<IActionResult> GetFactors([FromBody] SearchTargetDto searchTargetDto)
         {
 
             string query = $" Exec spWeb_GetFactor";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetFactors));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         /*
         [HttpPost]
         [Route("GetFactor")]
-        public string GetFactor([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> GetFactor([FromBody] FactorwebDto factorwebDto)
         {
 
             string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
@@ -1065,25 +1600,36 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetSupportFactors")]
-        public string GetSupportFactors([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> GetSupportFactors([FromBody] FactorwebDto factorwebDto)
         {
 
             string query = $"Exec spWeb_GetSupportFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
 
 
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
 
 
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetSupportFactors));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
 
         [HttpPost]
         [Route("WebFactorInsert")]
-        public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
+        public async Task<IActionResult> WebFactorInsert([FromBody] FactorwebDto factorwebDto)
         {
 
 
@@ -1091,23 +1637,45 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.isShopFactor}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(WebFactorInsert));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
         [HttpPost]
         [Route("WebFactorInsertRow")]
-        public string WebFactorInsertRow([FromBody] FactorRow factorRow)
+        public async Task<IActionResult> WebFactorInsertRow([FromBody] FactorRow factorRow)
         {
 
             string UserId = _configuration.GetConnectionString("Support_UserId");
 
             string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount},@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(WebFactorInsertRow));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
@@ -1115,21 +1683,31 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetCustomerFactor")]
-        public string GetCustomerFactor(string Where)
+        public async Task<IActionResult> GetCustomerFactor(string Where)
         {
 
 
             string query = $"spWeb_GetCustomerFactor {Where}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetCustomerFactor));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpPost]
         [Route("GetSupportData")]
-        public string GetSupportData([FromBody] SupportDto supportDto)
+        public async Task<IActionResult> GetSupportData([FromBody] SupportDto supportDto)
 
         {
             // 1 support panel
@@ -1138,8 +1716,20 @@ namespace webapikits.Controllers
 
             string query = $"   spWeb_SupportData @DateTarget = '{supportDto.DateTarget}', @BrokerCode = {supportDto.BrokerCode}, @Flag = {supportDto.Flag}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "SupportDatas", "");
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "SupportDatas", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetSupportData));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
@@ -1147,7 +1737,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("ManualAttendance")]
-        public string ManualAttendance([FromBody] ManualAttendance manualAttendance)
+        public async Task<IActionResult> ManualAttendance([FromBody] ManualAttendance manualAttendance)
 
         {
             // 0 ghayeb 
@@ -1158,42 +1748,92 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_Attendance_ManualInsert @CentralRef = {manualAttendance.CentralRef}, @Status = {manualAttendance.Status}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ManualAttendance));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpGet]
         [Route("AttendanceDashboard")]
-        public string AttendanceDashboard()
+        public async Task<IActionResult> AttendanceDashboard()
         {
             string query = "spWeb_Attendance_Dashboard";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(AttendanceDashboard));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpGet]
         [Route("AttendanceHistory")]
-        public string AttendanceHistory(string CentralRef)
+        public async Task<IActionResult> AttendanceHistory(string CentralRef)
         {
             string query = $"spWeb_Attendance_History @CentralRef = {CentralRef}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(AttendanceHistory));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
         [HttpGet]
         [Route("DeleteAutLetterRows")]
-        public string DeleteAutLetterRows(string LetterRowCode)
+        public async Task<IActionResult> DeleteAutLetterRows(string LetterRowCode)
         {
 
             string query = $" Delete From  AutLetterRow where LetterRowCode= {LetterRowCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DeleteAutLetterRows));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -1201,13 +1841,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("DeleteAutLetter")]
-        public string DeleteAutLetter(string LetterCode)
+        public async Task<IActionResult> DeleteAutLetter(string LetterCode)
         {
 
             string query = $" Delete From  AutLetter where LetterCode= {LetterCode}";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DeleteAutLetter));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -1215,26 +1868,52 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetGoodBase")]
-        public string GetGoodBase(string GoodCode)
+        public async Task<IActionResult> GetGoodBase(string GoodCode)
         {
 
             string query = $"  spWeb_GetGoodById {GoodCode},0";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodBase));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
         [HttpGet]
         [Route("GetLastGoodData")]
-        public string GetLastGoodData()
+        public async Task<IActionResult> GetLastGoodData()
         {
 
             string query = $"  declare @ss int  select  @ss=max(GoodCode) from good exec spWeb_GetGoodById @ss,0";
 
-            DataTable dataTable = db.Support_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetLastGoodData));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 

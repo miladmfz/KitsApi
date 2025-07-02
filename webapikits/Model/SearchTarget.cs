@@ -10,7 +10,7 @@
     public class SearchTargetDto
     {
 
-        public string? SearchTarget { get; set; }
+        public string? SearchTarget { get; set; } = "";
     }
 
 

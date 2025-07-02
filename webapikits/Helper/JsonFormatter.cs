@@ -37,25 +37,25 @@ public class JsonFormatter : IJsonFormatter
         {
             if (!string.IsNullOrEmpty(textValue))
             {
-                return $"{{\"{keyResponse}\":\"{dataTable.Rows[0][textValue]}\"}}";
+                return $"{{\"{keyResponse}\":\"{dataTable.Rows[0][textValue]?.ToString() ?? ""}\"}}";
             }
 
-            var rows = new List<Dictionary<string, object>>();
+            var rows = new List<Dictionary<string, string>>();
 
             foreach (DataRow row in dataTable.Rows)
             {
-                var dict = new Dictionary<string, object>();
+                var dict = new Dictionary<string, string>();
                 foreach (DataColumn col in dataTable.Columns)
                 {
-                    dict[col.ColumnName] = row[col] is DBNull ? null : row[col];
+                    dict[col.ColumnName] = row[col] is DBNull ? "" : row[col].ToString()!;
                 }
                 rows.Add(dict);
             }
 
             var response = new Dictionary<string, object>
-            {
-                { keyResponse, rows }
-            };
+        {
+            { keyResponse, rows }
+        };
 
             return JsonSerializer.Serialize(response);
         }
@@ -65,8 +65,9 @@ public class JsonFormatter : IJsonFormatter
             return "{\"Text\":\"Done\"}";
         }
 
-        return "{\"response\":{\"StatusCode\":\"1000\",\"Errormessage\":\"No Data Found\"}}";
+        return $"{{\"{keyResponse}\":[]}}"; // در صورتی که جدول خالی باشد
     }
+
 
     public string ConvertDataTableToJson(DataTable dataTable)
     {

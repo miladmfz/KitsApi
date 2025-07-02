@@ -35,6 +35,9 @@
         public string PhTel1 { get; set; } = "";
         public string PhMobile1 { get; set; } = "";
         public string PhEmail { get; set; } = "";
+        public string CONTACTS { get; set; } = "";
+        public string NumberPhone { get; set; } = "";
+
 
     }
 }

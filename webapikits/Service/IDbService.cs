@@ -14,4 +14,20 @@ public interface IDbService
     Task<DataTable> ExecKitsQueryAsync(HttpContext context, string query, Dictionary<string, object>? parameters = null);
 
     Task<byte[]?> GetImageDataAsync(string query);
+
+
+
+
+    Task<DataTable> Web_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Kowsar_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Support_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> SupportApp_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Broker_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Ocr_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Order_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Company_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Kits_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+
+    Task<byte[]?> Web_GetImageData(string query);
+    Task<DataTable> Support_ImageExecQuery(string query);
 }

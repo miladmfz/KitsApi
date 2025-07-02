@@ -1,59 +1,78 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-  <PropertyGroup>
-    <TargetFramework>net7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net7.0</TargetFramework>
+		<Nullable>enable</Nullable>
+		<ImplicitUsings>enable</ImplicitUsings>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="Controllers\WeatherForecastController.cs" />
-    <Compile Remove="WeatherForecast.cs" />
-  </ItemGroup>
+	<ItemGroup>
+		<Compile Remove="Controllers\WeatherForecastController.cs" />
+		<Compile Remove="WeatherForecast.cs" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="C:\Users\milad\.nuget\packages\pdfium.x64\4648.0.0\Build\x64\pdfium.dll" />
-    <Content Remove="C:\Users\milad\.nuget\packages\pdfiumviewer.native.x86.v8-xfa\2018.4.8.256\Build\x86\pdfium.dll" />
-    <Content Remove="C:\Users\milad\.nuget\packages\pdfiumviewer.native.x86_64.v8-xfa\2018.4.8.256\Build\x64\pdfium.dll" />
-  </ItemGroup>
+	<ItemGroup>
+		<Content Remove="C:\Users\milad\.nuget\packages\pdfium.x64\4648.0.0\Build\x64\pdfium.dll" />
+		<Content Remove="C:\Users\milad\.nuget\packages\pdfiumviewer.native.x86.v8-xfa\2018.4.8.256\Build\x86\pdfium.dll" />
+		<Content Remove="C:\Users\milad\.nuget\packages\pdfiumviewer.native.x86_64.v8-xfa\2018.4.8.256\Build\x64\pdfium.dll" />
+	</ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="FastReport.OpenSource" Version="2023.3.4" />
-    <PackageReference Include="FastReport.OpenSource.Export.PdfSimple" Version="2023.3.4" />
-    <PackageReference Include="IPE.SmsIr" Version="1.2.7" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="7.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="8.0.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Pdfium.Net.SDK" Version="4.89.2704" />
-    <PackageReference Include="PDFium.x64" Version="4648.0.0" />
-    <PackageReference Include="PdfiumViewer" Version="2.13.0" />
-    <PackageReference Include="PdfiumViewer.Native.x86.v8-xfa" Version="2018.4.8.256" />
-    <PackageReference Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="2018.4.8.256" />
-    <PackageReference Include="Serilog" Version="3.0.1" />
-    <PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
-    <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
-    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
-    <PackageReference Include="SmsIrRestful" Version="1.1.3" />
-    <PackageReference Include="Spire.PDF" Version="10.3.16" />
-    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
-    <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
-    <PackageReference Include="System.Drawing.Common" Version="7.0.0" />
-    <PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<!-- FastReport -->
+		<PackageReference Include="FastReport.OpenSource" Version="2023.3.4" />
+		<PackageReference Include="FastReport.OpenSource.Export.PdfSimple" Version="2023.3.4" />
 
-  <ItemGroup>
-    <Content Remove="C:\Users\milad\.nuget\packages\pdfium.net.sdk\4.89.2704\build\..\content\x64\pdfium.dll" />
-  </ItemGroup>
+		<!-- SMS -->
+		<PackageReference Include="IPE.SmsIr" Version="1.2.7" />
+		<PackageReference Include="SmsIrRestful" Version="1.1.3" />
 
-  <ItemGroup>
-    <Content Remove="C:\Users\milad\.nuget\packages\pdfium.net.sdk\4.89.2704\build\..\content\x86\pdfium.dll" />
-  </ItemGroup>
+		<!-- ASP.NET / Hosting -->
+		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="7.0.0" />
+		<PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.5" />
+
+		<!-- Logging (upgraded to fix downgrade issue) -->
+		<PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Logging.EventLog" Version="9.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="7.0.0" />
+
+		<!-- JSON -->
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+		<!-- Serilog (upgraded to fix downgrade issue) -->
+		<PackageReference Include="Serilog" Version="4.2.0" />
+		<PackageReference Include="Serilog.AspNetCore" Version="9.0.0" />
+		<PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
+		<PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+
+		<!-- PDF -->
+		<PackageReference Include="Pdfium.Net.SDK" Version="4.89.2704" />
+		<PackageReference Include="PDFium.x64" Version="4648.0.0" />
+		<PackageReference Include="PdfiumViewer" Version="2.13.0" />
+		<PackageReference Include="PdfiumViewer.Native.x86.v8-xfa" Version="2018.4.8.256" />
+		<PackageReference Include="PdfiumViewer.Native.x86_64.v8-xfa" Version="2018.4.8.256" />
+		<PackageReference Include="Spire.PDF" Version="10.3.16" />
+
+		<!-- SQLite / SQL Server -->
+		<PackageReference Include="Microsoft.Data.Sqlite.Core" Version="8.0.0" />
+		<PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+		<PackageReference Include="System.Data.SQLite" Version="1.0.118" />
+		<PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
+
+		<!-- Drawing / Services -->
+		<PackageReference Include="System.Drawing.Common" Version="7.0.0" />
+		<PackageReference Include="System.ServiceProcess.ServiceController" Version="8.0.0" />
+
+		<!-- Swagger -->
+		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="C:\Users\milad\.nuget\packages\pdfium.net.sdk\4.89.2704\build\..\content\x64\pdfium.dll" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Content Remove="C:\Users\milad\.nuget\packages\pdfium.net.sdk\4.89.2704\build\..\content\x86\pdfium.dll" />
+	</ItemGroup>
 
 </Project>

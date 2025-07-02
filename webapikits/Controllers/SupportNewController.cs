@@ -94,10 +94,7 @@ namespace webapikits.Controllers
         [Route("GetKowsarPersonInfo")]
         public async Task<IActionResult> GetKowsarPersonInfo(string PersonInfoCode)
         {
-            if (string.IsNullOrEmpty(PersonInfoCode))
-            {
-                return BadRequest("PersonInfoCode is required.");
-            }
+
 
             string query = "Exec [dbo].[spWeb_GetKowsarPersonInfo] @PersonInfoCode";
 
@@ -157,10 +154,7 @@ namespace webapikits.Controllers
         [Route("GetObjectTypeFromDbSetup")]
         public async Task<IActionResult> GetObjectTypeFromDbSetup(string ObjectType)
         {
-            if (string.IsNullOrEmpty(ObjectType))
-            {
-                return BadRequest("ObjectType parameter is required.");
-            }
+
 
             string query = "SELECT * FROM dbo.fnObjectType(@ObjectType)";
             var parameters = new Dictionary<string, object>
@@ -226,8 +220,7 @@ namespace webapikits.Controllers
         [HttpGet("GetCentralById")]
         public async Task<IActionResult> GetCentralById(string CentralCode)
         {
-            if (string.IsNullOrEmpty(CentralCode))
-                return BadRequest("CentralCode is required.");
+
 
             string query = "select CentralCode,Title,Name,FName,Manager,Delegacy,CentralName from vwcentral where CentralCode = @CentralCode";
             var parameters = new Dictionary<string, object>
@@ -252,7 +245,7 @@ namespace webapikits.Controllers
         [HttpPost("GetKowsarCentral")]
         public async Task<IActionResult> GetKowsarCentral([FromBody] SearchTargetDto searchTargetDto)
         {
-            if (searchTargetDto == null || string.IsNullOrEmpty(searchTargetDto.SearchTarget))
+            if (searchTargetDto == null)
                 return BadRequest("SearchTarget is required.");
 
             string query = "Exec [dbo].[spWeb_GetKowsarCentral] @SearchTarget";
@@ -279,7 +272,7 @@ namespace webapikits.Controllers
         [HttpPost("GetKowsarCustomer")]
         public async Task<IActionResult> GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
         {
-            if (searchTargetDto == null || string.IsNullOrEmpty(searchTargetDto.SearchTarget))
+            if (searchTargetDto == null)
                 return BadRequest("SearchTarget is required.");
 
             string query = "Exec [dbo].[spWeb_GetKowsarCustomer] @SearchTarget";
@@ -392,8 +385,7 @@ namespace webapikits.Controllers
         [HttpGet("GetLetterRowList")]
         public async Task<IActionResult> GetLetterRowList(string LetterRef)
         {
-            if (string.IsNullOrEmpty(LetterRef))
-                return BadRequest("LetterRef is required");
+
 
             string query = @"select LetterRowCode, CreatorCentralRef, AutLetterRow_PropDescription1, Name RowExecutorName,
                             LetterRef, LetterDate RowLetterDate, LetterDescription LetterRowDescription,
@@ -781,8 +773,7 @@ namespace webapikits.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(searchTarget.SearchTarget))
-                    return BadRequest("SearchTarget is required");
+
 
                 string query = "spWeb_SearchAttachFile @SearchTarget";
 
@@ -809,8 +800,7 @@ namespace webapikits.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(searchTarget.SearchTarget))
-                    return BadRequest("SearchTarget is required");
+;
 
                 string query = "spWeb_SearchAttachFile @SearchTarget, @Type";
 
@@ -957,7 +947,7 @@ namespace webapikits.Controllers
         {
             try
             {
-                if (attachFile == null || string.IsNullOrEmpty(attachFile.ClassName))
+                if (attachFile == null )
                     return BadRequest("Invalid request data");
 
                 string queryDb = attachFile.ClassName switch
@@ -1082,8 +1072,7 @@ namespace webapikits.Controllers
         {
             try
             {
-                if (string.IsNullOrEmpty(PersonInfoCode))
-                    return BadRequest("PersonInfoCode is required");
+
 
                 string query = "spWeb_GetNotification @PersonInfoCode";
                 var parameters = new Dictionary<string, object>
@@ -1342,24 +1331,32 @@ namespace webapikits.Controllers
             {
                 string userId = _configuration.GetValue<string>("AppSettings:Support_UserId");
 
-                string query = @"spWeb_Factor_Insert  
-                         @ClassName = 'Factor',
-                         @StackRef = 1,
-                         @UserId = @UserId,
-                         @Date = @Date,
-                         @Customer = @Customer,
-                         @Explain = @Explain,
-                         @BrokerRef = @BrokerRef,
-                         @IsShopFactor = 0";
+                string query = @"spWeb_Factor_Insert @ClassName = @ClassName, @StackRef = @StackRef, @UserId = @ssUserId, @Date = @ssDate, @Customer = @ssCustomer, @Explain = @ssExplain, @BrokerRef = @ssBrokerRef, @IsShopFactor = @IsShopFactor";
+
+//                var parameters = new Dictionary<string, object>
+//{
+//    { "@ClassName", "Factor" },
+//    { "@StackRef", 1 },
+//    { "@IsShopFactor", 0 },
+//    { "@ssUserId", userId },
+//    { "@ssDate", SanitizeInput(factorwebDto.FactorDate) },
+//    { "@ssCustomer", SanitizeInput(factorwebDto.CustomerCode) },
+//    { "@ssExplain", SanitizeInput(factorwebDto.Explain) },
+//    { "@ssBrokerRef", SanitizeInput(factorwebDto.BrokerRef) }
+//};
 
                 var parameters = new Dictionary<string, object>
-        {
-            { "@UserId", userId },
-            { "@Date", SanitizeInput(factorwebDto.FactorDate) },
-            { "@Customer", SanitizeInput(factorwebDto.CustomerCode) },
-            { "@Explain", SanitizeInput(factorwebDto.Explain)  },
-            { "@BrokerRef", SanitizeInput(factorwebDto.BrokerRef)  }
-        };
+{
+    { "@ClassName", "Factor" },
+    { "@StackRef", 1 },
+    { "@IsShopFactor", 0 },
+    { "@ssUserId", 31 },
+    { "@ssDate", "1404/04/08" },
+    { "@ssCustomer", "1894" },
+    { "@ssExplain", "oo" },
+    { "@ssBrokerRef", 1 }
+};
+
 
                 var dt = await _dbService.ExecSupportQueryAsync(HttpContext, query, parameters);
                 string json = _jsonFormatter.JsonResult_Str(dt, "Factors", "");
@@ -1367,9 +1364,10 @@ namespace webapikits.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error in WebSupportFactorInsert");
-                return StatusCode(500, "Internal server error");
+                Console.WriteLine("WebSupportFactorInsert Error: " + ex.Message);
+                return StatusCode(500, "Internal server error: " + ex.Message);
             }
+
         }
 
         [HttpPost("WebSupportFactorInsertRow")]
@@ -1377,21 +1375,13 @@ namespace webapikits.Controllers
         {
             try
             {
-                string query = @"spWeb_Factor_InsertRow  
-                         @ClassName = 'Factor',
-                         @FactorCode = @FactorCode,
-                         @GoodRef = @GoodRef,
-                         @Amount = 1,
-                         @Price = 0,
-                         @UserId = @UserId,
-                         @MustHasAmount = 0,
-                         @MergeFlag = 1";
+                string query = @"spWeb_Factor_InsertRow @ClassName = 'Factor', @FactorCode = @ssFactorCode, @GoodRef = @ssGoodRef,  @Amount = 1, @Price = 0, @UserId = @ssUserId, @MustHasAmount = 0,@MergeFlag = 1";
 
                 var parameters = new Dictionary<string, object>
         {
-            { "@FactorCode", factorRow.FactorRef },
-            { "@GoodRef", factorRow.GoodRef },
-            { "@UserId", 29 } // بهتر است از کانفیگ یا توکن بگیری نه هاردکد
+            { "@ssFactorCode", factorRow.FactorRef },
+            { "@ssGoodRef", factorRow.GoodRef },
+            { "@ssUserId", 29 } // بهتر است از کانفیگ یا توکن بگیری نه هاردکد
         };
 
                 var dt = await _dbService.ExecSupportQueryAsync(HttpContext, query, parameters);
