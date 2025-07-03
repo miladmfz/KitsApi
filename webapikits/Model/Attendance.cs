@@ -12,6 +12,8 @@
         public string? ObjectCode { get; set; }
         public string? Status { get; set; }
         public string? CentralRef { get; set; }
+        public string? UseTodayInstead { get; set; }
+        public string? TargetDate { get; set; }
 
     }
 

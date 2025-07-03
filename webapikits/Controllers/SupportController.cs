@@ -1919,6 +1919,38 @@ namespace webapikits.Controllers
 
 
 
+        [HttpPost]
+        [Route("GetAttendance_StatusDurations")]
+        public async Task<IActionResult> GetAttendance_StatusDurations([FromBody] ManualAttendance manualAttendance)
+
+        {
+            // 0 ghayeb 
+            // 1 hozor
+            // 2 mashghol
+
+
+            string query = $"spWeb_GetAttendance_StatusDurations @CentralRef={manualAttendance.CentralRef},@TargetDate='{manualAttendance.TargetDate}',@UseTodayInstead={manualAttendance.UseTodayInstead}";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Attendances", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ManualAttendance));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+
 
 
 
