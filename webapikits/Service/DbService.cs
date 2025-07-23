@@ -39,7 +39,7 @@ public class DbService : IDbService
     public async Task<DataTable> Kits_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null)
         => await ExecuteQueryAsync(context, "Kits_Connection", query, parameters);
 
-    public async Task<DataTable> Support_ImageExecQuery(string query, Dictionary<string, object>? parameters = null, HttpContext? context = null)
+    public async Task<DataTable> Support_ImageExecQuery(HttpContext? context,string query, Dictionary<string, object>? parameters = null)
     => await ExecuteQueryAsync(context, "Support_ImageConnection", query, parameters);
 
     
@@ -152,7 +152,7 @@ public class DbService : IDbService
         tagName = tagName.Replace("'", "''");
 
         var logQuery = $@"
-        exec sp_WebLogInsert 
+        exec spWeb_LogInsert 
             @ClassName = '{context.Request.Path}',
             @TagName = '{tagName}',
             @LogValue = '{query}',
@@ -168,8 +168,5 @@ public class DbService : IDbService
         await cmd.ExecuteNonQueryAsync();
     }
 
-    public Task<DataTable> Support_ImageExecQuery(string query)
-    {
-        throw new NotImplementedException();
-    }
+
 }

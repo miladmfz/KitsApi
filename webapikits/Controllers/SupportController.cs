@@ -238,7 +238,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable =await  db.Support_ImageExecQuery(query);
+                DataTable dataTable =await  db.Support_ImageExecQuery(HttpContext, query);
 
                 return "\"Ok\"";
             }
@@ -311,7 +311,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult>  GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query =  $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
+            string query =  $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}'";
 
 
             try
@@ -378,15 +378,15 @@ namespace webapikits.Controllers
                 }
             }
 
-            if (!string.IsNullOrEmpty(searchTargetLetterDto.CreationDate))
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.StartTime))
             {
                 if (!string.IsNullOrEmpty(Where))
                 {
-                    Where += $" And LetterDate>=''{searchTargetLetterDto.CreationDate}''";
+                    Where += $" And (LetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') ";
                 }
                 else
                 {
-                    Where = $"LetterDate>=''{searchTargetLetterDto.CreationDate}''";
+                    Where = $" ( LetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') ";
                 }
             }
 
@@ -749,7 +749,7 @@ namespace webapikits.Controllers
 
 
 
-            string query = $"spWeb_AutLetterListByPersontest '{Where}','{searchTargetLetterDto.PersonInfoCode}'";
+            string query = $"spWeb_AutLetterListByPerson '{Where}','{searchTargetLetterDto.PersonInfoCode}'";
 
 
 
@@ -802,7 +802,7 @@ namespace webapikits.Controllers
                 string filePath = _configuration.GetConnectionString("web_imagePath") + $"{Conversationref}.jpg"; // Provide the path where you want to save the image
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
                 string query = $"Exec spImageImport  '{data.ClassName}',{Conversationref},'{filePath}' ;select @@IDENTITY KsrImageCode";
-                DataTable dataTable = await db.Support_ImageExecQuery(query);
+                DataTable dataTable = await db.Support_ImageExecQuery(HttpContext, query);
                 return jsonClass.JsonResultWithout_Str(dataTable);
             }
             catch (Exception ex)
@@ -813,10 +813,10 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetWebImagess")]
-        public async Task<string> GetWebImagessAsync(string pixelScale, string ClassName, string ObjectRef)
+        public async Task<string> GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
         {
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
-            DataTable dataTable =await db.Support_ImageExecQuery(query);
+            DataTable dataTable =await db.Support_ImageExecQuery(HttpContext, query);
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
 
         }
@@ -877,15 +877,15 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("SetAttachFile")]
-        public async Task<IActionResult> SetAttachFile([FromBody] AttachFile attachFile)
+        [Route("AttachFile_Insert")]
+        public async Task<IActionResult> AttachFile_Insert([FromBody] AttachFile attachFile)
         {
 
             if (attachFile.Type == "URL")
             {
 
 
-                string query = $"exec spWeb_AttachFile '{attachFile.Title}','{attachFile.FileName}','{attachFile.ClassName}','{attachFile.Type}','{attachFile.FilePath}',''";
+                string query = $"exec spWeb_AttachFile_Insert '{attachFile.Title}','{attachFile.FileName}','{attachFile.ClassName}','{attachFile.Type}','{attachFile.FilePath}',''";
 
 
 
@@ -899,7 +899,7 @@ namespace webapikits.Controllers
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Error occurred in {Function}", nameof(SetAttachFile));
+                    _logger.LogError(ex, "Error occurred in {Function}", nameof(AttachFile_Insert));
                     return StatusCode(500, "Internal server error.");
                 }
 
@@ -1009,7 +1009,7 @@ namespace webapikits.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(SetAttachFile));
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(AttachFile_Insert));
                 return StatusCode(500, "Internal server error.");
             }
 
@@ -1706,15 +1706,15 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("GetSupportData")]
-        public async Task<IActionResult> GetSupportData([FromBody] SupportDto supportDto)
+        [Route("GetSupportPanel")]
+        public async Task<IActionResult> GetSupportPanel([FromBody] SupportDto supportDto)
 
         {
             // 1 support panel
             // 2 EmptyEndTimeCount
 
 
-            string query = $"   spWeb_SupportData @DateTarget = '{supportDto.DateTarget}', @BrokerCode = {supportDto.BrokerCode}, @Flag = {supportDto.Flag}";
+            string query = $"   spWeb_GetSupportPanel @DateTarget = '{supportDto.DateTarget}', @BrokerCode = {supportDto.BrokerCode}, @Flag = {supportDto.Flag}";
 
 
 
@@ -1727,7 +1727,7 @@ namespace webapikits.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetSupportData));
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetSupportPanel));
                 return StatusCode(500, "Internal server error.");
             }
         }
@@ -1746,7 +1746,7 @@ namespace webapikits.Controllers
 
             string userId = _configuration.GetConnectionString("Support_UserId");
 
-            string query = $"spWeb_Attendance_ManualInsert @CentralRef = {manualAttendance.CentralRef}, @Status = {manualAttendance.Status}";
+            string query = $"spWeb_Attendance_Insert @CentralRef = {manualAttendance.CentralRef}, @Status = {manualAttendance.Status}";
 
 
 
@@ -1916,6 +1916,39 @@ namespace webapikits.Controllers
             }
 
         }
+
+
+
+
+
+        [HttpPost]
+        [Route("GoodCrudService")]
+        public async Task<IActionResult> GoodCrudService([FromBody] JsonModelDto jsonModelDto)
+
+        {
+
+
+            string query = $"Exec spGood_AddNew '{jsonModelDto.JsonData}' ";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GoodCrudService));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
 
 
 

@@ -53,7 +53,7 @@ namespace webapikits.Controllers
         public string GetAmountItem(string Date, string State)
         {
 
-            string query = $" spWeb_Getchartpanel '{Date}' ,{State} ";
+            string query = $" spWeb_GetBrokerPanel '{Date}' ,{State} ";
 
             DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
@@ -76,8 +76,8 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
-        [Route("minMaxGood")]
-        public string minMaxGood(string StartDate, string EndDate, string State)
+        [Route("GetOrderPanel")]
+        public string GetOrderPanel(string StartDate, string EndDate, string State)
         {
 
             string query = $" spweb_Getorderpanel '{StartDate}' ,'{EndDate}' ,{State} ";

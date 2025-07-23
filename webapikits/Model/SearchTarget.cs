@@ -22,6 +22,8 @@
         public string? CentralRef { get; set; }
         public string? CreationDate { get; set; }
         public string? OwnCentralRef { get; set; }
+        public string? StartTime { get; set; }
+        public string? EndTime { get; set; }
     }
 
 

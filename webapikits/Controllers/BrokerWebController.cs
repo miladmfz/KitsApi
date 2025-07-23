@@ -495,7 +495,7 @@ namespace webapikits.Controllers
         public string GetBrokerCustomer(string BrokerCode, string FactorDate)
         {
 
-            string query = $" Exec GetBrokerCustomer  '{FactorDate}',{BrokerCode}  ";
+            string query = $" Exec spWeb_GetBrokerCustomer  '{FactorDate}',{BrokerCode}  ";
 
 
             DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);

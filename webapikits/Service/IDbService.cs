@@ -27,7 +27,7 @@ public interface IDbService
     Task<DataTable> Order_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
     Task<DataTable> Company_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
     Task<DataTable> Kits_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Support_ImageExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
 
     Task<byte[]?> Web_GetImageData(string query);
-    Task<DataTable> Support_ImageExecQuery(string query);
 }

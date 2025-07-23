@@ -96,7 +96,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = "Exec [dbo].[spWeb_GetKowsarPersonInfo] @PersonInfoCode";
+            string query = "Exec [dbo].[spWeb_GetPersonInfo] @PersonInfoCode";
 
             var parameters = new Dictionary<string, object>
             {
@@ -304,11 +304,6 @@ namespace webapikits.Controllers
             var whereClauses = new List<string>();
             var parameters = new Dictionary<string, object>();
 
-            if (!string.IsNullOrEmpty(searchTargetLetterDto.SearchTarget))
-            {
-                whereClauses.Add("(LetterTitle LIKE @SearchTarget OR LetterDescription LIKE @SearchTarget OR ds.RowExecutorName LIKE @SearchTarget)");
-                parameters.Add("@SearchTarget", $"%{searchTargetLetterDto.SearchTarget}%");
-            }
 
             if (!string.IsNullOrEmpty(searchTargetLetterDto.CentralRef))
             {
@@ -324,9 +319,10 @@ namespace webapikits.Controllers
 
             string where = whereClauses.Count > 0 ? string.Join(" AND ", whereClauses) : "1=1";
 
-            string query = $"EXEC spWeb_AutLetterList @Where, @OwnCentralRef";
+            string query = $"EXEC spWeb_AutLetterList @Where, @OwnCentralRef, @SearchTarget";
 
             parameters.Add("@Where", SanitizeInput(where));
+            parameters.Add("@SearchTarget", SanitizeInput(searchTargetLetterDto.SearchTarget));
             parameters.Add("@OwnCentralRef", searchTargetLetterDto.OwnCentralRef);
 
             try
@@ -658,7 +654,7 @@ namespace webapikits.Controllers
                         where = $"LetterDate >= '{dto.CreationDate.Replace("'", "''")}'";
                 }
 
-                string query = "spWeb_AutLetterListByPersontest @Where, @PersonInfoCode";
+                string query = "spWeb_AutLetterListByPerson @Where, @PersonInfoCode";
                 var parameters = new Dictionary<string, object>
         {
             { "@Where",SanitizeInput( where) },
