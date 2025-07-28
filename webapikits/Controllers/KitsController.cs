@@ -66,7 +66,7 @@ namespace webapikits.Controllers
     }
 
 
-    [HttpGet]
+        [HttpGet]
         [Route("kowsar_info")]
         public string kowsar_info(string Where)
         {
@@ -125,7 +125,7 @@ namespace webapikits.Controllers
         {
 
             
-            string query = $"select * from AppBrokerCustomer Where ActivationCode = '{Code}'";
+            string query = $"select * from AppActivation Where ActivationCode = '{Code}'";
 
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 

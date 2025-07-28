@@ -361,10 +361,7 @@ namespace webapikits.Controllers
 
             string Where = "";
 
-            if (!string.IsNullOrEmpty(searchTargetLetterDto.SearchTarget))
-            {
-                Where = $"(LetterTitle like ''%{searchTargetLetterDto.SearchTarget}%'' or LetterDescription like ''%{searchTargetLetterDto.SearchTarget}%'' or ds.RowExecutorName like ''%{searchTargetLetterDto.SearchTarget}%'')";
-            }
+
 
             if (!string.IsNullOrEmpty(searchTargetLetterDto.CentralRef))
             {
@@ -391,7 +388,7 @@ namespace webapikits.Controllers
             }
 
 
-            string query = $"Exec spWeb_AutLetterList '{Where}',{searchTargetLetterDto.OwnCentralRef}";
+            string query = $"Exec spWeb_AutLetterList '{Where}',{searchTargetLetterDto.OwnCentralRef},'{searchTargetLetterDto.SearchTarget}'";
 
 
 

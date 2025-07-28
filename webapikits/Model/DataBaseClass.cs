@@ -337,7 +337,7 @@ namespace webapikits.Model
 
             query = query.Replace("'", "''");
 
-            string Log = $"exec sp_WebLogInsert @ClassName='{httpContext.Request.Path}',@TagName='',@LogValue='{query}' ,@IpAddress='{Referer}',@UserAgent='{agent}',@SessionId='{PersonInfoRef}'";
+            string Log = $"exec spWeb_LogInsert @ClassName='{httpContext.Request.Path}',@TagName='',@LogValue='{query}' ,@IpAddress='{Referer}',@UserAgent='{agent}',@SessionId='{PersonInfoRef}'";
             
 
             string connectionString = _configuration.GetConnectionString("Web_Connection"); // استفاده از IConfiguration برای خواندن connection string

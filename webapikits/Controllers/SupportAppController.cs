@@ -62,11 +62,11 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
-        [Route("GetAppBrokerCustomer")]
-        public string GetAppBrokerCustomer()
+        [Route("GetAppActivation")]
+        public string GetAppActivation()
         {
 
-            string query = $"select * from AppBrokerCustomer";
+            string query = $"select * from AppActivation";
 
             DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
@@ -77,11 +77,11 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
-        [Route("GetAppBrokerCustomerByCode")]
-        public string GetAppBrokerCustomerByCode(string ActivationCode)
+        [Route("GetAppActivationByCode")]
+        public string GetAppActivationByCode(string ActivationCode)
         {
 
-            string query = $"select * from AppBrokerCustomer Where ActivationCode = '{ActivationCode}'";
+            string query = $"select * from AppActivation Where ActivationCode = '{ActivationCode}'";
 
             DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
@@ -101,11 +101,11 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("CrudAppBrokerCustomer")]
-        public string CrudAppBrokerCustomer([FromBody] BrokerCustomerDto brokercustomerdto)
+        [Route("CrudAppActivation")]
+        public string CrudAppActivation([FromBody] BrokerCustomerDto brokercustomerdto)
         {
 
-            string query = $"exec [spApp_CrudAppBrokerCustomer]  '{brokercustomerdto.ActivationCode}','{brokercustomerdto.EnglishCompanyName}', '{brokercustomerdto.PersianCompanyName}', '{brokercustomerdto.ServerURL}', " +
+            string query = $"exec [spApp_AppActivation_Crud]  '{brokercustomerdto.ActivationCode}','{brokercustomerdto.EnglishCompanyName}', '{brokercustomerdto.PersianCompanyName}', '{brokercustomerdto.ServerURL}', " +
                 $" '{brokercustomerdto.SQLiteURL}', {brokercustomerdto.UsedDevice}, {brokercustomerdto.MaxDevice}, '{brokercustomerdto.SecendServerURL}' , '{brokercustomerdto.DbName}', '{brokercustomerdto.DbImageName}', " +
                 $"{brokercustomerdto.AppType} , '{brokercustomerdto.ServerIp}', '{brokercustomerdto.ServerPort}', '{brokercustomerdto.ServerPathApi}'";
 
