@@ -10,17 +10,23 @@
 
     public class LogReportDto
     {
-        public string Device_Id { get; set; }
+        public string Device_Id { get; set; } = "";
 
-        public string Address_Ip { get; set; }
-        public string Server_Name { get; set; }
-        public string Factor_Code { get; set; }
-        public string StrDate { get; set; }
-        public string Broker { get; set; }
-        public string Explain { get; set; }
-        public string DeviceAgant { get; set; }
-        public string SdkVersion { get; set; }
-        public string DeviceIp { get; set; }
+        public string Address_Ip { get; set; } = "";
+        public string Server_Name { get; set; } = "";
+        public string Factor_Code { get; set; } = "";
+        public string StrDate { get; set; } = "";
+        public string Broker { get; set; } = "";
+        public string Explain { get; set; } = "";
+        public string DeviceAgant { get; set; } = "";
+        public string SdkVersion { get; set; } = "";
+        public string DeviceIp { get; set; } = "";
+
+        public string FromDate { get; set; } = "";
+        public string ToDate { get; set; } = "";
+        public string ServerName { get; set; } = "";
+        public string Flag { get; set; } = "";
+
     }
 
 

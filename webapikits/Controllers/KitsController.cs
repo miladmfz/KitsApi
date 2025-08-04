@@ -267,13 +267,15 @@ namespace webapikits.Controllers
         public string LogReport([FromBody] LogReportDto logReportDto)
         {
 
-            string query = $"exec spApp_appinfo '{logReportDto.Device_Id}','{logReportDto.Address_Ip}','{logReportDto.Server_Name}','{logReportDto.Factor_Code}','{logReportDto.StrDate}','{logReportDto.Broker}','{logReportDto.Explain}','{logReportDto.DeviceAgant}','{logReportDto.SdkVersion}','{logReportDto.DeviceIp}'";
+            string query = $"exec spApp_LogInsert '{logReportDto.Device_Id}','{logReportDto.Address_Ip}','{logReportDto.Server_Name}','{logReportDto.Factor_Code}','{logReportDto.StrDate}','{logReportDto.Broker}','{logReportDto.Explain}','{logReportDto.DeviceAgant}','{logReportDto.SdkVersion}','{logReportDto.DeviceIp}'";
             DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Text", "done");
 
 
         }
+
+
 
 
 

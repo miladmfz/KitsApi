@@ -158,9 +158,19 @@ namespace webapikits.Controllers
 
 
 
+        [HttpPost]
+        [Route("GetAppLogReport")]
+        public string GetAppLogReport([FromBody] LogReportDto logReportDto)
+        {
+
+            string query = $"exec spWeb_GetAppLogReport    @FromDate  = '{logReportDto.FromDate}',    @ToDate  = '{logReportDto.ToDate}',    @ServerName  = '{logReportDto.ServerName}',  @Flag  = {logReportDto.Flag}";
 
 
+            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
 
+
+        }
 
 
 
