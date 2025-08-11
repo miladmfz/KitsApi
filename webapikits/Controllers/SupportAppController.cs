@@ -102,7 +102,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("CrudAppActivation")]
-        public string CrudAppActivation([FromBody] BrokerCustomerDto brokercustomerdto)
+        public string CrudAppActivation([FromBody] AppActivationDto brokercustomerdto)
         {
 
             string query = $"exec [spApp_AppActivation_Crud]  '{brokercustomerdto.ActivationCode}','{brokercustomerdto.EnglishCompanyName}', '{brokercustomerdto.PersianCompanyName}', '{brokercustomerdto.ServerURL}', " +
@@ -171,6 +171,85 @@ namespace webapikits.Controllers
 
 
         }
+
+
+
+
+        [HttpPost]
+        [Route("WebSiteInsert")]
+        public string WebSiteInsert([FromBody] WebSiteActivationDto webSiteActivationDto)
+        {
+
+            string query = $"exec spWeb_InsertWebSiteActivation     @CustomerRef = {webSiteActivationDto.CustomerRef} , @CompanyName = '{webSiteActivationDto.CompanyName}' , @WebEmploy = '{webSiteActivationDto.WebEmploy}' , @Phone = '{webSiteActivationDto.Phone}' , @Explain = '{webSiteActivationDto.Explain}' , @Features = '{webSiteActivationDto.Features}' , @WebState = {webSiteActivationDto.WebState} , @Domain1 = '{webSiteActivationDto.Domain1}' , @Domain2 = '{webSiteActivationDto.Domain2}' , @Domain3 = '{webSiteActivationDto.Domain3}' , @Domain4 = '{webSiteActivationDto.Domain4}' , @KCServerVersion = '{webSiteActivationDto.KCServerVersion}' , @SiteType = '{webSiteActivationDto.SiteType}' , @PaymentGateway = '{webSiteActivationDto.PaymentGateway}' , @TorobApi = {webSiteActivationDto.TorobApi} , @EmallsApi = {webSiteActivationDto.EmallsApi} , @BasalamApi = {webSiteActivationDto.BasalamApi} , @SnapApi = {webSiteActivationDto.SnapApi} , @MobileTheme = {webSiteActivationDto.MobileTheme}  ";
+
+
+            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+        }
+
+
+        [HttpPost]
+        [Route("WebSiteUpdate")]
+        public string WebSiteUpdate([FromBody] WebSiteActivationDto webSiteActivationDto)
+        {
+
+            string query = $"exec spWeb_UpdateWebSiteActivation    @WebSiteActivationCode = {webSiteActivationDto.WebSiteActivationCode} , @CustomerRef = {webSiteActivationDto.CustomerRef} , @CompanyName = '{webSiteActivationDto.CompanyName}' , @WebEmploy = '{webSiteActivationDto.WebEmploy}' , @Phone = '{webSiteActivationDto.Phone}' , @Explain = '{webSiteActivationDto.Explain}'  , @Features = '{webSiteActivationDto.Features}' , @WebState = {webSiteActivationDto.WebState} , @Domain1 = '{webSiteActivationDto.Domain1}' , @Domain2 = '{webSiteActivationDto.Domain2}' , @Domain3 = '{webSiteActivationDto.Domain3}' , @Domain4 = '{webSiteActivationDto.Domain4}' , @KCServerVersion = '{webSiteActivationDto.KCServerVersion}' , @SiteType = '{webSiteActivationDto.SiteType}' , @PaymentGateway = '{webSiteActivationDto.PaymentGateway}' , @TorobApi = {webSiteActivationDto.TorobApi} , @EmallsApi = {webSiteActivationDto.EmallsApi} , @BasalamApi = {webSiteActivationDto.BasalamApi} , @SnapApi = {webSiteActivationDto.SnapApi} , @MobileTheme = {webSiteActivationDto.MobileTheme}  ";
+
+
+            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+        }
+
+
+
+
+        [HttpPost]
+        [Route("GetWebSiteActivation")]
+        public string GetWebSiteActivation([FromBody] WebSiteActivationDto webSiteActivationDto)
+        {
+
+            string query = $"exec spWeb_GetWebSiteActivation    @SearchTarget = '{webSiteActivationDto.SearchTarget}' ";
+
+
+            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+        }
+
+
+
+
+        [HttpGet]
+        [Route("GetWebSiteActivationById")]
+        public string GetWebSiteActivationById(string WebSiteActivationCode)
+        {
+
+            string query = $"exec spWeb_GetWebSiteActivationById    @WebSiteActivationCode = {WebSiteActivationCode} ";
+
+
+            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
