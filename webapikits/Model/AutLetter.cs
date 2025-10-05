@@ -27,6 +27,8 @@
         public string CentralRef { get; set; } = "";
         public string LetterPriority { get; set; } = "";
         public string LetterState { get; set; } = "";
+        public string OwnerCentral { get; set; } = "";
+        public string CreatorCentral { get; set; } = "";
 
     }
 

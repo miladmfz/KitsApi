@@ -11,6 +11,10 @@
     {
 
         public string? SearchTarget { get; set; } = "";
+        public string? ObjectRef { get; set; } = "0";
+        public string? ClassName { get; set; } = "";
+
+
     }
 
 
@@ -24,6 +28,7 @@
         public string? OwnCentralRef { get; set; }
         public string? StartTime { get; set; }
         public string? EndTime { get; set; }
+        public string? Flag { get; set; }
     }
 
 

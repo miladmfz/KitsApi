@@ -412,6 +412,57 @@ namespace webapikits.Controllers
         }
 
 
+
+        [HttpPost]
+        [Route("GetWebFactor")]
+        public string GetWebFactor([FromBody] FactorwebDto factorwebDto)
+        {
+
+
+            string query = $"spWeb_Get_Factor '{factorwebDto.ClassName}',{factorwebDto.ObjectRef},'{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}'";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
+
+
+
+        [HttpPost]
+        [Route("GetWebFactorRows")]
+        public string GetWebFactorRows([FromBody] FactorwebDto factorwebDto)
+        {
+
+
+            string query = $"spWeb_Get_Factor_Rows '{factorwebDto.ClassName}',{factorwebDto.ObjectRef}";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("GetFactors")]
+        public string GetFactors([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+            string query = $" Exec spWeb_GetFactors";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
+
+
+
+
+
         [HttpPost]
         [Route("GetGoods")]
         public string GetGoods([FromBody] SearchTargetDto searchTargetDto)
@@ -442,7 +493,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = $"Exec [dbo].[spWeb_GetKowsarCustomer] '{searchTargetDto.SearchTarget}'";
+            string query = $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}'";
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
 
             return jsonClass.JsonResult_Str(dataTable, "Customers", "");
@@ -510,36 +561,7 @@ namespace webapikits.Controllers
 
 
 
-        [HttpPost]
-        [Route("WebFactorInsert")]
-        public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
-        {
 
-
-            string UserId = _configuration.GetConnectionString("Support_UserId");
-
-            string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.isShopFactor}";
-
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
-
-
-        }
-
-
-
-        [HttpPost]
-        [Route("WebFactorInsertRow")]
-        public string WebFactorInsertRow([FromBody] FactorRow factorRow)
-        {
-
-            string UserId = _configuration.GetConnectionString("Support_UserId");
-
-            string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount},@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
-
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
-        }
 
 
 
@@ -568,6 +590,31 @@ namespace webapikits.Controllers
 
 
         }
+        [HttpGet]
+        [Route("DeleteWebPreFactorRows")]
+        public string DeleteWebPreFactorRows(string PreFactorRowCode)
+        {
+
+            string query = $" delete from  PreFactorRows where PreFactorRowCode= {PreFactorRowCode}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
+
+        [HttpGet]
+        [Route("DeleteWebPreFactor")]
+        public string DeleteWebPreFactor(string PreFactorCode)
+        {
+
+            string query = $" delete from  PreFactor where PreFactorCode= {PreFactorCode}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+
+        }
 
 
 
@@ -585,17 +632,231 @@ namespace webapikits.Controllers
 
         }
 
+
+
+
         [HttpPost]
-        [Route("GetFactors")]
-        public string GetFactors([FromBody] SearchTargetDto searchTargetDto)
+        [Route("GetCustomerById")]
+        public string GetCustomerById([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query = $" Exec spWeb_GetFactor";
+
+            string query = $"Exec [dbo].[spWeb_GetCustomerById] {searchTargetDto.ObjectRef}";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+
+        }
+
+
+        
+
+
+        [HttpPost]
+        [Route("GetCentralByCode")]
+        public string GetCentralByCode([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_GetCentralByCode] {searchTargetDto.ObjectRef}";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+
+        }
+
+        [HttpGet]
+        [Route("GetCentralUser")]
+        public string GetCentralUser()
+        {
+
+            string query = $"select CentralCode,CentralName from vwCentralUser ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+        }
+
+
+
+            [HttpPost]
+            [Route("GetLetterList")]
+            public string GetLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
+            {
+
+
+                string Where = "";
+
+
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.CentralRef))
+            {
+                if (!string.IsNullOrEmpty(Where))
+                {
+                    Where += $" And (CreatorCentralRef={searchTargetLetterDto.CentralRef} or OwnerCentralRef={searchTargetLetterDto.CentralRef} or RowExecutorCentralRef={searchTargetLetterDto.CentralRef})";
+                }
+                else
+                {
+                    Where = $"(CreatorCentralRef={searchTargetLetterDto.CentralRef} or OwnerCentralRef={searchTargetLetterDto.CentralRef} or RowExecutorCentralRef={searchTargetLetterDto.CentralRef})";
+                }
+            }
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.StartTime))
+            {
+                if (!string.IsNullOrEmpty(Where))
+                {
+                    Where += $" And (LetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') ";
+                }
+                else
+                {
+                    Where = $" ( LetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') ";
+                }
+            }
+
+
+            string query = $"Exec spWeb_AutLetterList '{Where}',{searchTargetLetterDto.OwnCentralRef},'{searchTargetLetterDto.SearchTarget}'";
+
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+            [HttpPost]
+            [Route("LetterInsert")]
+            public string LetterInsert([FromBody] LetterInsert letterInsert)
+            {
+
+
+
+
+
+
+
+
+
+                string CreatorCentral = _configuration.GetConnectionString("Support_CreatorCentral");
+
+
+            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag={letterInsert.InOutFlag},@Title ='{letterInsert.title}', " +
+                $"@Description='{SanitizeInput(letterInsert.Description)}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CreatorCentral}, @OwnerCentral ={letterInsert.OwnerCentral} ";
+
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+            [HttpPost]
+            [Route("AutLetterRowInsert")]
+            public string AutLetterRowInsert([FromBody] AutLetterRowInsert autLetterRowInsert)
+            {
+
+
+                string query = $"spAutLetterRow_Insert @LetterRef = {autLetterRowInsert.LetterRef}, @LetterDate = '{autLetterRowInsert.LetterDate}'" +
+                $", @Description = '{SanitizeInput(autLetterRowInsert.Description)}', @State = '{autLetterRowInsert.LetterState}', @Priority = '{autLetterRowInsert.LetterPriority}'" +
+                $", @CreatorCentral = {autLetterRowInsert.CreatorCentral}, @ExecuterCentral = {autLetterRowInsert.ExecuterCentral}";
+
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+
+        }
+
+
+
+            [HttpPost]
+            [Route("WebFactorInsert")]
+            public string WebFactorInsert([FromBody] FactorwebDto factorwebDto)
+            {
+
+
+
+                string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.isShopFactor}";
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
+
+
+
+
+
+
+            [HttpPost]
+            [Route("WebFactorInsertRow")]
+            public string WebFactorInsertRow([FromBody] FactorRow factorRow)
+            {
+
+
+                string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount},@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+
+
+            return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+        }
+
+
+
+
+
+
+
+        [HttpPost]
+        [Route("GetFactorByCustomerCode")]
+        public string GetFactorByCustomerCode([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_GetFactorByCustomerCode] '{searchTargetDto.ClassName}',{searchTargetDto.ObjectRef}";
+
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             return jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
         }
+
+
+
+
 
 
 

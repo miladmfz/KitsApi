@@ -1,15 +1,22 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using FastReport;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Data.Common;
 using System.Data.Entity.Core.Objects;
 using System.Data.SqlClient;
+using System.Diagnostics;
 using System.IO.Compression;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Sockets;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using webapikits.Model;
 using static System.Data.Entity.Infrastructure.Design.Executor;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace webapikits.Controllers
 {
@@ -42,7 +49,8 @@ namespace webapikits.Controllers
             IDbService dbService,
             IJsonFormatter jsonFormatter,
             ILogger<SupportNewController> logger,
-            IConfiguration configuration)
+            IConfiguration configuration
+            )
         {
             db = dbService;
             _jsonFormatter1 = jsonFormatter;
@@ -120,7 +128,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UpdatePersonInfo")]
-        public async Task<IActionResult>     UpdatePersonInfo([FromBody] PersonInfoDto personInfoDto)
+        public async Task<IActionResult> UpdatePersonInfo([FromBody] PersonInfoDto personInfoDto)
         {
 
 
@@ -143,7 +151,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetKowsarPersonInfo")]
-        public async Task<IActionResult> GetKowsarPersonInfo(String PersonInfoCode)
+        public async Task<IActionResult> GetKowsarPersonInfo(string PersonInfoCode)
         {
 
 
@@ -168,7 +176,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("IsUser")]
-        public async Task<IActionResult>  IsUser([FromBody] LoginUserDto loginUserDto)
+        public async Task<IActionResult> IsUser([FromBody] LoginUserDto loginUserDto)
         {
 
 
@@ -191,7 +199,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetObjectTypeFromDbSetup")]
-        public async Task<IActionResult>  GetObjectTypeFromDbSetup(string ObjectType)
+        public async Task<IActionResult> GetObjectTypeFromDbSetup(string ObjectType)
         {
 
             string query = $"select * from dbo.fnObjectType('{ObjectType}') ";
@@ -217,36 +225,82 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UploadImage")]
-        public async Task<string>  UploadImage([FromBody] ksrImageModeldto data)
+        public async Task<IActionResult> UploadImage([FromBody] ksrImageModeldto data)
         {
 
 
-            try
+
+            byte[] decodedImage = Convert.FromBase64String(data.image);
+
+
+            string data_base64 = data.image;
+            byte[] data_Bytes = Convert.FromBase64String(data_base64);
+
+
+
+            string dataName = $"{data.ObjectCode}.jpg"; // Constructing the image name
+            string dataPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName}"; // Provide the path where you want to save the image
+
+
+            System.IO.File.WriteAllBytes(dataPath, data_Bytes);
+
+
+
+            string connectionString = _configuration.GetConnectionString("Support_ImageConnection"); // Provide your SQL Server connection string
+
+
+
+            using (SqlConnection dbConnection = new SqlConnection(connectionString))
             {
 
-
-                // Decode the base64 string to bytes
-                byte[] decodedImage = Convert.FromBase64String(data.image);
-
-                // Save the image bytes to a file
-
-                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{data.ObjectCode}.jpg"; // Provide the path where you want to save the image
-
-                System.IO.File.WriteAllBytes(filePath, decodedImage);
+                dbConnection.Open();
 
 
-                string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
+
+                string sqlCommandText = @" INSERT INTO KsrImage (ClassName, ObjectRef, IMG, IsDefaultImage, FileName, Owner, CreationDate, Reformer, ReformDate, rowguid)  VALUES (@ClassName, @ObjectRef,@SourceFile, 0,  @FileName,  -1000, GETDATE(), -1000, GETDATE(), newId())  ";
+
+                // Create a SqlCommand object
+                using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
+                {
+                    //Bind parameters
+                    sqlCommand.Parameters.AddWithValue("@ClassName", data.ClassName);
+                    sqlCommand.Parameters.AddWithValue("@ObjectRef", data.ObjectCode);
+                    sqlCommand.Parameters.AddWithValue("@FileName", dataName);
+                    sqlCommand.Parameters.AddWithValue("@SourceFile", System.IO.File.ReadAllBytes(dataPath));
 
 
-                DataTable dataTable =await  db.Support_ImageExecQuery(HttpContext, query);
 
-                return "\"Ok\"";
+                    // Execute the command
+                    sqlCommand.ExecuteNonQuery();
+                }
+
+
+
+
+
+                System.IO.File.Delete(dataPath);
+
+            }
+
+
+
+
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query11);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+
+                return Content(json, "application/json");
             }
             catch (Exception ex)
             {
-                return $"{ex.Message}";
-
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(AttachFile_Insert));
+                return StatusCode(500, "Internal server error.");
             }
+
+
         }
 
 
@@ -308,10 +362,10 @@ namespace webapikits.Controllers
 
 
         [HttpPost("GetKowsarCustomer")]
-        public async Task<IActionResult>  GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
+        public async Task<IActionResult> GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query =  $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}'";
+            string query = $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}'";
 
 
             try
@@ -327,27 +381,45 @@ namespace webapikits.Controllers
             }
         }
 
+        [HttpPost("GetCustomerById")]
+        public async Task<IActionResult> GetCustomerById([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+            string query = $"Exec [dbo].[spWeb_GetCustomerById] {searchTargetDto.ObjectRef}";
 
 
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Customers", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetKowsarCustomer));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+        [HttpPost("GetCentralByCode")]
+        public async Task<IActionResult> GetCentralByCode([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+            string query = $"Exec [dbo].[spWeb_GetCentralByCode] {searchTargetDto.ObjectRef}";
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetKowsarCustomer));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
 
 
 
@@ -422,7 +494,8 @@ namespace webapikits.Controllers
             string CreatorCentral = _configuration.GetConnectionString("Support_CreatorCentral");
 
 
-            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag={letterInsert.InOutFlag},@Title ='{letterInsert.title}', @Description='{letterInsert.Description}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CentralRef}, @OwnerCentral ={CreatorCentral} ";
+            string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag={letterInsert.InOutFlag},@Title ='{letterInsert.title}', " +
+                $"@Description='{letterInsert.Description}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CreatorCentral}, @OwnerCentral ={letterInsert.OwnerCentral} ";
 
 
 
@@ -590,7 +663,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult> GetAutletterById(string LetterCode)
         {
 
-            string query = $"select LetterCode,LetterTitle,LetterDate,LetterDescription,LetterState,LetterPriority,OwnerName,CreatorName,ExecutorName,RowsCount from vwautletter  where LetterCode={LetterCode}";
+            string query = $"select LetterCode,LetterTitle,LetterDate,LetterDescription,LetterState,LetterPriority,OwnerName,OwnerCentralRef,CreatorName,ExecutorName,RowsCount from vwautletter  where LetterCode={LetterCode}";
 
 
 
@@ -664,7 +737,7 @@ namespace webapikits.Controllers
 
 
 
-            string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterRowState}' , LetterDescription = '{letterRowdto.LetterRowDescription}' , AlarmActive = 0 Where LetterRowCode = {letterRowdto.ObjectRef}";
+            string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterRowState}' , LetterDescription = '{letterRowdto.LetterRowDescription}' , AlarmActive = 0 , ReformDate = GetDate() Where LetterRowCode = {letterRowdto.ObjectRef}";
 
 
 
@@ -746,7 +819,7 @@ namespace webapikits.Controllers
 
 
 
-            string query = $"spWeb_AutLetterListByPerson '{Where}','{searchTargetLetterDto.PersonInfoCode}'";
+            string query = $"spWeb_AutLetterListByPerson '{Where}','{searchTargetLetterDto.PersonInfoCode}' ,'{searchTargetLetterDto.Flag}'";
 
 
 
@@ -774,49 +847,313 @@ namespace webapikits.Controllers
 
 
 
-
-
-
-
-
-
-
-
         [HttpPost]
-        [Route("Conversation_UploadImage")]
-        public async Task<string> Conversation_UploadImageAsync([FromBody] ksrImageModel data)
+        [Route("Conversation_UploadFile")]
+        public async Task<IActionResult> Conversation_UploadFile([FromBody] ksrImageModel data)
         {
-            try
+
+
+            string query2 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='{data.Title}'";
+
+            DataTable dataTable2 = await db.Support_ExecQuery(HttpContext, query2);
+            string Conversationref = dataTable2.Rows[0]["ConversationCode"] + "";
+            byte[] decodedImage = Convert.FromBase64String(data.File);
+
+
+            string data_base64 = data.File;
+            byte[] data_Bytes = Convert.FromBase64String(data_base64);
+
+
+
+            string dataName = $"{data.FileName}.{data.FileType}"; // Constructing the image name
+            string dataPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName}"; // Provide the path where you want to save the image
+
+
+            System.IO.File.WriteAllBytes(dataPath, data_Bytes);
+
+
+
+            string connectionString = _configuration.GetConnectionString("Support_Connection"); // Provide your SQL Server connection string
+
+
+
+            using (SqlConnection dbConnection = new SqlConnection(connectionString))
             {
-                string query1 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='Image'";
+
+                dbConnection.Open();
+                string dbname = "";
+                string query1 = "";
+                if (data.ClassName == "Aut")
+                {
+                    query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate" +
+                    $"" +
+                    $"" +
+                    $"" +
+                    $", '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {data.LetterRef}  Select @db dbname";
+
+                }
+                else if (data.ClassName == "Factor")
+                {
+
+                    query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {data.ObjectRef}  Select @db dbname";
+
+                }
+                else
+                {
+                    query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+                }
+
 
                 DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
-                string Conversationref = dataTable1.Rows[0]["ConversationCode"] + "";
-                byte[] decodedImage = Convert.FromBase64String(data.image);
+                dbname = dataTable1.Rows[0]["dbname"] + "";
+
+                string sqlCommandText = @" INSERT INTO " + dbname + @".dbo.AttachedFiles (Title, ClassName, ObjectRef, FileName, SourceFile, Type, Owner, CreationDate, Reformer, ReformDate,FilePath)  VALUES (@Title, @ClassName, @ObjectRef, @FileName, @SourceFile, @Type, -1000, GETDATE(), -1000, GETDATE(),@FilePath)  ";
+
+
+                using (SqlCommand sqlCommand = new SqlCommand(sqlCommandText, dbConnection))
+                {
+
+
+                    sqlCommand.Parameters.AddWithValue("@Title", data.Title);
+                    sqlCommand.Parameters.AddWithValue("@FileName", dataName);
+                    sqlCommand.Parameters.AddWithValue("@ObjectRef", Conversationref);
+                    sqlCommand.Parameters.AddWithValue("@ClassName", data.ClassName);
+                    sqlCommand.Parameters.AddWithValue("@Type", data.FileType);
+                    sqlCommand.Parameters.AddWithValue("@FilePath", dataPath);
+                    sqlCommand.Parameters.AddWithValue("@SourceFile", System.IO.File.ReadAllBytes(dataPath));
 
 
 
-                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{Conversationref}.jpg"; // Provide the path where you want to save the image
-                System.IO.File.WriteAllBytes(filePath, decodedImage);
-                string query = $"Exec spImageImport  '{data.ClassName}',{Conversationref},'{filePath}' ;select @@IDENTITY KsrImageCode";
-                DataTable dataTable = await db.Support_ImageExecQuery(HttpContext, query);
-                return jsonClass.JsonResultWithout_Str(dataTable);
+
+
+                    // Execute the command
+                    sqlCommand.ExecuteNonQuery();
+                }
+
+
+
+
+
+                System.IO.File.Delete(dataPath);
+
+            }
+
+
+
+
+            string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query11);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+
+                return Content(json, "application/json");
             }
             catch (Exception ex)
-            { return $"{ex.Message}"; }
-        }
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(AttachFile_Insert));
+                return StatusCode(500, "Internal server error.");
+            }
 
+
+
+
+
+        }
 
 
         [HttpGet]
         [Route("GetWebImagess")]
         public async Task<string> GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
+
         {
-            string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
-            DataTable dataTable =await db.Support_ImageExecQuery(HttpContext, query);
+
+
+            string query = $"SELECT *  FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
+
+
+
+            DataTable dataTable = await db.Support_ImageExecQuery(HttpContext, query);
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
 
         }
+
+
+
+        [HttpPost]
+        [Route("GetConversationFileFromAttach")]
+        public async Task<IActionResult> GetConversationFileFromAttach([FromBody] ConversationAttachDto dto)
+        {
+            try
+            {
+                // ۱. انتخاب دیتابیس بر اساس کلاس
+                string query1;
+                if (dto.ClassName == "Aut")
+                {
+                    query1 = $@" Declare @db nvarchar(100)=''   Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')    From FiscalPeriod p  Join AutLetter aut on PeriodId=PeriodRef  Where LetterCode= {dto.ObjectRef}   Select @db dbname";
+                }
+                else if (dto.ClassName == "Factor")
+                {
+                    query1 = $@" Declare @db nvarchar(100)=''   Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')    From FiscalPeriod p  Join Factor f on PeriodId=PeriodRef  Where FactorCode= {dto.ObjectRef}   Select @db dbname";
+                }
+                else
+                {
+                    query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select @dbname dbname";
+                }
+
+                DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
+                string dbname = dataTable1.Rows[0]["dbname"].ToString() ?? "";
+
+                // ۲. گرفتن فایل
+                string query = $@" SELECT * FROM {dbname}.dbo.AttachedFiles  WHERE Classname = '{dto.ClassName}'    AND ObjectRef = {dto.ConversationRef}  ORDER BY 1 DESC";
+
+                DataTable dataTable = await db.Support_ImageExecQuery(HttpContext, query);
+
+                string? fileName = dataTable.Rows[0]["FileName"]?.ToString() ?? "file.bin";
+                string? extension = Path.GetExtension(fileName).ToLower();
+                string? contentType = "application/octet-stream";
+
+
+                switch (extension)
+                {
+                    case ".jpg":
+                    case ".jpeg": contentType = "image/jpeg"; break;
+                    case ".png": contentType = "image/png"; break;
+                    case ".gif": contentType = "image/gif"; break;
+
+                    case ".mp3": contentType = "audio/mpeg"; break;
+                    case ".wav": contentType = "audio/wav"; break;
+
+                    case ".mp4": contentType = "video/mp4"; break;
+
+                    case ".pdf": contentType = "application/pdf"; break;
+
+                    // Word
+                    case ".doc": contentType = "application/msword"; break;
+                    case ".docx": contentType = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"; break;
+
+                    // Excel
+                    case ".xls": contentType = "application/vnd.ms-excel"; break;
+                    case ".xlsx": contentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"; break;
+
+                    case ".json": contentType = "application/json"; break;
+                    case ".zip": contentType = "application/zip"; break;
+                    case ".txt": contentType = "text/plain"; break;
+                    case ".csv": contentType = "text/csv"; break;
+                }
+
+
+                // ۴. کانورت به Base64
+                string base64 = Convert.ToBase64String((byte[])dataTable.Rows[0]["SourceFile"]);
+
+
+
+                var result = new
+                {
+                    Text = base64,
+                    ContentType = contentType,
+                    FileName = fileName
+                };
+
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Error = ex.Message });
+            }
+        }
+
+
+
+
+
+
+
+
+        [HttpGet]
+        [Route("GetImageFileFromAttach")]
+        public async Task<string> GetImageFileFromAttach(string pixelScale, string ClassName, string ObjectRef)
+
+        {
+
+            string query1 = "";
+            string dbname = "";
+
+            if (ClassName == "Aut")
+            {
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else if (ClassName == "Factor")
+            {
+
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else
+            {
+                query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+            }
+
+            query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+            DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
+            dbname = dataTable1.Rows[0]["dbname"] + "";
+
+
+            string query = $"SELECT * ,SourceFile FROM  " + dbname + $".dbo.AttachedFiles WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
+            DataTable dataTable = await db.Support_ImageExecQuery(HttpContext, query);
+            return jsonClass.ConvertAndScaleImageAttachedToBase64(Convert.ToInt32(pixelScale), dataTable);
+
+        }
+
+
+        [HttpGet]
+        [Route("GetVoiceFileFromAttach")]
+        public async Task<string> GetVoiceFileFromAttach(string pixelScale, string ClassName, string ObjectRef)
+
+        {
+
+            string query1 = "";
+            string dbname = "";
+
+            if (ClassName == "Aut")
+            {
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else if (ClassName == "Factor")
+            {
+
+                query1 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else
+            {
+                query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+            }
+
+            query1 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+            DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
+            dbname = dataTable1.Rows[0]["dbname"] + "";
+
+
+            string query = $"SELECT * ,SourceFile FROM  " + dbname + $".dbo.AttachedFiles WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
+            DataTable dataTable = await db.Support_ImageExecQuery(HttpContext, query);
+            return jsonClass.ConvertVoiceToBase64(dataTable);
+
+        }
+
+
+
 
         [HttpPost]
         [Route("KowsarAttachFile")]
@@ -1069,7 +1406,7 @@ namespace webapikits.Controllers
         }
 
 
-        
+
 
         [HttpGet]
         [Route("GetAttachFile")]
@@ -1103,7 +1440,7 @@ namespace webapikits.Controllers
 
 
             string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
-            DataTable dataTable1 = await  db.Support_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 = await db.Support_ExecQuery(HttpContext, query1);
             string base64File = dataTable1.Rows[0]["SourceFile"] + "";
             byte[] fileBytes = Convert.FromBase64String(base64File);
 
@@ -1228,6 +1565,73 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
         }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("GetWebFactor")]
+        public async Task<IActionResult> GetWebFactor([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"spWeb_Get_Factor '{factorwebDto.ClassName}',{factorwebDto.ObjectRef},'{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}'";
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(EditCustomerProperty));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
+
+        }
+
+        [HttpPost]
+        [Route("GetWebFactorRows")]
+        public async Task<IActionResult> GetWebFactorRows([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $"spWeb_Get_Factor_Rows '{factorwebDto.ClassName}',{factorwebDto.ObjectRef}";
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(EditCustomerProperty));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
+
+        }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         [HttpGet]
@@ -1368,7 +1772,7 @@ namespace webapikits.Controllers
 
             string UserId = _configuration.GetConnectionString("Support_UserId");
 
-            string query = $"spWeb_Factor_Insert  @ClassName ='Factor',@StackRef =1,@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = 0";
+            string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef =1,@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = 0";
 
 
 
@@ -1393,7 +1797,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult> WebSupportFactorInsertRow([FromBody] FactorRow factorRow)
         {
 
-            string query = $"spWeb_Factor_InsertRow  @ClassName ='Factor', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount =1,@Price =0,@UserId =29,@MustHasAmount =0, @MergeFlag =1 ";
+            string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount =1,@Price =0,@UserId =29,@MustHasAmount =0, @MergeFlag =1 ";
 
 
 
@@ -1531,8 +1935,6 @@ namespace webapikits.Controllers
 
 
             string query = $"Select * From [dbo].[fnGetGridSchema]('{Where}')  where Visible = 1";
-
-
 
 
 
@@ -1972,7 +2374,7 @@ namespace webapikits.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(ManualAttendance));
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAttendance_StatusDurations));
                 return StatusCode(500, "Internal server error.");
             }
         }
@@ -1984,6 +2386,259 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("GetAddress")]
+        public async Task<IActionResult> GetAddress(string CentralCode)
+        {
+            string query = $"spWeb_GetAddress  {CentralCode}";
+
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Address", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAddress));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+
+        [HttpPost]
+        [Route("UpdateAddress")]
+        public async Task<IActionResult> UpdateAddress([FromBody] AddressDto addressDto)
+
+        {
+            // 0 ghayeb 
+            // 1 hozor
+            // 2 mashghol
+
+
+            string query = $"spWeb_UpdateAddress Exec spWeb_UpdateAddress " +
+                $"@CentralRef ={addressDto.CentralRef},@AddressTitle ='{addressDto.AddressTitle}',@Address ='{addressDto.Address}'," +
+                $"@ZipCode ='{addressDto.ZipCode}',@PostCode ='{addressDto.PostCode}',@Phone ='{addressDto.Phone}',@Fax ='{addressDto.Fax}',@Mobile   ='{addressDto.Mobile}'," +
+                $"@Email ='{addressDto.Email}',@MobileName ='{addressDto.MobileName}'";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Address", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateAddress));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("GetTasks")]
+        public async Task<IActionResult> GetTasks([FromBody] KowsarTaskDto dto)
+        {
+            // تبدیل TaskRef و Flag به int یا NULL
+            string taskRef = !string.IsNullOrEmpty(dto.TaskRef) ? dto.TaskRef : "NULL";
+            string flag = !string.IsNullOrEmpty(dto.Flag) ? dto.Flag : "0";
+
+            string query = $"spWeb_GetKowsarTask @TaskRef = {taskRef}, @Flag = {flag}";
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "KowsarTasks", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(GetTasks));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("InsertTask")]
+        public async Task<IActionResult> InsertTask([FromBody] KowsarTaskDto dto)
+        {
+            try
+            {
+                string taskRef = !string.IsNullOrEmpty(dto.TaskRef) ? dto.TaskRef : "NULL";
+                string title = string.IsNullOrEmpty(dto.Title) ? "" : dto.Title.Replace("'", "''");
+                string explain = string.IsNullOrEmpty(dto.Explain) ? "" : dto.Explain.Replace("'", "''");
+
+                string query = $"spWeb_KowsarTaskInsert @TaskRef = {taskRef}, @Title = N'{title}', @Explain = N'{explain}'";
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "KowsarTasks", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(InsertTask));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("UpdateTask")]
+        public async Task<IActionResult> UpdateTask([FromBody] KowsarTaskDto dto)
+        {
+            if (string.IsNullOrEmpty(dto.TaskCode) || !int.TryParse(dto.TaskCode, out int taskCode))
+                return BadRequest("TaskCode is required and must be a valid number for update.");
+
+            try
+            {
+                // جایگزینی ' برای جلوگیری از خطای SQL
+                string title = string.IsNullOrEmpty(dto.Title) ? "" : dto.Title.Replace("'", "''");
+                string explain = string.IsNullOrEmpty(dto.Explain) ? "" : dto.Explain.Replace("'", "''");
+
+                string query = $"spWeb_KowsarTaskUpdate @TaskCode = {taskCode}, @Title = N'{title}', @Explain = N'{explain}'";
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "KowsarTasks", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(UpdateTask));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+        [HttpPost]
+        [Route("DeleteTask")]
+        public async Task<IActionResult> DeleteTask([FromBody] KowsarTaskDto kowsarTaskDto)
+        {
+            if (string.IsNullOrEmpty(kowsarTaskDto.TaskCode) || !int.TryParse(kowsarTaskDto.TaskCode, out int taskCode))
+                return BadRequest("TaskCode is required and must be a valid number for delete.");
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"spWeb_KowsarTaskDelete @TaskCode = {taskCode}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "KowsarTasks", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(DeleteTask));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+        [HttpPost]
+        [Route("DeleteTaskAll")]
+        public async Task<IActionResult> DeleteTaskAll([FromBody] KowsarTaskDto kowsarTaskDto)
+        {
+            if (string.IsNullOrEmpty(kowsarTaskDto.TaskCode) || !int.TryParse(kowsarTaskDto.TaskCode, out int taskCode))
+                return BadRequest("TaskCode is required and must be a valid number for delete.");
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"spWeb_KowsarTaskDeleteRecursive @TaskCode = {taskCode}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "KowsarTasks", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(DeleteTaskAll));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("GetKowsarReport")]
+        public async Task<IActionResult> GetKowsarReport([FromBody] KowsarReportDto kowsarReportDto)
+        {
+            
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spWeb_GetKowsarReport @SearchTarget = '{kowsarReportDto.SearchTarget}',@CentralRef = {kowsarReportDto.CentralRef},@LetterRowCode = {kowsarReportDto.LetterRowCode},@Flag = {kowsarReportDto.Flag},@DateTarget = '{kowsarReportDto.DateTarget}'";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "KowsarReports", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(GetKowsarReport));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("GetCustomerReport")]
+        public async Task<IActionResult> GetCustomerReport([FromBody] KowsarReportDto kowsarReportDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spWeb_GetCustomerReport @StartDateTarget = '{kowsarReportDto.StartDateTarget}',@EndDateTarget = '{kowsarReportDto.EndDateTarget}',@SearchTarget = '{kowsarReportDto.SearchTarget}',@CustomerRef = {kowsarReportDto.CustomerRef},@Flag = {kowsarReportDto.Flag}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "KowsarReports", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(GetCustomerReport));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+            [HttpPost]
+            [Route("GetFactorByCustomerCode")]
+            public async Task<IActionResult> GetFactorByCustomerCode([FromBody] SearchTargetDto searchTargetDto)
+            {
+
+
+
+                string query = $"Exec [dbo].[spWeb_GetFactorByCustomerCode] '{searchTargetDto.ClassName}',{searchTargetDto.ObjectRef}";
+
+            DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+            string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+            return Content(json, "application/json");
+
+
+        }
 
 
 

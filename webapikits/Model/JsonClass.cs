@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Data;
 using System.Drawing;
+using System.Net.Mime;
 using Image = System.Drawing.Image;
 
 namespace webapikits.Model
@@ -137,6 +138,182 @@ namespace webapikits.Model
                 return JsonConvert.SerializeObject(responseObj);
             }
         }
+
+
+
+        /// <summary>
+        /// تبدیل تصویر به Base64 با قابلیت Resize
+        /// </summary>
+        public static string ConvertAndScaleImageAttachedToBase64(int? targetSize, DataTable dataTable)
+        {
+            if (dataTable.Rows.Count == 0)
+            {
+                return BuildResponse("Nophoto", "image/jpeg","NoName");
+            }
+
+            byte[] imageData = (byte[])dataTable.Rows[0]["SourceFile"];
+           string? fileName = (string?) dataTable.Rows[0]["FileName"];
+
+
+            string base64String;
+
+            using (MemoryStream ms = new MemoryStream(imageData))
+            {
+                using (Image image = Image.FromStream(ms))
+                {
+                    // اگر تصویر بزرگتر از targetSize بود Resize می‌کنیم
+                    if (targetSize.HasValue && Math.Max(image.Width, image.Height) > targetSize.Value)
+                    {
+                        double scaleFactor = (double)targetSize.Value / Math.Max(image.Width, image.Height);
+
+                        int newWidth = (int)(image.Width * scaleFactor);
+                        int newHeight = (int)(image.Height * scaleFactor);
+
+                        using (Image scaledImage = new Bitmap(newWidth, newHeight))
+                        {
+                            using (Graphics g = Graphics.FromImage(scaledImage))
+                            {
+                                g.DrawImage(image, 0, 0, newWidth, newHeight);
+                            }
+
+                            using (MemoryStream scaledMs = new MemoryStream())
+                            {
+                                scaledImage.Save(scaledMs, System.Drawing.Imaging.ImageFormat.Jpeg);
+                                base64String = Convert.ToBase64String(scaledMs.ToArray());
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // بدون Resize
+                        base64String = Convert.ToBase64String(imageData);
+                    }
+                }
+            }
+
+            return BuildResponse(base64String, "image/jpeg",fileName);
+        }
+
+
+        /// <summary>
+        /// خروجی استاندارد JSON
+        /// </summary>
+        private static string BuildResponse(string base64, string contentType, string fileName)
+        {
+            var responseObj = new
+            {
+                Text = base64,
+                ContentType = contentType,
+                FileName = fileName
+            };
+
+            return JsonConvert.SerializeObject(responseObj);
+        }
+
+
+
+
+
+        public string ConvertVoiceToBase64(DataTable dataTable)
+        {
+            if (dataTable.Rows.Count > 0)
+            {
+                byte[] voiceData = (byte[])dataTable.Rows[0]["SourceFile"]; // ستون صدا رو اینجا بذار
+
+                string base64String = Convert.ToBase64String(voiceData);
+
+                // ContentType رو بر اساس فرمت ذخیره‌شده تنظیم کن (اینجا مثلا mp3)
+                string contentType = "audio/mpeg";
+
+                var responseObj = new
+                {
+                    Text = base64String,
+                    ContentType = contentType
+                };
+
+                return JsonConvert.SerializeObject(responseObj);
+            }
+            else
+            {
+                string contentType = "audio/mpeg";
+                var responseObj = new
+                {
+                    Text = "Novoice",
+                    ContentType = contentType
+                };
+
+                return JsonConvert.SerializeObject(responseObj);
+            }
+        }
+
+
+
+
+
+
+        public string ConvertAndScaleImageAttachedToBase64(int targetSize, DataTable dataTable)
+        {
+
+            if (dataTable.Rows.Count > 0)
+            {
+                byte[] imageData = (byte[])dataTable.Rows[0]["SourceFile"];
+                string base64String;
+
+                using (MemoryStream ms = new MemoryStream(imageData))
+                {
+                    Image image = Image.FromStream(ms);
+
+                    // Check image size and scale if necessary
+                    if (Math.Max(image.Width, image.Height) > targetSize)
+                    {
+                        double scaleFactor = (double)targetSize / Math.Max(image.Width, image.Height);
+
+                        int newWidth = (int)(image.Width * scaleFactor);
+                        int newHeight = (int)(image.Height * scaleFactor);
+
+                        Image scaledImage = new Bitmap(newWidth, newHeight);
+                        using (Graphics g = Graphics.FromImage(scaledImage))
+                        {
+                            g.DrawImage(image, 0, 0, newWidth, newHeight);
+                        }
+
+                        using (MemoryStream scaledMs = new MemoryStream())
+                        {
+                            scaledImage.Save(scaledMs, System.Drawing.Imaging.ImageFormat.Jpeg);
+                            base64String = Convert.ToBase64String(scaledMs.ToArray());
+                        }
+                    }
+                    else
+                    {
+                        base64String = Convert.ToBase64String(imageData);
+                    }
+                }
+
+                // Return the Base64 string and ContentType
+                string contentType = "image/jpeg";
+                var responseObj = new
+                {
+                    Text = base64String,
+                    ContentType = contentType
+                };
+
+                return JsonConvert.SerializeObject(responseObj);
+            }
+            else
+            {
+                // Return placeholder for no photo
+                string contentType = "image/jpeg";
+                var responseObj = new
+                {
+                    Text = "Nophoto",
+                    ContentType = contentType
+                };
+                return JsonConvert.SerializeObject(responseObj);
+            }
+        }
+
+
+
 
 
         public string ConvertAndScaleImageToBase64(int targetSize, DataTable dataTable)
@@ -356,12 +533,36 @@ namespace webapikits.Model
 
         }
 
+        /// <summary>
+        /// تبدیل صدا به Base64 (MP3/WAV و …)
+        /// </summary>
+        public string ConvertVoiceToBase641(DataTable dataTable)
+        {
+            return ConvertFileToBase64(dataTable, "audio/mpeg", "Novoice");
+        }
 
 
 
+        public string ConvertFileToBase64(DataTable dataTable, string contentType, string emptyText)
+        {
+            string? fileName = (string?)dataTable.Rows[0]["FileName"];
+            byte[] fileData = (byte[])dataTable.Rows[0]["SourceFile"];
+
+
+            if (dataTable.Rows.Count > 0)
+            {
+
+                string base64String = Convert.ToBase64String(fileData);
+                return BuildResponse(base64String, contentType, fileName);
+            }
+            else
+            {
+                return BuildResponse(emptyText, contentType, fileName);
+            }
+        }
 
     }
 
 
-   
+
 }

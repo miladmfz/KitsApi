@@ -35,6 +35,8 @@ internal class Program
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
+            //builder.Services.AddHttpClient();
+
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IDbService, DbService>();
             builder.Services.AddScoped<IJsonFormatter, JsonFormatter>();

@@ -33,6 +33,7 @@ namespace webapikits.Model
         public string? CustomerRef { get; set; } = "";
         public string? CustomerCode { get; set; } = "";
         public string? ClassName { get; set; } = "Factor";
+        public string? DepartmentRef { get; set; } = "0";
         public string? StackRef { get; set; } = "1";
         public string? isShopFactor { get; set; } = "0";
 

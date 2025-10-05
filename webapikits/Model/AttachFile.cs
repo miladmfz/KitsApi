@@ -1,4 +1,7 @@
-﻿namespace webapikits.Model
+﻿using System;
+using System.Data.Entity.Core.Objects;
+
+namespace webapikits.Model
 {
     public class AttachFile
     {
@@ -13,4 +16,19 @@
 
 
     }
+
+
+    public class ConversationAttachDto
+    {
+        public string? Title { get; set; } = "";
+        public string? PixelScale { get; set; } = "0";
+        public string? ClassName { get; set; } = "";
+        public string? ObjectRef { get; set; } = "";
+        public string? ConversationRef { get; set; } = "";
+
+
+    }
+
+
+
 }
