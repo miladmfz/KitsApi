@@ -1,15 +1,16 @@
 ﻿using FastReport;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System.Data;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
+using System.Data.SqlClient;
+using System.Drawing;
 using System.Net;
 using System.Reflection;
 using System.Xml.Linq;
 using webapikits.Model;
-using Microsoft.AspNetCore.Http;
-using Newtonsoft.Json;
-using System.Drawing;
-using System.Data.Entity.Core.Objects;
-using System.Data.SqlClient;
 
 namespace webapikits.Controllers
 {
@@ -857,7 +858,99 @@ namespace webapikits.Controllers
 
 
 
+        [HttpPost]
+        [Route("LeaveRequest_Insert")]
+        public string LeaveRequest_Insert([FromBody] LeaveRequestDto leaveRequestDto)
+        {
 
+
+            string query = $"Exec [dbo].[spWeb_LeaveRequest_Insert] {leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}','{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+
+        }
+
+
+        [HttpPost]
+        [Route("LeaveRequest_Update")]
+        public string LeaveRequest_Update([FromBody] LeaveRequestDto leaveRequestDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_LeaveRequest_Update] {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}','{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+
+        }
+
+        [HttpPost]
+        [Route("LeaveRequest_WorkFlow")]
+        public string LeaveRequest_WorkFlow([FromBody] LeaveRequestDto leaveRequestDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_LeaveRequest_WorkFlow]  {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.ManagerRef},{leaveRequestDto.WorkFlowStatus},'{leaveRequestDto.WorkFlowExplain}'";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+
+        }
+
+
+
+
+
+
+        [HttpPost]
+        [Route("GetLeaveRequest")]
+        public string GetLeaveRequest([FromBody] LeaveRequestDto leaveRequestDto)
+        {
+
+
+            string query = $"Exec [dbo].[spWeb_GetLeaveRequest]  '{leaveRequestDto.StartDate}','{leaveRequestDto.EndDate}',{leaveRequestDto.UserRef},{leaveRequestDto.ManagerRef},{leaveRequestDto.WorkFlowStatus}";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+
+        }
+
+
+
+        [HttpGet]
+        [Route("GetLeaveRequestById")]
+        public string GetLeaveRequestById(string LeaveRequestCode)
+        {
+
+            string query = $" Exec [dbo].[spWeb_GetLeaveRequest_ById] {LeaveRequestCode}";
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+
+
+        }
+
+
+
+
+        [HttpPost]
+        [Route("DeleteLeaveRequest")]
+        public string DeleteLeaveRequest([FromBody] LeaveRequestDto leaveRequestDto)
+        {
+
+
+            string query = $"Delete From LeaveRequest WHERE LeaveRequestCode = {leaveRequestDto.LeaveRequestCode}";
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+
+        }
 
 
 

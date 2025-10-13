@@ -10,12 +10,14 @@ namespace webapikits.Controllers
     [ApiController]
     public class OrderWebController : ControllerBase
     {
+
         public readonly IConfiguration _configuration;
         DataBaseClass db;
         DataTable DataTable = new DataTable();
         string Query = "";
         Response response = new();
         JsonClass jsonClass = new JsonClass();
+
         Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
         public OrderWebController(IConfiguration configuration)
@@ -28,7 +30,7 @@ namespace webapikits.Controllers
 
 
 
-        /// ////////////////////////////////////////////////////////////////
+        /// ///////////////////////////////////////////////////////////////
 
 
 
@@ -97,6 +99,7 @@ namespace webapikits.Controllers
 
             DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
+
         }
 
 
@@ -349,7 +352,7 @@ namespace webapikits.Controllers
         {
             string searchtarget = searchDto.Where.Replace(" ", "%");
 
-            string query = $"Exec spApp_GetGoods2 @RowCount = {searchDto.RowCount},@Where = N' GoodName like ''%{searchtarget}%''' ,@AppBasketInfoRef=0, @GroupCode = {searchDto.GroupCode} ,@AppType=3 ";
+            string query = $"Exec spApp_GetGoods2 @RowCount = {searchDto.RowCount},@Where = N' GoodName like ''%{searchtarget}%''' ,@AppBasketInfoRef=1, @GroupCode = {searchDto.GroupCode} ,@AppType=3 ,@OrderBy =' Order By ActiveStack DESC , GoodCode  Desc'";
 
             DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
             return jsonClass.JsonResultWithout_Str(dataTable);
