@@ -6,6 +6,12 @@
         public string? UserRef { get; set; }
         public string? LeaveRequestType { get; set; }
         public string? LeaveRequestExplain { get; set; }
+
+
+        public string? TotalDay { get; set; }
+        public string? WorkDay { get; set; }
+        public string? OffDay { get; set; }
+
         public string? LeaveStartDate { get; set; }
         public string? LeaveEndDate { get; set; }
         public string? LeaveStartTime { get; set; }

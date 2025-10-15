@@ -864,7 +864,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = $"Exec [dbo].[spWeb_LeaveRequest_Insert] {leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}','{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
+            string query = $"Exec [dbo].[spWeb_LeaveRequest_Insert] {leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}',{leaveRequestDto.TotalDay},{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
 
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
@@ -879,7 +879,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = $"Exec [dbo].[spWeb_LeaveRequest_Update] {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}','{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
+            string query = $"Exec [dbo].[spWeb_LeaveRequest_Update] {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}',{leaveRequestDto.TotalDay},{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
 
 
             DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
@@ -951,6 +951,8 @@ namespace webapikits.Controllers
             return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
 
         }
+
+
 
 
 
