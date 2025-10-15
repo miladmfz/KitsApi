@@ -29,6 +29,7 @@
         public string LetterState { get; set; } = "";
         public string OwnerCentral { get; set; } = "";
         public string CreatorCentral { get; set; } = "";
+        public string OwnerPersonInfoRef { get; set; } = "";
 
     }
 
