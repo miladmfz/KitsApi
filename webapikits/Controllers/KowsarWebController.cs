@@ -705,6 +705,20 @@ namespace webapikits.Controllers
                 }
             }
 
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.PersonInfoCode))
+            {
+                if (!string.IsNullOrEmpty(Where))
+                {
+                    Where += $" And (OwnerPersonInfoRef={searchTargetLetterDto.PersonInfoCode})";
+                }
+                else
+                {
+                    Where = $"(OwnerPersonInfoRef={searchTargetLetterDto.PersonInfoCode})";
+                }
+            }
+
+
             if (!string.IsNullOrEmpty(searchTargetLetterDto.StartTime))
             {
                 if (!string.IsNullOrEmpty(Where))
@@ -730,6 +744,52 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("DeleteAttachFile")]
+        public string  DeleteAttachFile(string AttachedFileCode, string ClassName, string ObjectRef)
+        {
+
+            string dbname = "";
+            string query11 = "";
+            if (ClassName == "AutLetter")
+            {
+                query11 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join AutLetter aut on PeriodId=PeriodRef Where LetterCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else if (ClassName == "Factor")
+            {
+
+                query11 = $"  Declare @db nvarchar(100)=''  Select @db = db_name()+'Ocr'+REPLACE(FromDate, '/', '')   From FiscalPeriod p Join Factor f on PeriodId=PeriodRef Where FactorCode= {ObjectRef}  Select @db dbname";
+
+            }
+            else
+            {
+                query11 = $"Declare @dbname nvarchar(200)=db_name()+'Ocr' select  @dbname dbname";
+
+
+            }
+
+
+
+            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query11);
+
+            dbname = dataTable.Rows[0]["dbname"] + "";
+
+
+
+            string query1 = $"Delete From {dbname}..AttachedFiles where ClassName = '{ClassName}' And AttachedFileCode = {AttachedFileCode} ";
+
+
+
+            DataTable dataTable1 = db.Kowsar_ExecQuery(HttpContext, query1);
+            return jsonClass.JsonResultWithout_Str(dataTable1);
+
+
+
+
+
+
+        }
 
 
 
@@ -739,7 +799,7 @@ namespace webapikits.Controllers
 
 
 
-            [HttpPost]
+        [HttpPost]
             [Route("LetterInsert")]
             public string LetterInsert([FromBody] LetterInsert letterInsert)
             {
