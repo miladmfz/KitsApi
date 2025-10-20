@@ -58,9 +58,9 @@ namespace webapikits.Controllers
 
             string query = $"select * from dbo.fnObjectType('{ObjectType}') ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
+            
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -83,9 +83,8 @@ namespace webapikits.Controllers
 
             string query = $" exec spApp_OrderMizList  {orderModel.InfoState}, N'{orderModel.MizType}' ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -316,8 +315,7 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+             
 
             try
             {
@@ -346,8 +344,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec spAppGetDistinctValues '{TableName}','{FieldNames} Value','{WhereClause}' ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Values", "");
+             
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -377,8 +374,7 @@ namespace webapikits.Controllers
             string query = "Select brokerCode,BrokerNameWithoutType,CentralRef,Active From vwSellBroker";
 
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
+             
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -611,9 +607,8 @@ namespace webapikits.Controllers
             }
 
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, sq);
+           
 
-            //return jsonClass.JsonResult_Str(dataTable, "Groups", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -638,9 +633,8 @@ namespace webapikits.Controllers
             //string query = "Exec spApp_GetGoods2 @RowCount = $RowCount,@Where = N'$Where',@AppBasketInfoRef=$AppBasketInfoRef, @GroupCode = $GroupCode ,@AppType=3 , @OrderBy = ' order by PrivateCodeForSort ' ";
             string query = $"Exec spApp_GetGoods2 @RowCount = {orderModel.RowCount}, @Where = N'{orderModel.Where}', @AppBasketInfoRef = {orderModel.AppBasketInfoRef}, @GroupCode = {orderModel.GroupCode}, @AppType = 3, @OrderBy = ' order by PrivateCodeForSort '";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -668,9 +662,8 @@ namespace webapikits.Controllers
 
             string query = $"Delete From AppBasket Where AppBasketInfoRef = {AppBasketInfoRef} and AppBasketCode = {RowCode}";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -697,9 +690,8 @@ namespace webapikits.Controllers
                         $" ,{orderModel.Prepayed},'{orderModel.ReserveStartTime}','{orderModel.ReserveEndTime}'" +
                         $" ,'{orderModel.Date}',{orderModel.State},{orderModel.InfoCode}";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -723,9 +715,8 @@ namespace webapikits.Controllers
 
             string query = $"exec spApp_OrderReserveList {MizRef}"  ;
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -747,9 +738,8 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -775,9 +765,8 @@ namespace webapikits.Controllers
                         $" {orderModel.bRatio}, '{orderModel.Explain}', {orderModel.UserId}," +
                         $" {orderModel.InfoRef}, {orderModel.RowCode}";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -800,9 +789,8 @@ namespace webapikits.Controllers
 
             string query = $"Exec spApp_OrderGetSummmary {AppBasketInfoRef}" ;
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -824,9 +812,8 @@ namespace webapikits.Controllers
 
             string query = $"Exec [dbo].[spApp_OrderGet] {AppBasketInfoRef} , {AppType} ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -849,9 +836,8 @@ namespace webapikits.Controllers
 
             string query = $"Exec [dbo].[spApp_OrderGetFactor] {AppBasketInfoRef}  ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -875,9 +861,8 @@ namespace webapikits.Controllers
 
             string query = $"Exec [dbo].[spApp_OrderToFactor] {AppBasketInfoRef} , -2000 ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -899,9 +884,8 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppPrinter ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "AppPrinters", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -926,9 +910,8 @@ namespace webapikits.Controllers
 
             string query = $"spApp_Order_CanPrint  {AppBasketInfoRef} ,{CanPrint}  ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -950,9 +933,8 @@ namespace webapikits.Controllers
 
             string query = $"Delete From AppBasket Where  PreFactorCode is null and  AppBasketInfoRef= {AppBasketInfoRef} ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -974,9 +956,8 @@ namespace webapikits.Controllers
 
             string query = $" spApp_OrderInfoReserveDelete  {AppBasketInfoRef} ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "Done");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -998,9 +979,8 @@ namespace webapikits.Controllers
 
             string query = $" spApp_OrderInfoUpdateExplain  '{orderModel.Explain}', {orderModel.AppBasketInfoCode}   ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "BasketInfos", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -1027,9 +1007,8 @@ namespace webapikits.Controllers
 
             string query = $"select GoodCode,GoodName,MaxSellPrice,'' ImageName from vwGood where  GoodCode in(Select GoodRef From GoodGroup p Join GoodsGrp s on p.GoodGroupRef = s.GroupCode Where s.GroupCode = {GroupCode} or s.L1 = {GroupCode} or s.L2 = {GroupCode} or s.L3 = {GroupCode} )";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
@@ -1059,9 +1038,8 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_OrderGetFactorRow] {AppBasketInfoRef}, {GoodGroups}, '{Where}'";
 
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
             try
             {
                 DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);

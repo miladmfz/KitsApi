@@ -105,10 +105,10 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_BasketGet] '{Mobile}'";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            
 
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
 
             try
             {
@@ -135,8 +135,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_BasketPreFactors] '{Mobile}',{Code},{ReservedRows}" ;
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "PreFactors", "");
+            
 
             try
             {
@@ -163,9 +162,9 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_BasketToPreFactor] '{Mobile}', -2000 , '{Explain}'";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
 
             try
             {
@@ -190,8 +189,8 @@ namespace webapikits.Controllers
             string query = $"Exec dbo.spApp_BasketSummary '{Mobile}'";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -217,8 +216,7 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -255,8 +253,7 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -289,8 +286,7 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "Result");
+            
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -315,8 +311,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_GetGoodGroups_Default] ";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -342,8 +337,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_GetGoodGroups_DefaultImage]  ";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -447,8 +441,8 @@ namespace webapikits.Controllers
             }
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -488,9 +482,8 @@ namespace webapikits.Controllers
             }
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            
 
-            //return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
             try
             {
@@ -532,8 +525,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_XUserCreate] '{UName}','{UPass}','{NewPass}','{FName}','{LName}','{mobile}','{company}','{address}','{PostalCode}','{email}',-2000,{Flag}"  ;
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "users", "");
+            
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -623,8 +615,7 @@ namespace webapikits.Controllers
 
             string query = $"Exec [dbo].[spApp_BasketInsert] '{DeviceCode}', {GoodRef}, {FacAmount}, {Price}, '{UnitRef}', '{Ratio}', '{Explain}', '{Source}', {UserId}, '{Mobile}'";
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, sq);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);

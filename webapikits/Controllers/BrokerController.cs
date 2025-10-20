@@ -63,8 +63,7 @@ namespace webapikits.Controllers
             string query = $"Exec [spApp_GetColumn]  0  ,'', {Type},{AppType}, {IncludeZero}";
 
 
-            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Columns", "");
+             
 
 
             try
@@ -95,9 +94,9 @@ namespace webapikits.Controllers
 
             string query = $"exec spApp_GetBrokerStack {BrokerRef}" ;
 
-            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
+            
 
             try
             {
@@ -136,7 +135,7 @@ namespace webapikits.Controllers
 
             string query = $"select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
 
-            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+             
 
             //return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
             try
@@ -162,7 +161,7 @@ namespace webapikits.Controllers
 
             string query = $"Select top 1 * from RepLogData order by 1 desc";
 
-            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+             
 
             //return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
             try

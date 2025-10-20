@@ -75,8 +75,7 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -238,11 +237,8 @@ namespace webapikits.Controllers
             
             string query = "select top 2 GoodCode,GoodName,GoodExplain1 from good ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //// Log the result to the console
-            //Debug.WriteLine("Check action result: " );
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
             try
             {
@@ -274,9 +270,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+             
             
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "VerNo");
 
             try
             {
@@ -307,9 +302,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Columns", "");
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -366,9 +360,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+             
             
-            //return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
             try
             {
@@ -400,8 +393,7 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Values", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -428,8 +420,7 @@ namespace webapikits.Controllers
             string query= "Select brokerCode,BrokerNameWithoutType,CentralRef,Active From vwSellBroker";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);

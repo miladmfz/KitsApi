@@ -58,9 +58,9 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
@@ -84,9 +84,9 @@ namespace webapikits.Controllers
             string query = $"Exec spapp_IsXUser  '{UName}','{UPass}'";
 
 
-            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
@@ -113,9 +113,9 @@ namespace webapikits.Controllers
             string query = $"Exec spApp_ChangeXUserPassword  '{UName}','{UPass}','{NewPass}'";
 
 
-            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
@@ -140,9 +140,9 @@ namespace webapikits.Controllers
             string query = $"select top 50 * from WebLog order by 1 desc";
 
 
-            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
@@ -165,9 +165,9 @@ namespace webapikits.Controllers
             string query = $"exec sp_WebLogInsert @ClassName='{ClassName}',@TagName='{TagName}',@LogValue='{LogValue}'";
 
 
-            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);

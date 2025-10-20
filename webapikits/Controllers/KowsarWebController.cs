@@ -70,8 +70,8 @@ namespace webapikits.Controllers
             string query = $"select KeyValue,Description,DataValue,KeyId from dbsetup where KeyValue in ('AppBroker_ActivationCode','AppOcr_ActivationCode','AppOrder_ActivationCode') and DataValue <> '0'";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "applications", "");
+             
+             
 
             try
             {
@@ -95,9 +95,9 @@ namespace webapikits.Controllers
 
             string query = "select * from dbo.fnObjectType('" + ObjectType + "') ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "ObjectTypes", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -124,8 +124,8 @@ namespace webapikits.Controllers
 
             string query = $"  declare @ss int  select  @ss=max(GoodCode) from good exec spWeb_GetGoodById @ss,0";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -148,8 +148,8 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},0";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -171,8 +171,8 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},1";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -195,8 +195,8 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},2";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -221,8 +221,8 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},3";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -249,8 +249,8 @@ namespace webapikits.Controllers
 
             string query = $"  spWeb_GetGoodById {GoodCode},4";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -274,8 +274,8 @@ namespace webapikits.Controllers
 
             string query = $" select  KsrImageCode,ClassName,ObjectRef,IsDefaultImage,FileName ,IMG='' from KsrImage Where ClassName='TGood' And objectref={GoodCode}";
 
-            //DataTable dataTable = db.Web_ImageExecQuery( query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Image_ExecQuery(HttpContext, query);
@@ -298,8 +298,8 @@ namespace webapikits.Controllers
 
             string query = $"select GoodGroupCode,GroupCode, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode  where Goodref = {GoodCode}  ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -323,8 +323,8 @@ namespace webapikits.Controllers
 
             string query = $"select GoodStackCode,GoodRef,StackRef,Amount,ReservedAmount,Name,ActiveStack  from vwGoodStack where goodref= {GoodCode}  ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -353,8 +353,8 @@ namespace webapikits.Controllers
 
             string query = $"Exec spGood_AddNew '{jsonModelDto.JsonData}' ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -381,8 +381,8 @@ namespace webapikits.Controllers
 
             string query = $"Select top 100 * from vwgood order by 1 desc";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -406,8 +406,8 @@ namespace webapikits.Controllers
 
             string query = $"Select StackCode,L1,L2,L3,L4,L5,Name from Stacks";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Stacks", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -430,8 +430,7 @@ namespace webapikits.Controllers
 
             string query = $"select GroupCode,L1,L2,L3,L4,L5,Name from GoodsGrp";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "GoodsGrps", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -457,8 +456,8 @@ namespace webapikits.Controllers
 
             string query = $"select dbo.NodeValue(PropertySchema, 'DisplayName') DisplayName, PropertySchemaCode,PropertySchema,ClassName,ObjectType,PropertyName,PropertySequence,PropertyType,PropertyValueMap From PropertySchema p where  p.ObjectType ='{propertyDto.ObjectType}' order by PropertySequence";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Propertys", "");
+             
+            
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -486,8 +485,7 @@ namespace webapikits.Controllers
                 $"From(Select cast(PropertySchema as xml) xschema, PropertySchemaCode, ClassName,ObjectType,PropertyName,PropertySequence,PropertyType,PropertyValueMap ," +
                 $" dbo.NodeValue(PropertySchema, 'DisplayName') dispname  From PropertySchema where PropertyType = 'Choice' And ClassName='{propertyDto.ClassName}') ds cross apply ds.xschema.nodes('/Fields/CHOICES/ *') AS R(x)";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "GetPropertyChoiess", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -525,7 +523,6 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                // DataTable dataTable = db.Image_ExecQuery( query);
 
             try
             {
@@ -562,8 +559,8 @@ namespace webapikits.Controllers
 
             string query = $" delete from GoodGroup Where GoodGroupCode = {Where}  ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+            
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -587,8 +584,8 @@ namespace webapikits.Controllers
 
             string query = $" delete from KsrImage Where KsrImageCode = {Where}  ";
 
-            //DataTable dataTable = db.Web_ImageExecQuery( query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+            
             try
             {
                 DataTable dataTable = await db.Image_ExecQuery(HttpContext, query);
@@ -611,8 +608,7 @@ namespace webapikits.Controllers
 
             string query = $"Select BarCodeId,GoodRef,BarCode From Barcode where goodref={Where}";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Barcodes", "");
+  
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -638,8 +634,8 @@ namespace webapikits.Controllers
 
             string query = $"Select top 5 GoodCode,GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType,SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -665,8 +661,8 @@ namespace webapikits.Controllers
 
             string query = $" spGood_IsbnToBarcode  '{isbnToBarcodeDto.Isbn}' , {isbnToBarcodeDto.GoodCode} ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -691,8 +687,7 @@ namespace webapikits.Controllers
 
             string query = $"Select * From [dbo].[fnGetGridSchema]('{Where}')  where Visible = 1";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "GridSchemas", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -718,8 +713,8 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_Get_Factor '{factorwebDto.ClassName}',{factorwebDto.ObjectRef},'{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}'";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -746,8 +741,8 @@ namespace webapikits.Controllers
             string query = $"spWeb_Get_Factor_Rows '{factorwebDto.ClassName}',{factorwebDto.ObjectRef}";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -775,8 +770,8 @@ namespace webapikits.Controllers
 
             string query = $" Exec spWeb_GetFactors";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -803,8 +798,8 @@ namespace webapikits.Controllers
 
             string query = $" Exec spWeb_GetGood '{searchTargetDto.SearchTarget}'";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -821,14 +816,6 @@ namespace webapikits.Controllers
         }
 
 
-        /// <summary>
-        /// ///////////////////////////////////////////////////////////////////////////////////////////
-        /// </summary>
-        /// <param name="factorwebDto"></param>
-        /// <returns></returns>
-
-
-
 
 
 
@@ -839,9 +826,8 @@ namespace webapikits.Controllers
 
 
             string query = $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}'";
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Customers", "");
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -868,8 +854,8 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_GetGoodListSupport '{SanitizeInput(searchTargetDto.SearchTarget)}'";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -896,8 +882,8 @@ namespace webapikits.Controllers
 
             string query = $" spWeb_GetFactor '{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}','{factorwebDto.isShopFactor}'";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -924,8 +910,8 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_EditFactorProperty '{factorwebDto.starttime}','{factorwebDto.Endtime}','{factorwebDto.worktime}','{factorwebDto.Barbary}',{factorwebDto.ObjectRef} ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -954,8 +940,8 @@ namespace webapikits.Controllers
 
             string query = $" delete from  FactorRows where FactorRowCode= {FactorRowCode}";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -979,8 +965,8 @@ namespace webapikits.Controllers
 
             string query = $" delete from  Factor where FactorCode= {FactorCode}";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1004,8 +990,8 @@ namespace webapikits.Controllers
 
             string query = $" delete from  PreFactorRows where PreFactorRowCode= {PreFactorRowCode}";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1028,8 +1014,8 @@ namespace webapikits.Controllers
 
             string query = $" delete from  PreFactor where PreFactorCode= {PreFactorCode}";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1054,9 +1040,9 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+            
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1084,8 +1070,8 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spWeb_GetCustomerById] {searchTargetDto.ObjectRef}";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1113,8 +1099,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spWeb_GetCentralByCode] {searchTargetDto.ObjectRef}";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1136,8 +1121,8 @@ namespace webapikits.Controllers
 
             string query = $"select CentralCode,CentralName from vwCentralUser ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+            
 
             try
             {
@@ -1210,8 +1195,8 @@ namespace webapikits.Controllers
         
         
         
-        //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-        //return jsonClass.JsonResultWithout_Str(dataTable);
+         
+        
 
             try
             {
@@ -1266,8 +1251,6 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable1 = db.Kowsar_ExecQuery(HttpContext, query1);
-            //return jsonClass.JsonResultWithout_Str(dataTable1);
 
 
             try
@@ -1308,8 +1291,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+            
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1348,8 +1331,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+            
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1378,8 +1361,8 @@ namespace webapikits.Controllers
                 string UserId = _configuration.GetConnectionString("Support_UserId");
 
             string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.isShopFactor}";
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1409,10 +1392,10 @@ namespace webapikits.Controllers
 
             string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount},@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+             
 
 
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1442,8 +1425,8 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spWeb_GetFactorByCustomerCode] '{searchTargetDto.ClassName}',{searchTargetDto.ObjectRef}";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Factors", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1470,8 +1453,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spWeb_LeaveRequest_Insert] {leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}',{leaveRequestDto.TotalDay},{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1496,8 +1478,7 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spWeb_LeaveRequest_Update] {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}',{leaveRequestDto.TotalDay},{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1521,8 +1502,8 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spWeb_LeaveRequest_WorkFlow]  {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.ManagerRef},{leaveRequestDto.WorkFlowStatus},'{leaveRequestDto.WorkFlowExplain}'";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1551,8 +1532,8 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spWeb_GetLeaveRequest]  '{leaveRequestDto.StartDate}','{leaveRequestDto.EndDate}',{leaveRequestDto.UserRef},{leaveRequestDto.ManagerRef},{leaveRequestDto.WorkFlowStatus}";
 
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -1576,8 +1557,8 @@ namespace webapikits.Controllers
 
             string query = $" Exec [dbo].[spWeb_GetLeaveRequest_ById] {LeaveRequestCode}";
 
-            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+             
+             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);

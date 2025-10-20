@@ -88,9 +88,9 @@ namespace webapikits.Controllers
 
             string query = $"select top 1 DataValue from dbsetup where KeyValue = '{Where}'";
 
-            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+     
 
 
 
@@ -116,8 +116,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult> KowsarQuery(string str)
         {
             string query = str;
-            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Data", "");
+             
             try
             {
                 DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
@@ -150,8 +149,7 @@ namespace webapikits.Controllers
                 query += $" , '{Flag}' ";
             }
 
-            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Activations", "");
+             
             try
             {
                 DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
@@ -304,8 +302,7 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+             
 
             try
             {
@@ -329,9 +326,8 @@ namespace webapikits.Controllers
         {
 
             string query = $"exec spApp_LogInsert '{logReportDto.Device_Id}','{logReportDto.Address_Ip}','{logReportDto.Server_Name}','{logReportDto.Factor_Code}','{logReportDto.StrDate}','{logReportDto.Broker}','{logReportDto.Explain}','{logReportDto.DeviceAgant}','{logReportDto.SdkVersion}','{logReportDto.DeviceIp}'";
-            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
             try
             {
                 DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);

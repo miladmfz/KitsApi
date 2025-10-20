@@ -61,9 +61,9 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
+            
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+             
 
             try
             {
@@ -108,8 +108,8 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppActivation";
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+            
+             
 
             try
             {
@@ -134,8 +134,8 @@ namespace webapikits.Controllers
 
             string query = $"select * from AppActivation Where ActivationCode = '{ActivationCode}'";
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+            
+             
 
             try
             {
@@ -170,9 +170,8 @@ namespace webapikits.Controllers
                 $"{brokercustomerdto.AppType} , '{brokercustomerdto.ServerIp}', '{brokercustomerdto.ServerPort}', '{brokercustomerdto.ServerPathApi}'";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
+            
 
-            //return jsonClass.JsonResultWithout_Str(dataTable); ;
             try
             {
                 DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);
@@ -201,9 +200,9 @@ namespace webapikits.Controllers
             string query = $"Select Server_Name, STRING_AGG([Broker],',') within group (order by case when isnumeric([Broker])=1 then cast([Broker] as decimal) else 0 end, [Broker] ) as BrokerStr From (select Server_Name, Device_Id, [Broker] from app_info where DATEDIFF(m,Updatedate,GETDATE())<{Filter} group by Server_Name, Device_Id, [Broker]) ds group by Server_Name";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
+            
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+             
             try
             {
                 DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);
@@ -229,9 +228,9 @@ namespace webapikits.Controllers
             string query = $"select top 50 * from WebLog order by 1 desc";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
+            
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+             
             try
             {
                 DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);
@@ -259,8 +258,8 @@ namespace webapikits.Controllers
             string query = $"exec spWeb_GetAppLogReport    @FromDate  = '{logReportDto.FromDate}',    @ToDate  = '{logReportDto.ToDate}',    @ServerName  = '{logReportDto.ServerName}',  @Flag  = {logReportDto.Flag}";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+            
+             
             try
             {
                 DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);
@@ -287,8 +286,8 @@ namespace webapikits.Controllers
             string query = $"exec spWeb_InsertWebSiteActivation     @CustomerRef = {webSiteActivationDto.CustomerRef} , @CompanyName = '{webSiteActivationDto.CompanyName}' , @WebEmploy = '{webSiteActivationDto.WebEmploy}' , @Phone = '{webSiteActivationDto.Phone}' , @Explain = '{webSiteActivationDto.Explain}' , @Features = '{webSiteActivationDto.Features}' , @WebState = {webSiteActivationDto.WebState} , @Domain1 = '{webSiteActivationDto.Domain1}' , @Domain2 = '{webSiteActivationDto.Domain2}' , @Domain3 = '{webSiteActivationDto.Domain3}' , @Domain4 = '{webSiteActivationDto.Domain4}' , @KCServerVersion = '{webSiteActivationDto.KCServerVersion}' , @SiteType = '{webSiteActivationDto.SiteType}' , @PaymentGateway = '{webSiteActivationDto.PaymentGateway}' , @TorobApi = {webSiteActivationDto.TorobApi} , @EmallsApi = {webSiteActivationDto.EmallsApi} , @BasalamApi = {webSiteActivationDto.BasalamApi} , @SnapApi = {webSiteActivationDto.SnapApi} , @MobileTheme = {webSiteActivationDto.MobileTheme}  ";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+            
+             
 
             try
             {
@@ -313,8 +312,8 @@ namespace webapikits.Controllers
             string query = $"exec spWeb_UpdateWebSiteActivation    @WebSiteActivationCode = {webSiteActivationDto.WebSiteActivationCode} , @CustomerRef = {webSiteActivationDto.CustomerRef} , @CompanyName = '{webSiteActivationDto.CompanyName}' , @WebEmploy = '{webSiteActivationDto.WebEmploy}' , @Phone = '{webSiteActivationDto.Phone}' , @Explain = '{webSiteActivationDto.Explain}'  , @Features = '{webSiteActivationDto.Features}' , @WebState = {webSiteActivationDto.WebState} , @Domain1 = '{webSiteActivationDto.Domain1}' , @Domain2 = '{webSiteActivationDto.Domain2}' , @Domain3 = '{webSiteActivationDto.Domain3}' , @Domain4 = '{webSiteActivationDto.Domain4}' , @KCServerVersion = '{webSiteActivationDto.KCServerVersion}' , @SiteType = '{webSiteActivationDto.SiteType}' , @PaymentGateway = '{webSiteActivationDto.PaymentGateway}' , @TorobApi = {webSiteActivationDto.TorobApi} , @EmallsApi = {webSiteActivationDto.EmallsApi} , @BasalamApi = {webSiteActivationDto.BasalamApi} , @SnapApi = {webSiteActivationDto.SnapApi} , @MobileTheme = {webSiteActivationDto.MobileTheme}  ";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+            
+             
 
             try
             {
@@ -341,8 +340,8 @@ namespace webapikits.Controllers
             string query = $"exec spWeb_GetWebSiteActivation    @SearchTarget = '{webSiteActivationDto.SearchTarget}' ";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+            
+             
 
             try
             {
@@ -369,9 +368,9 @@ namespace webapikits.Controllers
             string query = $"exec spWeb_GetWebSiteActivationById    @WebSiteActivationCode = {WebSiteActivationCode} ";
 
 
-            //DataTable dataTable = db.SupportApp_ExecQuery(HttpContext, query);
+            
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);;
+             
             try
             {
                 DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);

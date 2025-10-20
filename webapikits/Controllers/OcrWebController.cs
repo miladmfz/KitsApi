@@ -57,8 +57,8 @@ namespace webapikits.Controllers
         {
             string query = $"Exec dbo.spApp_ocrFactorList 4 , '{conditionDto.SearchTarget}' ,' ',50 ,0 , ' order by o.AppTcPrintRef desc' ,0,'{_configuration.GetConnectionString("OcrSecond_Db")}',{conditionDto.SourceFlag} ";
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
 
             try
             {
@@ -82,8 +82,8 @@ namespace webapikits.Controllers
         {
 
             string query = $"Exec spApp_ocrGetFactorDetail {AppOCRFactorCode}  ";
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
 
             try
             {
@@ -108,8 +108,8 @@ namespace webapikits.Controllers
         {
 
             string query = $"update AppOCRFactor set HasSignature = 0, AppIsDelivered = 0 where AppOCRFactorCode = {AppOCRFactorCode}  ";
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
 
             try
             {
@@ -133,8 +133,8 @@ namespace webapikits.Controllers
 
             string query = $" spWeb_GetOcrPanel '{StartDate}' ,'{EndDate}' ,{State} ";
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -157,8 +157,7 @@ namespace webapikits.Controllers
 
             string query = $"select dbo.fnDate_AddDays(dbo.fnDate_Today(),{day}) TodeyFromServer  ";
 
-            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -175,7 +174,6 @@ namespace webapikits.Controllers
 
 
 
-        /// ////////////////////////////////////////////////////////////////////////
 
 
         [HttpGet]
@@ -208,9 +206,9 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
 
             try
             {
@@ -242,9 +240,9 @@ namespace webapikits.Controllers
            
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -270,7 +268,7 @@ namespace webapikits.Controllers
             string query = "";
 
 
-            if (AppType == "2") // Ocrkowsar
+            if (AppType == "2") 
             {
                 query = "  select '' test ";
             }
@@ -278,9 +276,9 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -303,9 +301,9 @@ namespace webapikits.Controllers
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -332,8 +330,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -360,8 +358,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
 
             try
             {
@@ -398,8 +396,8 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -430,8 +428,8 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
 
             try
             {
@@ -459,8 +457,8 @@ namespace webapikits.Controllers
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -500,8 +498,8 @@ namespace webapikits.Controllers
             }
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -547,9 +545,8 @@ namespace webapikits.Controllers
             dbname = dataTable1.Rows[0]["dbname"] + "";
 
             string query = $"select * from {dbname}..AttachedFiles where ClassName = '{attachFile.ClassName}' And ObjectRef = {attachFile.ObjectRef} ";
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
@@ -609,7 +606,7 @@ namespace webapikits.Controllers
 
 
 
-            string dataName_zip = $"{FileName}.zip"; // Constructing the image name
+            string dataName_zip = $"{FileName}.zip"; 
             string data_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName_zip}";
             string contentType = $"application/{dataTable1.Rows[0]["Type"]}";
 
@@ -633,8 +630,8 @@ namespace webapikits.Controllers
             string query = $"Update AppOcrFactor Set AppPackCount ={ocrModel.AppPackCount} and AppPackDeliverDate='{ocrModel.AppPackDeliverDate}' where AppOCRFactorCode = {ocrModel.AppOCRFactorCode}";
 
 
-            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);

@@ -46,15 +46,6 @@ namespace webapikits.Controllers
 
 
 
-        /// ////////////////////////////////////////////////////////////////////////
-
-
-
-
-
-        /// ////////////////////////////////////////////////////////////////////////
-
-
         [HttpGet]
         [Route("BasketColumnCard")]
         public async Task<IActionResult> BasketColumnCard(string Where, string AppType)
@@ -85,9 +76,9 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -117,9 +108,9 @@ namespace webapikits.Controllers
             }
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -182,9 +173,9 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -207,9 +198,9 @@ namespace webapikits.Controllers
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+             
 
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -236,8 +227,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -265,8 +256,8 @@ namespace webapikits.Controllers
 
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -303,8 +294,8 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -335,8 +326,8 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -364,8 +355,8 @@ namespace webapikits.Controllers
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
@@ -405,8 +396,8 @@ namespace webapikits.Controllers
             }
 
 
-            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            //return jsonClass.JsonResultWithout_Str(dataTable);
+             
+             
             try
             {
                 DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);

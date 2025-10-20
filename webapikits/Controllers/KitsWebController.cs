@@ -53,9 +53,6 @@ namespace webapikits.Controllers
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
-
-            //return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
             try
             {
                 DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
