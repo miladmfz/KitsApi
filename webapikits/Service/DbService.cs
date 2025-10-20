@@ -42,7 +42,11 @@ public class DbService : IDbService
     public async Task<DataTable> Support_ImageExecQuery(HttpContext? context,string query, Dictionary<string, object>? parameters = null)
     => await ExecuteQueryAsync(context, "Support_ImageConnection", query, parameters);
 
-    
+    public async Task<DataTable> Image_ExecQuery(HttpContext? context, string query, Dictionary<string, object>? parameters = null)
+=> await ExecuteQueryAsync(context, "ImageConnection", query, parameters);
+
+
+
 
 
 

@@ -28,7 +28,6 @@ namespace webapikits.Controllers
 
         //public readonly IConfiguration _configuration;
         //DataBaseClass db;
-        JsonClass jsonClass = new JsonClass();
 
 
         //public SupportController(IConfiguration configuration)
@@ -40,6 +39,7 @@ namespace webapikits.Controllers
         //}
 
 
+        JsonClass jsonClass = new JsonClass();
 
         private readonly IDbService db;
         private readonly IJsonFormatter _jsonFormatter1;

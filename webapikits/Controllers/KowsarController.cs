@@ -20,38 +20,74 @@ namespace webapikits.Controllers
     [ApiController]
     public class KowsarController : ControllerBase
     {
-        public readonly IConfiguration _configuration;
+        //public readonly IConfiguration _configuration;
 
-        Dictionary<string, string> jsonDict = new();
+        //Dictionary<string, string> jsonDict = new();
 
-        DataBaseClass db;
-        DataTable DataTable = new ();
-        Response response = new();
+        //DataBaseClass db;
+        //DataTable DataTable = new ();
+        //Response response = new();
+        //FileManager fileManager = new();
+        //JsonClass jsonClass = new ();
+
+
+
+        //public KowsarController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new (_configuration);
+        //}
+
+
         FileManager fileManager = new();
-        JsonClass jsonClass = new ();
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
+        JsonClass jsonClass = new JsonClass();
 
 
-
-        public KowsarController(IConfiguration configuration)
+        public KowsarController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new (_configuration);
         }
+
+
 
 
 
 
         [HttpGet]
         [Route("DbSetupvalue")]
-        public string DbSetupvalue(string Where)
+        public async Task<IActionResult> DbSetupvalue(string Where)
         {
 
             string query = $"select top 1 DataValue from dbsetup where KeyValue = '{Where}'";
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DbSetupvalue));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -60,7 +96,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("ToDoPrint")]
-        public IActionResult ToDoPrint()
+        public async Task<IActionResult> ToDoPrintAsync()
         {
 
 
@@ -85,7 +121,7 @@ namespace webapikits.Controllers
 
             string query = " select * from AppPrinter ";
 
-            DataTable Table_print = db.Kowsar_ExecQuery(HttpContext, query);
+            DataTable Table_print = await db.Kowsar_ExecQuery(HttpContext, query);
 
             List<Printer> Printers = new();
 
@@ -134,7 +170,7 @@ namespace webapikits.Controllers
 
 
                 query = "select top 2 GoodCode, GoodName, GoodExplain1 from good ";
-                DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+                DataTable dataTable =await db.Kowsar_ExecQuery(HttpContext, query);
                 List<Good> goods = new ();
 
 
@@ -197,17 +233,28 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("Check")]
-        public string Check()
+        public async Task<IActionResult> Check()
         {
             
             string query = "select top 2 GoodCode,GoodName,GoodExplain1 from good ";
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            // Log the result to the console
-            Debug.WriteLine("Check action result: " );
+            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            //// Log the result to the console
+            //Debug.WriteLine("Check action result: " );
 
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Check));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -218,19 +265,30 @@ namespace webapikits.Controllers
 
 
 
-    [HttpGet]
+        [HttpGet]
         [Route("kowsarVersion")]
-        public string kowsarVersion()
+        public async Task<IActionResult> kowsarVersion()
         {
 
             string query = "Exec spversioninfo";
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             
-            return jsonClass.JsonResult_Str(dataTable, "Text", "VerNo");
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "VerNo");
 
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "VerNo");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(kowsarVersion));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -242,22 +300,33 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetGoodType")]
-        public string GetGoodType()
+        public async Task<IActionResult> GetGoodType()
         {
 
             string query = "Exec [spApp_GetGoodType]";
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Columns", "");
+            //return jsonClass.JsonResult_Str(dataTable, "Columns", "");
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Columns", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodType));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
-        
+
         [HttpGet]
         [Route("GetColumnList")]
-        public string GetColumnList(
+        public async Task<IActionResult> GetColumnList(
             string GoodCode,
             string GoodType,
             string Type,
@@ -297,17 +366,28 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
             
-            return jsonClass.JsonResult_Str(dataTable, "Columns", "");
+            //return jsonClass.JsonResult_Str(dataTable, "Columns", "");
 
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Columns", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetColumnList));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
-                
+
         [HttpGet]
         [Route("GetDistinctValues")]
-        public string GetDistinctValues(
+        public async Task<IActionResult> GetDistinctValues(
             string TableName,
             string FieldNames,
             string WhereClause
@@ -320,8 +400,19 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Values", "");
+            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Values", "");
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Values", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetDistinctValues));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -331,244 +422,261 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetSellBroker")]
-        public string GetSellBroker()
+        public async Task<IActionResult> GetSellBroker()
         {
 
             string query= "Select brokerCode,BrokerNameWithoutType,CentralRef,Active From vwSellBroker";
 
 
-            DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
+            //DataTable dataTable = db.Kowsar_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "SellBrokers", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetSellBroker));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
 
 
-        [HttpGet]
-        [Route("GetImage")]
-        public string GetImage(
-            string ObjectRef,
-            string IX,
-            string Scale,
-            string ClassName
-            )
-        {
+        //[HttpGet]
+        //[Route("GetImage")]
+        //public string GetImage(
+        //    string ObjectRef,
+        //    string IX,
+        //    string Scale,
+        //    string ClassName
+        //    )
+        //{
 
 
-            int sScale = Convert.ToInt32(Scale);
+        //    int sScale = Convert.ToInt32(Scale);
 
-            string sq = $"Exec dbo.spApp_GetImage {ObjectRef}, {IX}, '{ClassName}'";
+        //    string sq = $"Exec dbo.spApp_GetImage {ObjectRef}, {IX}, '{ClassName}'";
 
-            byte[] imageBytes = db.Web_GetImageData(sq);
+        //    byte[] imageBytes = db.Web_GetImageData(sq);
 
 
-            if (imageBytes != null)
-            {
-                using (MemoryStream ms = new MemoryStream(imageBytes))
-                {
-                    using (Image image = Image.FromStream(ms))
-                    {
-                        int cropWidth = image.Width;
-                        int cropHeight = image.Height;
+        //    if (imageBytes != null)
+        //    {
+        //        using (MemoryStream ms = new MemoryStream(imageBytes))
+        //        {
+        //            using (Image image = Image.FromStream(ms))
+        //            {
+        //                int cropWidth = image.Width;
+        //                int cropHeight = image.Height;
 
-                        if (cropWidth > cropHeight)
-                        {
-                            float ratio = (float)cropWidth / cropHeight;
-                            cropWidth = sScale;
-                            cropHeight = (int)(cropWidth / ratio);
-                        }
-                        else
-                        {
-                            float ratio = (float)cropHeight / cropWidth;
-                            cropHeight = sScale;
-                            cropWidth = (int)(cropHeight / ratio);
-                        }
+        //                if (cropWidth > cropHeight)
+        //                {
+        //                    float ratio = (float)cropWidth / cropHeight;
+        //                    cropWidth = sScale;
+        //                    cropHeight = (int)(cropWidth / ratio);
+        //                }
+        //                else
+        //                {
+        //                    float ratio = (float)cropHeight / cropWidth;
+        //                    cropHeight = sScale;
+        //                    cropWidth = (int)(cropHeight / ratio);
+        //                }
 
-                        using (Image resizedImage = new Bitmap(cropWidth, cropHeight))
-                        {
-                            using (Graphics graphics = Graphics.FromImage(resizedImage))
-                            {
-                                graphics.DrawImage(image, 0, 0, cropWidth, cropHeight);
-                            }
+        //                using (Image resizedImage = new Bitmap(cropWidth, cropHeight))
+        //                {
+        //                    using (Graphics graphics = Graphics.FromImage(resizedImage))
+        //                    {
+        //                        graphics.DrawImage(image, 0, 0, cropWidth, cropHeight);
+        //                    }
 
-                            using (MemoryStream outputMs = new MemoryStream())
-                            {
-                                resizedImage.Save(outputMs, ImageFormat.Jpeg);
-                                byte[] resizedImageBytes = outputMs.ToArray();
+        //                    using (MemoryStream outputMs = new MemoryStream())
+        //                    {
+        //                        resizedImage.Save(outputMs, ImageFormat.Jpeg);
+        //                        byte[] resizedImageBytes = outputMs.ToArray();
 
-                                string encodedImage = Convert.ToBase64String(resizedImageBytes);
-                                response.StatusCode = "200";
-                                response.Errormessage = "";
+        //                        string encodedImage = Convert.ToBase64String(resizedImageBytes);
+        //                        response.StatusCode = "200";
+        //                        response.Errormessage = "";
 
-                                jsonDict.Add("response", JsonConvert.SerializeObject(response));
-                                jsonDict.Add("Text", encodedImage);
+        //                        jsonDict.Add("response", JsonConvert.SerializeObject(response));
+        //                        jsonDict.Add("Text", encodedImage);
 
-                                return JsonConvert.SerializeObject(jsonDict);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                response.StatusCode = "200";
-                response.Errormessage = "";
+        //                        return JsonConvert.SerializeObject(jsonDict);
 
-                jsonDict.Add("response", JsonConvert.SerializeObject(response));
-                jsonDict.Add("Text", "no_photo");
 
-                return JsonConvert.SerializeObject(jsonDict);
-            }
-        }
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        response.StatusCode = "200";
+        //        response.Errormessage = "";
+
+        //        jsonDict.Add("response", JsonConvert.SerializeObject(response));
+        //        jsonDict.Add("Text", "no_photo");
+
+        //        return JsonConvert.SerializeObject(jsonDict);
+
+
+
+        //    }
+        //}
 
         
 
-        [HttpGet]
-        [Route("GetImageFromKsr")]
-        public string GetImageFromKsr(string KsrImageCode)
-        {
+        //[HttpGet]
+        //[Route("GetImageFromKsr")]
+        //public string GetImageFromKsr(string KsrImageCode)
+        //{
 
 
-            int sScale = 500;
+        //    int sScale = 500;
 
-            string sq = $"Exec dbo.spApp_GetKsrImage {KsrImageCode}" ;
+        //    string sq = $"Exec dbo.spApp_GetKsrImage {KsrImageCode}" ;
 
-            byte[] imageBytes = db.Web_GetImageData(sq);
-
-
-            if (imageBytes != null)
-            {
-                using (MemoryStream ms = new MemoryStream(imageBytes))
-                {
-                    using (Image image = Image.FromStream(ms))
-                    {
-                        int cropWidth = image.Width;
-                        int cropHeight = image.Height;
-
-                        if (cropWidth > cropHeight)
-                        {
-                            float ratio = (float)cropWidth / cropHeight;
-                            cropWidth = sScale;
-                            cropHeight = (int)(cropWidth / ratio);
-                        }
-                        else
-                        {
-                            float ratio = (float)cropHeight / cropWidth;
-                            cropHeight = sScale;
-                            cropWidth = (int)(cropHeight / ratio);
-                        }
-
-                        using (Image resizedImage = new Bitmap(cropWidth, cropHeight))
-                        {
-                            using (Graphics graphics = Graphics.FromImage(resizedImage))
-                            {
-                                graphics.DrawImage(image, 0, 0, cropWidth, cropHeight);
-                            }
-
-                            using (MemoryStream outputMs = new MemoryStream())
-                            {
-                                resizedImage.Save(outputMs, ImageFormat.Jpeg);
-                                byte[] resizedImageBytes = outputMs.ToArray();
-
-                                string encodedImage = Convert.ToBase64String(resizedImageBytes);
-                                response.StatusCode = "200";
-                                response.Errormessage = "";
-
-                                jsonDict.Add("response", JsonConvert.SerializeObject(response));
-                                jsonDict.Add("Text", encodedImage);
-
-                                return JsonConvert.SerializeObject(jsonDict);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                response.StatusCode = "200";
-                response.Errormessage = "";
-
-                jsonDict.Add("response", JsonConvert.SerializeObject(response));
-                jsonDict.Add("Text", "no_photo");
-
-                return JsonConvert.SerializeObject(jsonDict);
-            }
-        }
+        //    byte[] imageBytes = db.Web_GetImageData(sq);
 
 
+        //    if (imageBytes != null)
+        //    {
+        //        using (MemoryStream ms = new MemoryStream(imageBytes))
+        //        {
+        //            using (Image image = Image.FromStream(ms))
+        //            {
+        //                int cropWidth = image.Width;
+        //                int cropHeight = image.Height;
 
+        //                if (cropWidth > cropHeight)
+        //                {
+        //                    float ratio = (float)cropWidth / cropHeight;
+        //                    cropWidth = sScale;
+        //                    cropHeight = (int)(cropWidth / ratio);
+        //                }
+        //                else
+        //                {
+        //                    float ratio = (float)cropHeight / cropWidth;
+        //                    cropHeight = sScale;
+        //                    cropWidth = (int)(cropHeight / ratio);
+        //                }
+
+        //                using (Image resizedImage = new Bitmap(cropWidth, cropHeight))
+        //                {
+        //                    using (Graphics graphics = Graphics.FromImage(resizedImage))
+        //                    {
+        //                        graphics.DrawImage(image, 0, 0, cropWidth, cropHeight);
+        //                    }
+
+        //                    using (MemoryStream outputMs = new MemoryStream())
+        //                    {
+        //                        resizedImage.Save(outputMs, ImageFormat.Jpeg);
+        //                        byte[] resizedImageBytes = outputMs.ToArray();
+
+        //                        string encodedImage = Convert.ToBase64String(resizedImageBytes);
+        //                        response.StatusCode = "200";
+        //                        response.Errormessage = "";
+
+        //                        jsonDict.Add("response", JsonConvert.SerializeObject(response));
+        //                        jsonDict.Add("Text", encodedImage);
+
+        //                        return JsonConvert.SerializeObject(jsonDict);
+
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        response.StatusCode = "200";
+        //        response.Errormessage = "";
+
+        //        jsonDict.Add("response", JsonConvert.SerializeObject(response));
+        //        jsonDict.Add("Text", "no_photo");
+
+        //        return JsonConvert.SerializeObject(jsonDict);
+        //    }
+        //}
 
 
 
-        [HttpGet]
-        [Route("GetImageCustom")]
-        public string GetImageCustom(string ClassName, string ObjectRef, string Scale)
-        {
 
 
-            int sScale = 500;
 
-            string sq = $"set nocount on  select IMG from ksrimage where ClassName ='{ClassName}' and ObjectRef={ObjectRef} ";
+        //[HttpGet]
+        //[Route("GetImageCustom")]
+        //public string GetImageCustom(string ClassName, string ObjectRef, string Scale)
+        //{
 
-            byte[] imageBytes = db.Web_GetImageData(sq);
+
+        //    int sScale = 500;
+
+        //    string sq = $"set nocount on  select IMG from ksrimage where ClassName ='{ClassName}' and ObjectRef={ObjectRef} ";
+
+        //    byte[] imageBytes = db.Web_GetImageData(sq);
 
 
-            if (imageBytes != null)
-            {
-                using (MemoryStream ms = new MemoryStream(imageBytes))
-                {
-                    using (Image image = Image.FromStream(ms))
-                    {
-                        int cropWidth = image.Width;
-                        int cropHeight = image.Height;
+        //    if (imageBytes != null)
+        //    {
+        //        using (MemoryStream ms = new MemoryStream(imageBytes))
+        //        {
+        //            using (Image image = Image.FromStream(ms))
+        //            {
+        //                int cropWidth = image.Width;
+        //                int cropHeight = image.Height;
 
-                        if (cropWidth > cropHeight)
-                        {
-                            float ratio = (float)cropWidth / cropHeight;
-                            cropWidth = sScale;
-                            cropHeight = (int)(cropWidth / ratio);
-                        }
-                        else
-                        {
-                            float ratio = (float)cropHeight / cropWidth;
-                            cropHeight = sScale;
-                            cropWidth = (int)(cropHeight / ratio);
-                        }
+        //                if (cropWidth > cropHeight)
+        //                {
+        //                    float ratio = (float)cropWidth / cropHeight;
+        //                    cropWidth = sScale;
+        //                    cropHeight = (int)(cropWidth / ratio);
+        //                }
+        //                else
+        //                {
+        //                    float ratio = (float)cropHeight / cropWidth;
+        //                    cropHeight = sScale;
+        //                    cropWidth = (int)(cropHeight / ratio);
+        //                }
 
-                        using (Image resizedImage = new Bitmap(cropWidth, cropHeight))
-                        {
-                            using (Graphics graphics = Graphics.FromImage(resizedImage))
-                            {
-                                graphics.DrawImage(image, 0, 0, cropWidth, cropHeight);
-                            }
+        //                using (Image resizedImage = new Bitmap(cropWidth, cropHeight))
+        //                {
+        //                    using (Graphics graphics = Graphics.FromImage(resizedImage))
+        //                    {
+        //                        graphics.DrawImage(image, 0, 0, cropWidth, cropHeight);
+        //                    }
 
-                            using (MemoryStream outputMs = new MemoryStream())
-                            {
-                                resizedImage.Save(outputMs, ImageFormat.Jpeg);
-                                byte[] resizedImageBytes = outputMs.ToArray();
+        //                    using (MemoryStream outputMs = new MemoryStream())
+        //                    {
+        //                        resizedImage.Save(outputMs, ImageFormat.Jpeg);
+        //                        byte[] resizedImageBytes = outputMs.ToArray();
 
-                                string encodedImage = Convert.ToBase64String(resizedImageBytes);
+        //                        string encodedImage = Convert.ToBase64String(resizedImageBytes);
 
-                                jsonDict.Add("Text", encodedImage);
+        //                        jsonDict.Add("Text", encodedImage);
 
-                                return JsonConvert.SerializeObject(jsonDict);
-                            }
-                        }
-                    }
-                }
-            }
-            else
-            {
-                response.StatusCode = "200";
-                response.Errormessage = "";
+        //                        return JsonConvert.SerializeObject(jsonDict);
+        //                    }
+        //                }
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        response.StatusCode = "200";
+        //        response.Errormessage = "";
 
-                jsonDict.Add("response", JsonConvert.SerializeObject(response));
-                jsonDict.Add("Text", "no_photo");
+        //        jsonDict.Add("response", JsonConvert.SerializeObject(response));
+        //        jsonDict.Add("Text", "no_photo");
 
-                return JsonConvert.SerializeObject(jsonDict);
-            }
-        }
+        //        return JsonConvert.SerializeObject(jsonDict);
+        //    }
+        //}
 
 
 

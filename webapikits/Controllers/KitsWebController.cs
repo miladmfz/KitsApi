@@ -8,33 +8,65 @@ namespace webapikits.Controllers
     [ApiController]
     public class KitsWebController : ControllerBase
     {
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+        //public KitsWebController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-        public KitsWebController(IConfiguration configuration)
+
+        public KitsWebController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
 
 
 
         [HttpGet]
         [Route("GetTodeyFromServer")]
-        public string GetTodeyFromServer()
+        public async Task<IActionResult> GetTodeyFromServer()
         {
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+            try
+            {
+                DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetTodeyFromServer));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 

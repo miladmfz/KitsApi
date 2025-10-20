@@ -8,30 +8,64 @@ namespace webapikits.Controllers
     [ApiController]
     public class BrokerWebController : ControllerBase
     {
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+        //public BrokerWebController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-        public BrokerWebController(IConfiguration configuration)
+
+        public BrokerWebController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
+
+
 
 
 
         [HttpGet]
         [Route("GetWebImagess")]
-        public string GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
+        public async Task<IActionResult> GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
         {
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
-            DataTable dataTable = db.Support_ImageExecQuery(query);
-            return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
+
+
+            try
+            {
+                DataTable dataTable = await db.Image_ExecQuery(HttpContext, query);
+                string json = jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetWebImagess));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -39,12 +73,10 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UploadImage")]
-        public string UploadImage([FromBody] ksrImageModeldto data)
+        public async Task<IActionResult> UploadImage([FromBody] ksrImageModeldto data)
         {
 
 
-            try
-            {
 
 
                 // Decode the base64 string to bytes
@@ -60,29 +92,44 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable = db.Web_ImageExecQuery(query);
+     
+                try
+                {
+                    DataTable dataTable = await db.Image_ExecQuery(HttpContext, query);
+                    string json = jsonClass.JsonResult_Str(dataTable, "Ok", "Ok");
+                    return Content(json, "application/json");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred in {Function}", nameof(UploadImage));
+                    return StatusCode(500, "Internal server error.");
+                }
 
-                return "\"Ok\"";
-            }
-            catch (Exception ex)
-            {
-                return $"{ex.Message}";
-
-            }
         }
 
 
         [HttpGet]
         [Route("GetBrokers")]
-        public string GetBrokers()
+        public async Task<IActionResult> GetBrokers()
         {
 
             string query = $"select Explain,RelationType,BrokerCode , CentralRef,BrokerNameWithoutType from vwSellBroker where active=0";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetBrokers));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -90,15 +137,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetBrokerDetail")]
-        public string GetBrokerDetail(string BrokerCode)
+        public async Task<IActionResult> GetBrokerDetail(string BrokerCode)
         {
 
             string query = $"spWeb_BrokerDetail {BrokerCode} ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetBrokerDetail));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -110,7 +168,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("GetAppBrokerReport")]
-        public string GetAppBrokerReport([FromBody] BrokerWebDto brokerWebDto)
+        public async Task<IActionResult> GetAppBrokerReport([FromBody] BrokerWebDto brokerWebDto)
         {
 
             // flag report
@@ -121,7 +179,7 @@ namespace webapikits.Controllers
             //  4-
 
             string query1 = $"select DataValue From DBSetup with(nolock) Where KeyValue = 'AppBroker_FactorType'";
-            DataTable dataTable1 = db.Broker_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 = await db.Broker_ExecQuery(HttpContext, query1);
             string FactorType = dataTable1.Rows[0]["DataValue"] + "";
 
 
@@ -157,9 +215,20 @@ namespace webapikits.Controllers
                         $"@Columns='{brokerWebDto.Columns}', @startDate='{brokerWebDto.StartDate}', @endDate='{brokerWebDto.EndDate}', @Flag ={brokerWebDto.Flag}";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAppBrokerReport));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -181,7 +250,7 @@ namespace webapikits.Controllers
         /*
         [HttpGet]
         [Route("CreateAppBroker")]
-        public string CreateAppBroker(string KowsarDb, string KowsarImage)
+        public async Task<IActionResult> CreateAppBroker(string KowsarDb, string KowsarImage)
         {
 
             db.Broker_ExecQuery(HttpContext, "DROP DATABASE IF EXISTS Appbroker");
@@ -199,29 +268,52 @@ namespace webapikits.Controllers
         */
 
 
-        [HttpGet]
-        [Route("TestImport")]
-        public string TestImport()
-        {
+        //[HttpGet]
+        //[Route("TestImport")]
+        //public async Task<IActionResult> TestImport()
+        //{
 
-            db.TestImportedit();
+        //    db.TestImportedit();
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, "select  count (*) count from Good");
-            return jsonClass.JsonResultWithout_Str(dataTable);
+        //    DataTable dataTable = db.Broker_ExecQuery(HttpContext, "select  count (*) count from Good");
+        //    return jsonClass.JsonResultWithout_Str(dataTable);
+        //    try
+        //    {
+        //        DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+        //        string json = jsonClass.JsonResultWithout_Str(dataTable);
+        //        return Content(json, "application/json");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred in {Function}", nameof(TestImport));
+        //        return StatusCode(500, "Internal server error.");
+        //    }
 
-        }
+        //}
 
         [HttpGet]
         [Route("BrokerCustomerRefresh")]
-        public string BrokerCustomerRefresh()
+        public async Task<IActionResult> BrokerCustomerRefresh()
         {
             string query = "Insert Into BrokerCustomer(BrokerRef, CustomerRef, Owner, CreationDate, Reformer, ReformDate)" +
                 " Select BrokerCode, CustomerCode,1, GetDate(),1, GetDate() From Customer c Join SellBroker b on 1=1" +
                 " Where c.Active<2 And b.Active<2 And Not Exists(Select 1 from BrokerCustomer s where s.BrokerRef=b.BrokerCode and s.CustomerRef=c.CustomerCode)";
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BrokerCustomerRefresh));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -232,7 +324,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("BasketColumnCard")]
-        public string BasketColumnCard(string Where, string AppType)
+        public async Task<IActionResult> BasketColumnCard(string Where, string AppType)
         {
             string query = "";
 
@@ -260,16 +352,28 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketColumnCard));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("Web_GetDbsetupObject")]
-        public string Web_GetDbsetupObject(string Where)
+        public async Task<IActionResult> Web_GetDbsetupObject(string Where)
         {
             string query = "";
 
@@ -281,16 +385,28 @@ namespace webapikits.Controllers
             
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Web_GetDbsetupObject));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("CreateBasketColumn")]
-        public string CreateBasketColumn(string AppType)
+        public async Task<IActionResult> CreateBasketColumn(string AppType)
         {
             string query = "";
 
@@ -326,37 +442,72 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(CreateBasketColumn));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
         [HttpGet]
         [Route("GetBasketColumnList")]
-        public string GetBasketColumnList(string AppType)
+        public async Task<IActionResult> GetBasketColumnList(string AppType)
         {
 
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetBasketColumnList));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("GetGoodType")]
-        public string GetGoodType()
+        public async Task<IActionResult> GetGoodType()
         {
 
             string query = "Exec [spApp_GetGoodType]";
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodType));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -364,15 +515,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetProperty")]
-        public string GetProperty(string Where)
+        public async Task<IActionResult> GetProperty(string Where)
         {
 
             string query = $" Select  PropertySchema,PropertyValueMap,PropertyName  from PropertySchema Where ClassName = 'TGOOD' And  ObjectType = '{Where}'";
 
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetProperty));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -380,7 +542,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("InsertSingleColumn")]
-        public string InsertSingleColumn(
+        public async Task<IActionResult> InsertSingleColumn(
             string ColumnName,
             string ColumnDesc,
             string ObjectType,
@@ -398,9 +560,20 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(InsertSingleColumn));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -410,7 +583,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("UpdateDbSetup")]
-        public string UpdateDbSetup(
+        public async Task<IActionResult> UpdateDbSetup(
             string DataValue,
             string KeyId)
 
@@ -419,8 +592,19 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateDbSetup));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -430,16 +614,27 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAppPrinter")]
-        public string GetAppprinter(string AppType)
+        public async Task<IActionResult> GetAppprinter(string AppType)
 
         {
 
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAppprinter));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -450,7 +645,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UpdatePrinter")]
-        public string UpdatePrinter([FromBody] AppPrinterDto printerDto)
+        public async Task<IActionResult> UpdatePrinter([FromBody] AppPrinterDto printerDto)
         {
 
 
@@ -467,42 +662,77 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdatePrinter));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
         }
 
 
 
         [HttpGet]
         [Route("GetGpstracker")]
-        public string GetGpstracker(string BrokerCode, string StartDate, string EndDate)
+        public async Task<IActionResult> GetGpstracker(string BrokerCode, string StartDate, string EndDate)
         {
 
             string query = $" Exec spWeb_GetGpstracker  '{StartDate}' , '{EndDate}',{BrokerCode}  ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Gpstrackers", "");
+            //return jsonClass.JsonResult_Str(dataTable, "Gpstrackers", "");
 
             //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Gpstrackers", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGpstracker));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
         [HttpGet]
         [Route("GetBrokerCustomer")]
-        public string GetBrokerCustomer(string BrokerCode, string FactorDate)
+        public async Task<IActionResult> GetBrokerCustomer(string BrokerCode, string FactorDate)
         {
 
             string query = $" Exec spWeb_GetBrokerCustomer  '{FactorDate}',{BrokerCode}  ";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "BrokerCustomer", "");
+            //return jsonClass.JsonResult_Str(dataTable, "BrokerCustomer", "");
 
             //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "BrokerCustomer", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetBrokerCustomer));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 

@@ -1,12 +1,7 @@
 ﻿using System.Data;
 using Microsoft.AspNetCore.Mvc;
 using webapikits.Model;
-using Newtonsoft.Json;
 using System.Text;
-using SmsIrRestful;
-using IPE.SmsIrClient.Models.Requests;
-using IPE.SmsIrClient;
-using FastReport;
 
 namespace webapikits.Controllers
 {
@@ -16,26 +11,48 @@ namespace webapikits.Controllers
     [ApiController]
     public class KitsController : ControllerBase
     {
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+
+        //public KitsController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
 
-        public KitsController(IConfiguration configuration)
+        public KitsController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
 
 
 
 
-    [HttpPost]
+        [HttpPost]
     [Route("SendSms")]
     public async Task<string> SendSms(string RandomCode, string NumberPhone)
     {
@@ -60,47 +77,67 @@ namespace webapikits.Controllers
             var response = await httpClient.PostAsync("https://api.sms.ir/v1/send/verify", content);
             var result = await response.Content.ReadAsStringAsync();
 
-
-
             return result; // You may want to return an error message or handle this differently.
-    }
+        }
 
 
         [HttpGet]
         [Route("kowsar_info")]
-        public string kowsar_info(string Where)
+        public async Task<IActionResult> kowsar_info(string Where)
         {
 
             string query = $"select top 1 DataValue from dbsetup where KeyValue = '{Where}'";
 
+            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
 
 
-           
-            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
-
+            try
+            {
+                DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(kowsar_info));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
-        
+
 
 
 
         [HttpGet]
         [Route("KowsarQuery")]
-        public string KowsarQuery(string str)
+        public async Task<IActionResult> KowsarQuery(string str)
         {
             string query = str;
-            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Data", "");
+            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Data", "");
+            try
+            {
+                DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Data", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(KowsarQuery));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
-        
+
 
 
         [HttpGet]
         [Route("Activation")]
-        public string Activation(string ActivationCode, string? Flag)
+        public async Task<IActionResult> Activation(string ActivationCode, string? Flag)
         {
             
 
@@ -113,21 +150,32 @@ namespace webapikits.Controllers
                 query += $" , '{Flag}' ";
             }
 
-            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Activations", "");
+            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Activations", "");
+            try
+            {
+                DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Activations", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Activation));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
         [HttpGet]
         [Route("GetDb")]
-        public IActionResult GetDb(string Code)
+        public async Task<IActionResult> GetDbAsync(string Code)
         {
 
             
             string query = $"select * from AppActivation Where ActivationCode = '{Code}'";
 
-            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+            DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
 
             string filePath = dataTable.Rows[0]["SQLiteURL"] + "";
 
@@ -241,7 +289,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("ErrorLog")]
-        public string ErrorLog(
+        public async Task<IActionResult> ErrorLog(
             string ErrorLog,
             string Broker,
             string DeviceId,
@@ -256,34 +304,49 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+
+            try
+            {
+                DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "done");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ErrorLog));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
         }
 
 
         [HttpPost]
         [Route("LogReport")]
-        public string LogReport([FromBody] LogReportDto logReportDto)
+        public async Task<IActionResult> LogReport([FromBody] LogReportDto logReportDto)
         {
 
             string query = $"exec spApp_LogInsert '{logReportDto.Device_Id}','{logReportDto.Address_Ip}','{logReportDto.Server_Name}','{logReportDto.Factor_Code}','{logReportDto.StrDate}','{logReportDto.Broker}','{logReportDto.Explain}','{logReportDto.DeviceAgant}','{logReportDto.SdkVersion}','{logReportDto.DeviceIp}'";
-            DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Kits_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            try
+            {
+                DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "done");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(LogReport));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
 
         }
-
-
-
-
-
-
-
-
-
-
 
 
     }

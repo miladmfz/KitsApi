@@ -14,66 +14,114 @@ namespace webapikits.Controllers
     public class CompanyController : ControllerBase
     {
 
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+
+
+        //public CompanyController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
 
-
-        public CompanyController(IConfiguration configuration)
+        public CompanyController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
 
 
 
 
 
-        [HttpGet]
-        [Route("VersionInfo")]
-        public string VersionInfo()
-        {
-            response.StatusCode = "2000";
-            response.Errormessage = "";
 
-            jsonDict.Add("response", JsonConvert.SerializeObject(response));
-            jsonDict.Add("Text", "2.0");
-            return JsonConvert.SerializeObject(jsonDict);
-        }
+        //[HttpGet]
+        //[Route("VersionInfo")]
+        //public string VersionInfo()
+        //{
+        //    response.StatusCode = "2000";
+        //    response.Errormessage = "";
+
+        //    jsonDict.Add("response", JsonConvert.SerializeObject(response));
+        //    jsonDict.Add("Text", "2.0");
+        //    return JsonConvert.SerializeObject(jsonDict);
+            
+        //}
 
 
-        [HttpGet]
-        [Route("check_server")]
-        public string check_server()
-        {
-            response.StatusCode = "2000";
-            response.Errormessage = "";
+        //[HttpGet]
+        //[Route("check_server")]
+        //public async Task<IActionResult> check_server()
+        //{
+        //    response.StatusCode = "2000";
+        //    response.Errormessage = "";
 
-            jsonDict.Add("response", JsonConvert.SerializeObject(response));
-            jsonDict.Add("Text", "false");
-            return JsonConvert.SerializeObject(jsonDict);
-        }
+        //    jsonDict.Add("response", JsonConvert.SerializeObject(response));
+        //    jsonDict.Add("Text", "false");
+        //    return JsonConvert.SerializeObject(jsonDict);
+
+        //    try
+        //    {
+        //        DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+        //        string json = jsonClass.JsonResult_Str(dataTable, "users", "");
+        //        return Content(json, "application/json");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred in {Function}", nameof(IsUser));
+        //        return StatusCode(500, "Internal server error.");
+        //    }
+
+        //}
 
 
 
         [HttpGet]
         [Route("BasketGet")]
-        public string BasketGet(string Mobile)
+        public async Task<IActionResult> BasketGet(string Mobile)
         {
 
             string query = $"Exec [dbo].[spApp_BasketGet] '{Mobile}'";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
 
 
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketGet));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
         }
 
@@ -81,14 +129,27 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("BasketHistory")]
-        public string BasketHistory(string Mobile,string Code, string ReservedRows)
+        public async Task<IActionResult> BasketHistory(string Mobile,string Code, string ReservedRows)
         {
 
             string query = $"Exec [dbo].[spApp_BasketPreFactors] '{Mobile}',{Code},{ReservedRows}" ;
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "PreFactors", "");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "PreFactors", "");
+
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "PreFactors", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketHistory));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
 
         }
@@ -96,30 +157,52 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("BasketToPreFactor")]
-        public string BasketToPreFactor(string Mobile, string Explain)
+        public async Task<IActionResult> BasketToPreFactor(string Mobile, string Explain)
         {
 
             string query = $"Exec [dbo].[spApp_BasketToPreFactor] '{Mobile}', -2000 , '{Explain}'";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
 
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketToPreFactor));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
         [HttpGet]
         [Route("BasketSum")]
-        public string BasketSum(string Mobile)
+        public async Task<IActionResult> BasketSum(string Mobile)
         {
 
             string query = $"Exec dbo.spApp_BasketSummary '{Mobile}'";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketSum));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -127,15 +210,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("Basketdeleteall")]
-        public string Basketdeleteall(string Mobile)
+        public async Task<IActionResult> Basketdeleteall(string Mobile)
         {
 
             string query = $"  set nocount on Update AppBasket set ProcessStatus = 10 where MobileNo = '{Mobile}' and ProcessStatus = 0 select 1";
 
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "done");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Basketdeleteall));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -149,7 +243,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("deletebasket")]
-        public string deletebasket(
+        public async Task<IActionResult> deletebasket(
             string DeviceCode,
             string GoodRef,
             string UserId,
@@ -161,8 +255,19 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "done");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "done");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(deletebasket));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -173,7 +278,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("Favorite_action")]
-        public string Favorite_action(
+        public async Task<IActionResult> Favorite_action(
             string Mobile,
             string GoodRef,
             string DeleteFlag
@@ -184,8 +289,19 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Text", "Result");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "Result");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "Result");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Favorite_action));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -193,14 +309,25 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GoodGroupInfo_Default")]
-        public string GoodGroupInfo_Default()
+        public async Task<IActionResult> GoodGroupInfo_Default()
         {
 
             string query = $"Exec [dbo].[spApp_GetGoodGroups_Default] ";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Groups", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GoodGroupInfo_Default));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -209,14 +336,25 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GoodGroupInfo_DefaultImage")]
-        public string GoodGroupInfo_DefaultImage()
+        public async Task<IActionResult> GoodGroupInfo_DefaultImage()
         {
 
             string query = $"Exec [dbo].[spApp_GetGoodGroups_DefaultImage]  ";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Groups", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GoodGroupInfo_DefaultImage));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -228,7 +366,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("goodinfo")]
-        public string goodinfo(
+        public async Task<IActionResult> goodinfo(
             string RowCount,
             string SearchTarget,
             string OrderBy,
@@ -309,8 +447,19 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(goodinfo));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -321,7 +470,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GoodGroupInfo")]
-        public string GoodGroupInfo(string GroupName,
+        public async Task<IActionResult> GoodGroupInfo(string GroupName,
             string GroupCode
             )
         {
@@ -339,10 +488,21 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Groups", "");
+            //return jsonClass.JsonResult_Str(dataTable, "Groups", "");
 
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Groups", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GoodGroupInfo));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -352,7 +512,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("XUserCreate")]
-        public string XUserCreate(
+        public async Task<IActionResult> XUserCreate(
             string FName,
             string LName,
             string UName,
@@ -372,21 +532,32 @@ namespace webapikits.Controllers
             string query = $"Exec [dbo].[spApp_XUserCreate] '{UName}','{UPass}','{NewPass}','{FName}','{LName}','{mobile}','{company}','{address}','{PostalCode}','{email}',-2000,{Flag}"  ;
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "users", "");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "users", "");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "users", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(XUserCreate));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
 
 
 
- 
+
 
 
 
         [HttpPost]
         [Route("InsertBasket")]
-        public string InsertBasket([FromBody] JObject request)
+        public async Task<IActionResult> InsertBasket([FromBody] JObject request)
         {
             int XUser = 0;
             string DeviceCode = "";
@@ -450,62 +621,85 @@ namespace webapikits.Controllers
                 Mobile = mobileToken.Value<string>();
             }
 
-            string sq = $"Exec [dbo].[spApp_BasketInsert] '{DeviceCode}', {GoodRef}, {FacAmount}, {Price}, '{UnitRef}', '{Ratio}', '{Explain}', '{Source}', {UserId}, '{Mobile}'";
+            string query = $"Exec [dbo].[spApp_BasketInsert] '{DeviceCode}', {GoodRef}, {FacAmount}, {Price}, '{UnitRef}', '{Ratio}', '{Explain}', '{Source}', {UserId}, '{Mobile}'";
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, sq);
-            return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, sq);
+            //return jsonClass.JsonResult_Str(dataTable, "Goods", "");
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Goods", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(InsertBasket));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
 
 
-        [HttpPost]
-        [Route("PFRCDEWS")]
-        public IActionResult PFRCDEWS([FromBody] JObject request)
-        {
-            int UserId = -2000;
-            string Mobile = "";
-            int Price = 0;
-            string Rahgiri = "";
-            string BankKart = "";
-            string KartOwner = "";
-            int PreFactorCode = 0;
+        //[HttpPost]
+        //[Route("PFRCDEWS")]
+        //public IActionResult PFRCDEWS([FromBody] JObject request)
+        //{
+        //    int UserId = -2000;
+        //    string Mobile = "";
+        //    int Price = 0;
+        //    string Rahgiri = "";
+        //    string BankKart = "";
+        //    string KartOwner = "";
+        //    int PreFactorCode = 0;
 
-            if (request.TryGetValue("Mobile", out JToken mobileToken))
-            {
-                Mobile = mobileToken.Value<string>();
-            }
+        //    if (request.TryGetValue("Mobile", out JToken mobileToken))
+        //    {
+        //        Mobile = mobileToken.Value<string>();
+        //    }
 
-            if (request.TryGetValue("Price", out JToken priceToken))
-            {
-                Price = priceToken.Value<int>();
-            }
+        //    if (request.TryGetValue("Price", out JToken priceToken))
+        //    {
+        //        Price = priceToken.Value<int>();
+        //    }
 
-            if (request.TryGetValue("Rahgiri", out JToken rahgiriToken))
-            {
-                Rahgiri = rahgiriToken.Value<string>();
-            }
+        //    if (request.TryGetValue("Rahgiri", out JToken rahgiriToken))
+        //    {
+        //        Rahgiri = rahgiriToken.Value<string>();
+        //    }
 
-            if (request.TryGetValue("BankKart", out JToken bankKartToken))
-            {
-                BankKart = bankKartToken.Value<string>();
-            }
+        //    if (request.TryGetValue("BankKart", out JToken bankKartToken))
+        //    {
+        //        BankKart = bankKartToken.Value<string>();
+        //    }
 
-            if (request.TryGetValue("KartOwner", out JToken kartOwnerToken))
-            {
-                KartOwner = kartOwnerToken.Value<string>();
-            }
+        //    if (request.TryGetValue("KartOwner", out JToken kartOwnerToken))
+        //    {
+        //        KartOwner = kartOwnerToken.Value<string>();
+        //    }
 
-            if (request.TryGetValue("PreFactorCode", out JToken preFactorCodeToken))
-            {
-                PreFactorCode = preFactorCodeToken.Value<int>();
-            }
+        //    if (request.TryGetValue("PreFactorCode", out JToken preFactorCodeToken))
+        //    {
+        //        PreFactorCode = preFactorCodeToken.Value<int>();
+        //    }
 
-            string sq = $"Exec [dbo].[spApp_InsertReceive] '{Mobile}', {Price}, '{Rahgiri}', '{BankKart}', '{KartOwner}', {PreFactorCode}, {UserId}";
+        //    string sq = $"Exec [dbo].[spApp_InsertReceive] '{Mobile}', {Price}, '{Rahgiri}', '{BankKart}', '{KartOwner}', {PreFactorCode}, {UserId}";
 
-            string last = JsonConvert.SerializeObject(response, Formatting.None);
-            return Content("{\"users\":" + last + "}", "application/json");
-        }
+        //    string last = JsonConvert.SerializeObject(response, Formatting.None);
+        //    return Content("{\"users\":" + last + "}", "application/json");
+        //    try
+        //    {
+        //        DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+        //        string json = jsonClass.JsonResult_Str(dataTable, "users", "");
+        //        return Content(json, "application/json");
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error occurred in {Function}", nameof(PFRCDEWS));
+        //        return StatusCode(500, "Internal server error.");
+        //    }
+
+        //}
 
 
 
@@ -516,7 +710,7 @@ namespace webapikits.Controllers
     public IActionResult GetBanner()
     {
             //TODO banner list 
-        return Ok(response);
+        return Ok(GetBanner);
     }
 
 

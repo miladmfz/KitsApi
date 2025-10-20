@@ -14,27 +14,33 @@ namespace webapikits.Controllers
     {
 
 
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-        public BrokerController(IConfiguration configuration)
+
+        public BrokerController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
+
 
 
 
 
         [HttpGet]
         [Route("GetColumnList")]
-        public string GetColumnList(
+        public async Task<IActionResult> GetColumnList(
             string Type,
             string AppType,
             string IncludeZero
@@ -57,15 +63,30 @@ namespace webapikits.Controllers
             string query = $"Exec [spApp_GetColumn]  0  ,'', {Type},{AppType}, {IncludeZero}";
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResult_Str(dataTable, "Columns", "");
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResult_Str(dataTable, "Columns", "");
+
+
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Columns", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetColumnList));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
 
 
         }
 
         [HttpGet]
         [Route("BrokerStack")]
-        public string BrokerStack(string BrokerRef)
+        public async Task<IActionResult> BrokerStack(string BrokerRef)
         {
             if (string.IsNullOrEmpty(BrokerRef))
             {
@@ -73,59 +94,95 @@ namespace webapikits.Controllers
             }
 
             string query = $"exec spApp_GetBrokerStack {BrokerRef}" ;
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
+
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "BrokerStack");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BrokerStack));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
-        [HttpGet]
-        [Route("getImageInfo")]
-        public string getImageInfo(string code)
-        {
+        //[HttpGet]
+        //[Route("getImageInfo")]
+        //public string getImageInfo(string code)
+        //{
 
 
-            string query = $"Exec spApp_GetInfo 1, 'KsrImage', {code} , @RowCount=200, @CountFlag=1 ";
+        //    string query = $"Exec spApp_GetInfo 1, 'KsrImage', {code} , @RowCount=200, @CountFlag=1 ";
 
-            DataTable dataTable = db.Web_ImageExecQuery(query);
+        //    DataTable dataTable = db.Web_ImageExecQuery(HttpContext,query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "");
+        //    return jsonClass.JsonResult_Str(dataTable, "Text", "");
 
-        }
+
+        //}
 
         [HttpGet]
         [Route("GetMenuBroker")]
-        public string GetMenuBroker()
+        public async Task<IActionResult>GetMenuBroker()
         {
 
 
             string query = $"select DataValue from DbSetup where KeyValue='AppBroker_MenuGroupCode'";
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "DataValue");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetMenuBroker));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
 
         [HttpGet]
         [Route("GetMaxRepLog")]
-        public string GetMaxRepLog()
+        public async Task<IActionResult>GetMaxRepLog()
         {
 
 
             string query = $"Select top 1 * from RepLogData order by 1 desc";
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
+            //return jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "RepLogDataCode");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetMaxRepLog));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
 
         [HttpGet]
         [Route("RetrofitReplicate")]
-        public string RetrofitReplicate(
+        public async Task<IActionResult>RetrofitReplicate(
             string code,
             string table,
             string reptype,
@@ -137,18 +194,27 @@ namespace webapikits.Controllers
             string query = $"Exec spApp_GetInfo {reptype}, {table}, {code}, @RowCount={Reprow} , @CountFlag=1";
              
 
-            DataTable dataTable;
-            if (table.Equals("KsrImage"))
-            {
-                dataTable = db.Web_ImageExecQuery(query);
-            }
-            else
-            {
-                dataTable = db.Broker_ExecQuery(HttpContext, query);
-            }
 
-            return jsonClass.JsonResult_Str1(dataTable, "Text", "");
+            try
+            {
+                DataTable dataTable;
+                if (table.Equals("KsrImage"))
+                {
+                    dataTable = await db.Image_ExecQuery(HttpContext, query);
+                }
+                else
+                {
+                    dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                }
 
+                string json = jsonClass.JsonResult_Str1(dataTable, "Text", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(RetrofitReplicate));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -156,7 +222,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("BrokerOrder")]
-        public string BrokerOrder([FromBody] BrokerOrderClass brokerOrderrequest)
+        public async Task<IActionResult>BrokerOrder([FromBody] BrokerOrderClass brokerOrderrequest)
         {
 
             List<HeaderDetail> headerDetails = brokerOrderrequest.HeaderDetails;
@@ -195,7 +261,7 @@ namespace webapikits.Controllers
             string query_dbsetup = "SELECT KeyValue, DataValue FROM DbSetup WHERE KeyValue IN ('AppBroker_FactorType', 'AppBroker_IsShopFactor', 'AppBroker_DefaultStackCode', 'AppBroker_MustHasAmount')";
 
             // اجرای کوئری و دریافت نتیجه به صورت DataTable
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query_dbsetup);
+            DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query_dbsetup);
 
             // بررسی نتیجه
             if (dataTable != null && dataTable.Rows.Count > 0)
@@ -228,14 +294,12 @@ namespace webapikits.Controllers
 
             string sq = $"Exec [dbo].[spPreFactor_Insert] '{appBrokerFactorType}', {appBrokerDefaultStackCode}, {UserId}, 0, '', {Customer}, '{Explain}', {Broker}, {MobFCode}, '{MobFDate}'";
 
-            var result = db.Broker_ExecQuery(HttpContext, sq);
+            var result = await db.Broker_ExecQuery(HttpContext, sq);
             if (result != null)
             {
                 factorcode = Convert.ToInt32(result.Rows[0]["PreFactorCode"]);
                 factordate = result.Rows[0]["PreFactorDate"].ToString();
                 ExistFlag = Convert.ToInt32(result.Rows[0]["ExistFlag"]);
-
-
             }
 
             DataTable dataTable1 = new DataTable();
@@ -243,13 +307,8 @@ namespace webapikits.Controllers
             DataTable dataTable3 = new DataTable();
 
 
-
-
-
             if (ExistFlag == 0){
 
-
-            
                    DataTable notAmountTable = new DataTable();
                    notAmountTable.Columns.Add("GoodCode", typeof(int));
                    notAmountTable.Columns.Add("Flag", typeof(int));
@@ -262,7 +321,7 @@ namespace webapikits.Controllers
                        int Price = Convert.ToInt32(rowDetail_single.Price);
 
                        string sqrow = $"Exec [dbo].[spPreFactor_InsertRow] '{appBrokerFactorType}', {factorcode}, {Code}, {Amount}, 0, {UserId}, '', {appBrokerMustHasAmount}, 0, {Price}";
-                       var res = db.Broker_ExecQuery(HttpContext, sqrow);
+                       var res = await db.Broker_ExecQuery(HttpContext, sqrow);
                        if (res != null)
                        {
                            int rowCode = Convert.ToInt32(res.Rows[0]["RowCode"]);
@@ -282,13 +341,21 @@ namespace webapikits.Controllers
                            string sq1 = $"Select Sum(FacAmount) rcount From {appBrokerFactorType}Rows Where {appBrokerFactorType}Ref = {factorcode}";
 
 
-                           var res1 = db.Broker_ExecQuery(HttpContext, sq1);
+                           var res1 = await db.Broker_ExecQuery(HttpContext, sq1);
                            int rcount = Convert.ToInt32(res1.Rows[0]["rcount"]);
 
                            if (CountRows == rcount)    {
 
                                    string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
-                                   return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(HttpContext, query), "Text", "");
+
+
+
+                                DataTable dataTable22 = await db.Broker_ExecQuery(HttpContext, query);
+
+
+                                string json = jsonClass.JsonResult_Str1(dataTable, "Text", "");
+                                return Content(json, "application/json");
+
 
 
                            }else{
@@ -307,14 +374,41 @@ namespace webapikits.Controllers
                            db.Broker_ExecQuery(HttpContext, temp2);
                    }
 
-                   return jsonClass.JsonResult_Str1(notAmountTable, "Text", "");
 
 
-            }else{
+
+                try
+                {
+                    string json = jsonClass.JsonResult_Str1(notAmountTable, "Text", "");
+
+                    return Content(json, "application/json");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred in {Function}", nameof(BrokerOrder));
+                    return StatusCode(500, "Internal server error.");
+                }
+
+
+            }
+            else
+            {
                    string query = $"select  0 as GoodCode, {factorcode} as PreFactorCode ,{factordate} as PreFactorDate ,{ExistFlag} as ExistFlag ";
-                   return jsonClass.JsonResult_Str1(db.Broker_ExecQuery(HttpContext, query), "Text", "");
+
+                   
 
 
+                try
+                {
+                    
+                    string json = jsonClass.JsonResult_Str1(await db.Broker_ExecQuery(HttpContext, query), "Text", "");
+                    return Content(json, "application/json");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error occurred in {Function}", nameof(BrokerOrder));
+                    return StatusCode(500, "Internal server error.");
+                }
 
 
 
@@ -334,12 +428,11 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("UpdateLocation")]
-        public string UpdateLocation([FromBody] string GpsLocations)
+        public async Task<IActionResult>UpdateLocation([FromBody] string GpsLocations)
         {
 
-
             var locations = JsonConvert.DeserializeObject<List<GpsLocation>>(GpsLocations);
-
+            string query = "";
             foreach (var lc in locations)
             {
                 string longitude = lc.Longitude;
@@ -350,17 +443,25 @@ namespace webapikits.Controllers
                 DateTime dateObj = DateTime.ParseExact(gpsDate, "yyyy-MM-dd HH:mm:ss", CultureInfo.InvariantCulture);
                 string formattedDate = dateObj.ToString("yyyy/MM/dd HH:mm:ss");
 
-                Query = $"INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('{longitude}', '{latitude}', {brokerRef}, '{formattedDate}'); SELECT SCOPE_IDENTITY();";
-                DataTable = db.Broker_ExecQuery(HttpContext, Query);
+                query = $"INSERT INTO GpsLocation (Longitude, Latitude, BrokerRef, GpsDate) VALUES ('{longitude}', '{latitude}', {brokerRef}, '{formattedDate}'); SELECT SCOPE_IDENTITY();";
+                await db.Broker_ExecQuery(HttpContext, query);
 
             }
 
 
-            Query = $"select top 1 * from GpsLocation order by 1 desc  ";
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, Query);
+             query = $"select top 1 * from GpsLocation order by 1 desc  ";
 
-
-            return jsonClass.JsonResult_Str(dataTable, "Locations", "");
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Locations", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateLocation));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -369,7 +470,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("CustomerInsert")]
-        public string CustomerInsert(string BrokerRef,
+        public async Task<IActionResult>CustomerInsert(string BrokerRef,
             string CityCode,
             string KodeMelli,
             string FName,
@@ -453,24 +554,22 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Broker_ExecQuery(HttpContext, query);
-
-
-            return jsonClass.JsonResult_Str(dataTable, "Customers", "");
+            try
+            {
+                DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Customers", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(CustomerInsert));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
-
-
-
-
-
     }
-
-
-
-
 
 
 

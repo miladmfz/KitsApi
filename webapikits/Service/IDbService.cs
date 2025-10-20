@@ -23,6 +23,8 @@ public interface IDbService
     Task<DataTable> Support_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
     Task<DataTable> SupportApp_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
     Task<DataTable> Broker_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+    Task<DataTable> Image_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+
     Task<DataTable> Ocr_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
     Task<DataTable> Order_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
     Task<DataTable> Company_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);

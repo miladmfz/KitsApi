@@ -9,21 +9,42 @@ namespace webapikits.Controllers
     [ApiController]
     public class OcrWebController : ControllerBase
     {
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+        //public OcrWebController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-        public OcrWebController(IConfiguration configuration)
+
+        public OcrWebController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
-
 
 
         /// ////////////////////////////////////////////////////////////////////////
@@ -32,24 +53,50 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("OcrFactorList")]
-        public string OcrFactorList([FromBody] ConditionDto conditionDto)
+        public async Task<IActionResult> OcrFactorList([FromBody] ConditionDto conditionDto)
         {
             string query = $"Exec dbo.spApp_ocrFactorList 4 , '{conditionDto.SearchTarget}' ,' ',50 ,0 , ' order by o.AppTcPrintRef desc' ,0,'{_configuration.GetConnectionString("OcrSecond_Db")}',{conditionDto.SourceFlag} ";
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(OcrFactorList));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("ocrGetFactorDetail")]
-        public string ocrGetFactorDetail(string AppOCRFactorCode)
+        public async Task<IActionResult> ocrGetFactorDetail(string AppOCRFactorCode)
         {
 
             string query = $"Exec spApp_ocrGetFactorDetail {AppOCRFactorCode}  ";
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ocrGetFactorDetail));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -57,36 +104,73 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("ExitDelivery")]
-        public string ExitDelivery(string AppOCRFactorCode)
+        public async Task<IActionResult> ExitDelivery(string AppOCRFactorCode)
         {
 
             string query = $"update AppOCRFactor set HasSignature = 0, AppIsDelivered = 0 where AppOCRFactorCode = {AppOCRFactorCode}  ";
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ExitDelivery));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
         [HttpGet]
         [Route("GetOcrPanel")]
-        public string GetOcrPanel(string StartDate, string EndDate, string State)
+        public async Task<IActionResult> GetOcrPanel(string StartDate, string EndDate, string State)
         {
 
             string query = $" spWeb_GetOcrPanel '{StartDate}' ,'{EndDate}' ,{State} ";
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetOcrPanel));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
         [HttpGet]
         [Route("GetTodeyFromServer")]
-        public string GetTodeyFromServer(string day)
+        public async Task<IActionResult> GetTodeyFromServer(string day)
         {
 
             string query = $"select dbo.fnDate_AddDays(dbo.fnDate_Today(),{day}) TodeyFromServer  ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetTodeyFromServer));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -96,7 +180,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("BasketColumnCard")]
-        public string BasketColumnCard(string Where, string AppType)
+        public async Task<IActionResult> BasketColumnCard(string Where, string AppType)
         {
             string query = "";
 
@@ -124,16 +208,29 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketColumnCard));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("Web_GetDbsetupObject")]
-        public string Web_GetDbsetupObject(string Where)
+        public async Task<IActionResult> Web_GetDbsetupObject(string Where)
         {
             string query = "";
 
@@ -145,9 +242,21 @@ namespace webapikits.Controllers
            
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Web_GetDbsetupObject));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -156,7 +265,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("CreateBasketColumn")]
-        public string CreateBasketColumn(string AppType)
+        public async Task<IActionResult> CreateBasketColumn(string AppType)
         {
             string query = "";
 
@@ -169,22 +278,46 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(CreateBasketColumn));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
         [HttpGet]
         [Route("GetBasketColumnList")]
-        public string GetBasketColumnList(string AppType)
+        public async Task<IActionResult> GetBasketColumnList(string AppType)
         {
 
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetBasketColumnList));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -192,15 +325,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetGoodType")]
-        public string GetGoodType()
+        public async Task<IActionResult> GetGoodType()
         {
 
             string query = "Exec [spApp_GetGoodType]";
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodType));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -209,23 +353,34 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetProperty")]
-        public string GetProperty(string Where)
+        public async Task<IActionResult> GetProperty(string Where)
         {
 
             string query = $" Select  PropertySchema,PropertyValueMap,PropertyName  from PropertySchema Where ClassName = 'TGOOD' And  ObjectType = '{Where}'";
 
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetProperty));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
         [HttpGet]
         [Route("InsertSingleColumn")]
-        public string InsertSingleColumn(
+        public async Task<IActionResult> InsertSingleColumn(
             string ColumnName,
             string ColumnDesc,
             string ObjectType,
@@ -243,8 +398,19 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(InsertSingleColumn));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -255,7 +421,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("UpdateDbSetup")]
-        public string UpdateDbSetup(
+        public async Task<IActionResult> UpdateDbSetup(
             string DataValue,
             string KeyId)
 
@@ -264,9 +430,20 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateDbSetup));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -275,15 +452,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAppPrinter")]
-        public string GetAppprinter(string AppType)
+        public async Task<IActionResult> GetAppprinter(string AppType)
 
         {
 
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAppprinter));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -295,7 +483,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UpdatePrinter")]
-        public string UpdatePrinter([FromBody] AppPrinterDto printerDto)
+        public async Task<IActionResult> UpdatePrinter([FromBody] AppPrinterDto printerDto)
         {
 
 
@@ -312,12 +500,24 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdatePrinter));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
         [HttpPost]
         [Route("GetAttachFileList")]
-        public string GetAttachFileList([FromBody] AttachFile attachFile)
+        public async Task<IActionResult> GetAttachFileList([FromBody] AttachFile attachFile)
         {
 
 
@@ -343,13 +543,24 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable1 = db.Ocr_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 =await  db.Ocr_ExecQuery(HttpContext, query1);
             dbname = dataTable1.Rows[0]["dbname"] + "";
 
             string query = $"select * from {dbname}..AttachedFiles where ClassName = '{attachFile.ClassName}' And ObjectRef = {attachFile.ObjectRef} ";
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
+            //return jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable,"AttachedFiles", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAttachFileList));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -358,7 +569,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAttachFile")]
-        public IActionResult GetAttachFile(string AttachedFileCode, string ClassName, string ObjectRef)
+        public async Task<IActionResult> GetAttachFileAsync(string AttachedFileCode, string ClassName, string ObjectRef)
         {
 
             string dbname = "";
@@ -383,12 +594,12 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable4 = db.Ocr_ExecQuery(HttpContext, query11);
+            DataTable dataTable4 = await db.Ocr_ExecQuery(HttpContext, query11);
             dbname = dataTable4.Rows[0]["dbname"] + "";
 
 
             string query1 = $"spWeb_GetAttachFile '{AttachedFileCode}' , '{dbname}'";
-            DataTable dataTable1 = db.Ocr_ExecQuery(HttpContext, query1);
+            DataTable dataTable1 = await db.Ocr_ExecQuery(HttpContext, query1);
             string base64File = dataTable1.Rows[0]["SourceFile"] + "";
             byte[] fileBytes = Convert.FromBase64String(base64File);
 
@@ -415,15 +626,26 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("EditPackDetail")]
-        public string EditPackDetail([FromBody] OcrModel ocrModel)
+        public async Task<IActionResult> EditPackDetail([FromBody] OcrModel ocrModel)
         {
 
 
             string query = $"Update AppOcrFactor Set AppPackCount ={ocrModel.AppPackCount} and AppPackDeliverDate='{ocrModel.AppPackDeliverDate}' where AppOCRFactorCode = {ocrModel.AppOCRFactorCode}";
 
 
-            DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Ocr_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Ocr_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(EditPackDetail));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 

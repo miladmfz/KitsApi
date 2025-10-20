@@ -12,47 +12,92 @@ namespace webapikits.Controllers
 
 
 
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+        //public WebController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-        public WebController(IConfiguration configuration)
+
+        public WebController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
+
 
 
         [HttpGet]
         [Route("GetTodeyFromServer")]
-        public string GetTodeyFromServer()
+        public async Task<IActionResult> GetTodeyFromServer()
         {
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
-            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetTodeyFromServer));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
 
         [HttpGet]
         [Route("ExistUser")]
-        public string ExistUser(string UName, string UPass)
+        public async Task<IActionResult> ExistUser(string UName, string UPass)
         {
 
             string query = $"Exec spapp_IsXUser  '{UName}','{UPass}'";
 
 
-            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ExistUser));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -62,15 +107,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("ChangeXUserPassword")]
-        public string ChangeXUserPassword(string UName, string UPass, string NewPass)
+        public async Task<IActionResult> ChangeXUserPassword(string UName, string UPass, string NewPass)
         {
 
             string query = $"Exec spApp_ChangeXUserPassword  '{UName}','{UPass}','{NewPass}'";
 
 
-            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ChangeXUserPassword));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -78,29 +134,51 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetWebLog")]
-        public string GetWebLog()
+        public async Task<IActionResult> GetWebLog()
         {
 
             string query = $"select top 50 * from WebLog order by 1 desc";
 
 
-            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "users", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetWebLog));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
         [HttpGet]
         [Route("InsertwebLog")]
-        public string InsertwebLog(string ClassName, string TagName, string LogValue)
+        public async Task<IActionResult> InsertwebLog(string ClassName, string TagName, string LogValue)
         {
 
             string query = $"exec sp_WebLogInsert @ClassName='{ClassName}',@TagName='{TagName}',@LogValue='{LogValue}'";
 
 
-            DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Web_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(InsertwebLog));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 

@@ -8,19 +8,40 @@ namespace webapikits.Controllers
     [ApiController]
     public class CompanyWebController : Controller
     {
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+        //public CompanyWebController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-        public CompanyWebController(IConfiguration configuration)
+
+        public CompanyWebController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
 
 
@@ -36,7 +57,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("BasketColumnCard")]
-        public string BasketColumnCard(string Where, string AppType)
+        public async Task<IActionResult> BasketColumnCard(string Where, string AppType)
         {
             string query = "";
 
@@ -64,16 +85,28 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketColumnCard));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("Web_GetDbsetupObject")]
-        public string Web_GetDbsetupObject(string Where)
+        public async Task<IActionResult> Web_GetDbsetupObject(string Where)
         {
             string query = "";
 
@@ -84,9 +117,21 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Web_GetDbsetupObject));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -95,7 +140,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("CreateBasketColumn")]
-        public string CreateBasketColumn(string AppType)
+        public async Task<IActionResult> CreateBasketColumn(string AppType)
         {
             string query = "";
 
@@ -137,22 +182,46 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(CreateBasketColumn));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
         [HttpGet]
         [Route("GetBasketColumnList")]
-        public string GetBasketColumnList(string AppType)
+        public async Task<IActionResult> GetBasketColumnList(string AppType)
         {
 
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetBasketColumnList));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -160,15 +229,27 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetGoodType")]
-        public string GetGoodType()
+        public async Task<IActionResult> GetGoodType()
         {
 
             string query = "Exec [spApp_GetGoodType]";
 
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodType));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
 
         }
@@ -177,15 +258,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetProperty")]
-        public string GetProperty(string Where)
+        public async Task<IActionResult> GetProperty(string Where)
         {
 
             string query = $" Select  PropertySchema,PropertyValueMap,PropertyName  from PropertySchema Where ClassName = 'TGOOD' And  ObjectType = '{Where}'";
 
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetProperty));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -193,7 +285,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("InsertSingleColumn")]
-        public string InsertSingleColumn(
+        public async Task<IActionResult> InsertSingleColumn(
             string ColumnName,
             string ColumnDesc,
             string ObjectType,
@@ -211,8 +303,19 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(InsertSingleColumn));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -223,7 +326,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("UpdateDbSetup")]
-        public string UpdateDbSetup(
+        public async Task<IActionResult> UpdateDbSetup(
             string DataValue,
             string KeyId)
 
@@ -232,8 +335,19 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateDbSetup));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -243,15 +357,26 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAppPrinter")]
-        public string GetAppprinter(string AppType)
+        public async Task<IActionResult> GetAppprinter(string AppType)
 
         {
 
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAppprinter));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -263,7 +388,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UpdatePrinter")]
-        public string UpdatePrinter([FromBody] AppPrinterDto printerDto)
+        public async Task<IActionResult> UpdatePrinter([FromBody] AppPrinterDto printerDto)
         {
 
 
@@ -280,8 +405,20 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Company_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Company_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdatePrinter));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 

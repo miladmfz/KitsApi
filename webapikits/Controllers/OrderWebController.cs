@@ -1,6 +1,7 @@
 ﻿
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
+using System.Threading.Tasks;
 using webapikits.Model;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -11,22 +12,42 @@ namespace webapikits.Controllers
     public class OrderWebController : ControllerBase
     {
 
-        public readonly IConfiguration _configuration;
-        DataBaseClass db;
-        DataTable DataTable = new DataTable();
-        string Query = "";
-        Response response = new();
+        //public readonly IConfiguration _configuration;
+        //DataBaseClass db;
+        //DataTable DataTable = new DataTable();
+        //string Query = "";
+        //Response response = new();
+        //JsonClass jsonClass = new JsonClass();
+
+        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
+
+        //public OrderWebController(IConfiguration configuration)
+        //{
+        //    _configuration = configuration;
+        //    db = new DataBaseClass(_configuration);
+
+        //}
+
+
+        private readonly IDbService db;
+        private readonly IJsonFormatter _jsonFormatter1;
+        private readonly ILogger<SupportNewController> _logger;
+        private readonly IConfiguration _configuration;
         JsonClass jsonClass = new JsonClass();
 
-        Dictionary<string, string> jsonDict = new Dictionary<string, string>();
 
-        public OrderWebController(IConfiguration configuration)
+        public OrderWebController(
+            IDbService dbService,
+            IJsonFormatter jsonFormatter,
+            ILogger<SupportNewController> logger,
+            IConfiguration configuration
+            )
         {
+            db = dbService;
+            _jsonFormatter1 = jsonFormatter;
+            _logger = logger;
             _configuration = configuration;
-            db = new DataBaseClass(_configuration);
-
         }
-
 
 
 
@@ -39,26 +60,48 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("OrderMizList")]
-        public string OrderMizList(string InfoState, string MizType)
+        public async Task<IActionResult> OrderMizList(string InfoState, string MizType)
         {
 
             string query = $" exec spApp_OrderMizList  {InfoState}, N'{MizType}' ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(OrderMizList));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
         [HttpGet]
         [Route("GetAmountItem")]
-        public string GetAmountItem(string Date, string State)
+        public async Task<IActionResult> GetAmountItem(string Date, string State)
         {
 
             string query = $" spWeb_GetBrokerPanel '{Date}' ,{State} ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAmountItem));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -67,38 +110,74 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetTodeyFromServer")]
-        public string GetTodeyFromServer(string day)
+        public async Task<IActionResult> GetTodeyFromServer(string day)
         {
 
             string query = $"select dbo.fnDate_AddDays(dbo.fnDate_Today(),{day}) TodeyFromServer  ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetTodeyFromServer));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
         [HttpGet]
         [Route("GetOrderPanel")]
-        public string GetOrderPanel(string StartDate, string EndDate, string State)
+        public async Task<IActionResult> GetOrderPanel(string StartDate, string EndDate, string State)
         {
 
             string query = $" spweb_Getorderpanel '{StartDate}' ,'{EndDate}' ,{State} ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetOrderPanel));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("GetCustomerMandeh")]
-        public string GetCustomerMandeh()
+        public async Task<IActionResult> GetCustomerMandeh()
         {
 
             string query = $" spWeb_GetCustomerMandeh ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetCustomerMandeh));
+                return StatusCode(500, "Internal server error.");
+            }
+
 
         }
 
@@ -106,13 +185,25 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetCustomerlastGood")]
-        public string GetCustomerlastGood(string CustomerCode)
+        public async Task<IActionResult> GetCustomerlastGood(string CustomerCode)
         {
 
             string query = $" spWeb_GetCustomerlastGood {CustomerCode} ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetCustomerlastGood));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -124,7 +215,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("BasketColumnCard")]
-        public string BasketColumnCard(string Where, string AppType)
+        public async Task<IActionResult> BasketColumnCard(string Where, string AppType)
         {
             string query = "";
 
@@ -152,16 +243,28 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(BasketColumnCard));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("Web_GetDbsetupObject")]
-        public string Web_GetDbsetupObject(string Where)
+        public async Task<IActionResult> Web_GetDbsetupObject(string Where)
         {
             string query = "";
 
@@ -173,9 +276,21 @@ namespace webapikits.Controllers
            
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Web_GetDbsetupObject));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -183,7 +298,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("CreateBasketColumn")]
-        public string CreateBasketColumn(string AppType)
+        public async Task<IActionResult> CreateBasketColumn(string AppType)
         {
             string query = "";
 
@@ -197,22 +312,46 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(CreateBasketColumn));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
         [HttpGet]
         [Route("GetBasketColumnList")]
-        public string GetBasketColumnList(string AppType)
+        public async Task<IActionResult> GetBasketColumnList(string AppType)
         {
 
 
             string query = $" select * from AppBasketColumn Where AppType ={AppType} ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
 
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetBasketColumnList));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -220,16 +359,27 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetGoodType")]
-        public string GetGoodType()
+        public async Task<IActionResult> GetGoodType()
         {
 
             string query = "Exec [spApp_GetGoodType]";
 
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodType));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -237,7 +387,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetProperty")]
-        public string GetProperty(string Where)
+        public async Task<IActionResult> GetProperty(string Where)
         {
 
 
@@ -245,16 +395,27 @@ namespace webapikits.Controllers
 
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetProperty));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
 
         [HttpGet]
         [Route("InsertSingleColumn")]
-        public string InsertSingleColumn(
+        public async Task<IActionResult> InsertSingleColumn(
             string ColumnName,
             string ColumnDesc,
             string ObjectType,
@@ -272,9 +433,20 @@ namespace webapikits.Controllers
                 $" Select '{ColumnName}','{ColumnDesc}','','{ObjectType}','{DetailVisible}','{ListVisible}','-1','{SearchVisible}','{ColumnType}','0','','{AppType}' ";
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(InsertSingleColumn));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -284,7 +456,7 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("UpdateDbSetup")]
-        public string UpdateDbSetup(
+        public async Task<IActionResult> UpdateDbSetup(
             string DataValue,
             string KeyId)
 
@@ -293,8 +465,19 @@ namespace webapikits.Controllers
             string query = $" update dbsetup set DataValue = '{DataValue}'  where keyid = {KeyId}";
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateDbSetup));
+                return StatusCode(500, "Internal server error.");
+            }
 
 
         }
@@ -304,16 +487,27 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetAppPrinter")]
-        public string GetAppprinter(string AppType)
+        public async Task<IActionResult> GetAppprinter(string AppType)
 
         {
 
             string query = $"select * from AppPrinter Where AppType={AppType}";
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
 
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAppprinter));
+                return StatusCode(500, "Internal server error.");
+            }
 
         }
 
@@ -324,7 +518,7 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("UpdatePrinter")]
-        public string UpdatePrinter([FromBody] AppPrinterDto printerDto)
+        public async Task<IActionResult> UpdatePrinter([FromBody] AppPrinterDto printerDto)
         {
 
 
@@ -341,34 +535,70 @@ namespace webapikits.Controllers
             }
 
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdatePrinter));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
         [HttpPost]
         [Route("GetOrderGoodList")]
-        public string GetOrderGoodList([FromBody] OrderGoodListSearchDto searchDto)
+        public async Task<IActionResult> GetOrderGoodList([FromBody] OrderGoodListSearchDto searchDto)
         {
             string searchtarget = searchDto.Where.Replace(" ", "%");
 
             string query = $"Exec spApp_GetGoods2 @RowCount = {searchDto.RowCount},@Where = N' GoodName like ''%{searchtarget}%''' ,@AppBasketInfoRef=1, @GroupCode = {searchDto.GroupCode} ,@AppType=3 ,@OrderBy =' Order By ActiveStack DESC , GoodCode  Desc'";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetOrderGoodList));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("ChangeGoodActive")]
-        public string ChangeGoodActive(string GoodCode, string ActiveFlag)
+        public async Task<IActionResult> ChangeGoodActive(string GoodCode, string ActiveFlag)
         {
 
             string query = $"spWeb_ChangeGoodActive {GoodCode},{ActiveFlag} ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(ChangeGoodActive));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -377,24 +607,48 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetGoodEdit")]
-        public string GetGoodEdit(string Where)
+        public async Task<IActionResult> GetGoodEdit(string Where)
         {
 
             string query = $"Select GoodCode,GoodName, CAST(MaxSellprice AS INT) MaxSellprice,GoodExplain1,GoodExplain2,GoodExplain3,GoodExplain4,GoodExplain5,GoodExplain6 from Good Where GoodCode = {Where} ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodEdit));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
         [HttpGet]
         [Route("GetActiveGood")]
-        public string GetActiveGood(string GoodCode)
+        public async Task<IActionResult> GetActiveGood(string GoodCode)
         {
 
             string query = $"select ActiveStack,GoodRef from GoodStack where goodref = {GoodCode}  order by 1 desc ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetActiveGood));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -403,26 +657,50 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("Web_InsertGood")]
-        public string Web_InsertGood([FromBody] GoodDto gooddto)
+        public async Task<IActionResult> Web_InsertGood([FromBody] GoodDto gooddto)
         {
 
             string query = $"Exec spWeb_InsertGood '{gooddto.GoodName}' , {gooddto.MaxSellPrice},'{gooddto.GoodExplain1}','{gooddto.GoodExplain2}','{gooddto.GoodExplain3}','{gooddto.GoodExplain4}','{gooddto.GoodExplain5}','{gooddto.GoodExplain6}' ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Web_InsertGood));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpPost]
         [Route("Web_UpdateGoodDetail")]
-        public string Web_UpdateGoodDetail([FromBody] GoodDto gooddto)
+        public async Task<IActionResult> Web_UpdateGoodDetail([FromBody] GoodDto gooddto)
         {
 
             string query = $"Exec spWeb_UpdateGoodDetail {gooddto.GoodCode},'{gooddto.GoodName}' , {gooddto.MaxSellPrice},'{gooddto.GoodExplain1}','{gooddto.GoodExplain2}','{gooddto.GoodExplain3}','{gooddto.GoodExplain4}','{gooddto.GoodExplain5}','{gooddto.GoodExplain6}' ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(Web_UpdateGoodDetail));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -432,13 +710,25 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetGroupFromGood")]
-        public string GetGroupFromGood(string Where)
+        public async Task<IActionResult> GetGroupFromGood(string Where)
         {
 
             string query = $"select GoodGroupCode,GoodGroupRef, Name, GoodRef from GoodGroup join Goodsgrp  on GoodGroupRef = GroupCode where Goodref = {Where}  ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGroupFromGood));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
@@ -447,46 +737,71 @@ namespace webapikits.Controllers
 
 
         [Route("GetGoodFromGroup")]
-        public string GetGoodFromGroup(string Where)
+        public async Task<IActionResult> GetGoodFromGroup(string Where)
         {
 
             string query = $"select GoodGroupCode, GoodName, GoodCode from Good join GoodGroup on goodref = GoodCode  where GoodGroupRef = {Where}  ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetGoodFromGroup));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
         [HttpGet]
         [Route("DeleteGoodGroupCode")]
-        public string DeleteGoodGroupCode(string Where)
+        public async Task<IActionResult> DeleteGoodGroupCode(string Where)
         {
 
             string query = $" delete from GoodGroup Where GoodGroupCode = {Where}  ";
 
-            DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
-            return jsonClass.JsonResultWithout_Str(dataTable);
+            //DataTable dataTable = db.Order_ExecQuery(HttpContext, query);
+            //return jsonClass.JsonResultWithout_Str(dataTable);
+            try
+            {
+                DataTable dataTable = await db.Order_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DeleteGoodGroupCode));
+                return StatusCode(500, "Internal server error.");
+            }
+
         }
 
 
 
         [HttpGet]
         [Route("GetWebImagess")]
-        public string GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
+        public async Task<string> GetWebImagess(string pixelScale, string ClassName, string ObjectRef)
         {
             string query = $"SELECT * FROM KsrImage WHERE Classname = '{ClassName}' AND ObjectRef = {ObjectRef} order by 1 desc";
 
 
-            DataTable dataTable = db.Web_ImageExecQuery( query);
+            DataTable dataTable =await db.Image_ExecQuery(HttpContext, query);
 
 
             return jsonClass.ConvertAndScaleImageToBase64(Convert.ToInt32(pixelScale), dataTable);
+
 
         }
 
         [HttpPost]
         [Route("UploadImage")]
-        public string UploadImage([FromBody] ksrImageModeldto data)
+        public async Task<string> UploadImage([FromBody] ksrImageModeldto data)
         {
 
 
@@ -507,7 +822,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spImageImport  '{data.ClassName}',{data.ObjectCode},'{filePath}' ;select @@IDENTITY KsrImageCode";
 
 
-                DataTable dataTable = db.Web_ImageExecQuery( query);
+                DataTable dataTable =await db.Image_ExecQuery(HttpContext, query);
 
                 return "\"Ok\"";
             }
