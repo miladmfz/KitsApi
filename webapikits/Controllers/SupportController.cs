@@ -1478,6 +1478,30 @@ namespace webapikits.Controllers
 
         }
 
+        [HttpGet]
+        [Route("GetLeaveRequestPerson")]
+        public async Task<IActionResult> GetLeaveRequestPerson(string TargetDate)
+        {
+
+            string query = $" Exec [dbo].[spWeb_GetLeaveRequest_Person_Bydate] '{TargetDate}'";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "LeaveRequests", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetLeaveRequestPerson));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
+        }
+
 
 
         [HttpGet]
