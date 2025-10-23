@@ -706,12 +706,65 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
+        [Route("UpdateFactorInvoiceState")]
+        public async Task<IActionResult> UpdateFactorInvoiceState([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $" Update Factor Set InvoiceState = {factorwebDto.InvoiceState} Where FactorCode={factorwebDto.FactorCode} ;select 1 's'";
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateFactorInvoiceState));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
+
+        }
+
+        [HttpPost]
+        [Route("UpdatePreFactorPFState")]
+        public async Task<IActionResult> UpdatePreFactorPFState([FromBody] FactorwebDto factorwebDto)
+        {
+
+            string query = $" Update PreFactor Set PFState = {factorwebDto.PFState} Where PreFactorCode={factorwebDto.FactorCode} ;select 1 's'";
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdatePreFactorPFState));
+                return StatusCode(500, "Internal server error.");
+            }
+
+
+
+        }
+
+
+
+
+        [HttpPost]
         [Route("GetWebFactor")]
         public async Task<IActionResult> GetWebFactor([FromBody] FactorwebDto factorwebDto)
         {
 
 
-            string query = $"spWeb_Get_Factor '{factorwebDto.ClassName}',{factorwebDto.ObjectRef},'{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}'";
+            string query = $"spWeb_Get_Factor '{factorwebDto.ClassName}',{factorwebDto.ObjectRef},'{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}'";
 
              
              
@@ -825,7 +878,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query = $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}'";
+            string query = $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}' ,{searchTargetDto.BrokerRef}";
              
 
             try

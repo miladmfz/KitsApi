@@ -27,7 +27,11 @@ namespace webapikits.Model
     public class FactorwebDto
     {
         public string? FactorRef { get; set; } = "";
+        public string? PreFactorRef { get; set; } = "";
         public string? FactorCode { get; set; } = "";
+        public string? PreFactorCode { get; set; } = "";
+        public string? InvoiceState { get; set; } = "";
+        public string? PFState { get; set; } = "";
         public string? BrokerRef { get; set; } = "";
         public string? FactorDate { get; set; } = "";
         public string? CustomerRef { get; set; } = "";

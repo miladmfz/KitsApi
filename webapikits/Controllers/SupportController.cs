@@ -365,7 +365,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult> GetKowsarCustomer([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query = $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}'";
+            string query = $"Exec [dbo].[spWeb_GetCustomer] '{searchTargetDto.SearchTarget}' ,{searchTargetDto.BrokerRef}";
 
 
             try
@@ -1673,7 +1673,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult> GetWebFactor([FromBody] FactorwebDto factorwebDto)
         {
 
-            string query = $"spWeb_Get_Factor '{factorwebDto.ClassName}',{factorwebDto.ObjectRef},'{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}'";
+            string query = $"spWeb_Get_Factor '{factorwebDto.ClassName}',{factorwebDto.ObjectRef},'{factorwebDto.StartDateTarget}','{factorwebDto.EndDateTarget}','{factorwebDto.SearchTarget}','{factorwebDto.BrokerRef}'";
 
 
             try
@@ -1692,6 +1692,11 @@ namespace webapikits.Controllers
 
 
         }
+
+
+
+
+
 
         [HttpPost]
         [Route("GetWebFactorRows")]

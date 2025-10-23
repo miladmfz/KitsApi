@@ -13,6 +13,7 @@
         public string? SearchTarget { get; set; } = "";
         public string? ObjectRef { get; set; } = "0";
         public string? ClassName { get; set; } = "";
+        public string? BrokerRef { get; set; } = "";
 
 
     }
