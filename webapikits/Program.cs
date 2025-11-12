@@ -49,8 +49,7 @@ internal class Program
                     builder.AllowAnyOrigin()
                            .AllowAnyHeader()
                            .AllowAnyMethod()
-                           .WithExposedHeaders("PersonInfoRef");// Allow this header to be exposed to the frontend
-
+            .WithExposedHeaders("PersonInfoRef", "Content-Disposition");
 
                 });
             });

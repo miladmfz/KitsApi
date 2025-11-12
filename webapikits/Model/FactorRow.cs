@@ -5,6 +5,7 @@ namespace webapikits.Model
         public string? FactorRef { get; set; }
 
         public string?  GoodCode { get; set; } 
+        public string? RowCode { get; set; } 
         public string? GoodName { get; set; }
         public string? FactorRowCode { get; set; }
         public string? GoodRef { get; set; } 

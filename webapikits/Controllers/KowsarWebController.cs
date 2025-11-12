@@ -454,7 +454,8 @@ namespace webapikits.Controllers
         public async Task<IActionResult> GetProperty([FromBody] PropertyDto propertyDto)
         {
 
-            string query = $"select dbo.NodeValue(PropertySchema, 'DisplayName') DisplayName, PropertySchemaCode,PropertySchema,ClassName,ObjectType,PropertyName,PropertySequence,PropertyType,PropertyValueMap From PropertySchema p where  p.ObjectType ='{propertyDto.ObjectType}' order by PropertySequence";
+            string query = $"select dbo.NodeValue(PropertySchema, 'DisplayName') DisplayName, PropertySchemaCode,PropertySchema,ClassName,ObjectType,PropertyName,PropertySequence" +
+                $",PropertyType,PropertyValueMap From PropertySchema p where  p.ObjectType ='{propertyDto.ObjectType}' order by PropertySequence";
 
              
             
@@ -510,12 +511,10 @@ namespace webapikits.Controllers
         {
 
 
-                // Decode the base64 string to bytes
                 byte[] decodedImage = Convert.FromBase64String(data.image);
 
-                // Save the image bytes to a file
 
-                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{data.ObjectCode}.jpg"; // Provide the path where you want to save the image
+                string filePath = _configuration.GetConnectionString("web_imagePath") + $"{data.ObjectCode}.jpg";
 
                 System.IO.File.WriteAllBytes(filePath, decodedImage);
 
@@ -564,7 +563,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "GoodGroups", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -584,12 +583,10 @@ namespace webapikits.Controllers
 
             string query = $" delete from KsrImage Where KsrImageCode = {Where}  ";
 
-             
-            
             try
             {
                 DataTable dataTable = await db.Image_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "KsrImages", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -632,7 +629,8 @@ namespace webapikits.Controllers
         {
            
 
-            string query = $"Select top 5 GoodCode,GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType,SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
+            string query = $"Select top 5 GoodCode,GoodType,GoodName,Type,UsedGood,MinSellPrice,MaxSellPrice,BarCodePrintState,SellPriceType," +
+                $"SellPrice1,SellPrice2,SellPrice3,SellPrice4,SellPrice5,SellPrice6 From Good where GoodName like '%{Where}%'";
 
              
              
@@ -710,12 +708,11 @@ namespace webapikits.Controllers
         public async Task<IActionResult> UpdateFactorInvoiceState([FromBody] FactorwebDto factorwebDto)
         {
 
+
             string query = $" Update Factor Set InvoiceState = {factorwebDto.InvoiceState} Where FactorCode={factorwebDto.FactorCode} ;select 1 's'";
-
-
             try
             {
-                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
                 string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
                 return Content(json, "application/json");
@@ -726,9 +723,9 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
 
-
-
         }
+
+
 
         [HttpPost]
         [Route("UpdatePreFactorPFState")]
@@ -740,7 +737,7 @@ namespace webapikits.Controllers
 
             try
             {
-                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
                 string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
 
                 return Content(json, "application/json");
@@ -754,6 +751,34 @@ namespace webapikits.Controllers
 
 
         }
+
+
+        [HttpPost]
+        [Route("WebFactorUpdateRow")]
+        public async Task<IActionResult> WebFactorUpdateRow([FromBody] FactorRow factorRow)
+        {
+
+            string UserId = _configuration.GetConnectionString("Support_UserId");
+
+            string query = $"spWeb_Factor_UpdateRow @RowCode ={factorRow.RowCode},@Amount ={factorRow.Amount},@Price ={factorRow.Price}, @ClassName ='{factorRow.ClassName}',@UserId ={UserId}";
+
+
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Factors", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(WebFactorInsertRow));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
 
 
 
@@ -1099,7 +1124,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -1180,7 +1205,8 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Centrals", "");
+
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -1196,8 +1222,8 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("GetLetterList")]
-        public async Task<IActionResult> GetLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
+        [Route("GetAutLetterList")]
+        public async Task<IActionResult> GetAutLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
         {
         
         
@@ -1254,12 +1280,13 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
                 return Content(json, "application/json");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetLetterList));
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutLetterList));
                 return StatusCode(500, "Internal server error.");
             }
 
@@ -1309,7 +1336,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable1 = await db.Kowsar_ExecQuery(HttpContext, query1);
-                string json = jsonClass.JsonResultWithout_Str(dataTable1);
+                string json = jsonClass.JsonResult_Str(dataTable1, "AutLetters", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -1330,7 +1357,7 @@ namespace webapikits.Controllers
 
 
 
-        [HttpPost]
+            [HttpPost]
             [Route("LetterInsert")]
             public async Task<IActionResult> LetterInsert([FromBody] LetterInsert letterInsert)
             {
@@ -1340,16 +1367,15 @@ namespace webapikits.Controllers
 
 
             string query = $"exec dbo.spAutLetter_Insert @LetterDate='{letterInsert.LetterDate}', @InOutFlag={letterInsert.InOutFlag},@Title ='{letterInsert.title}', " +
-                $"@Description='{SanitizeInput(letterInsert.Description)}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', @CreatorCentral ={letterInsert.CreatorCentral}, @OwnerCentral ={letterInsert.OwnerCentral} ";
+                $"@Description='{SanitizeInput(letterInsert.Description)}',@State ='{letterInsert.LetterState}',@Priority ='{letterInsert.LetterPriority}', @ReceiveType =N'دستی', " +
+                $"@CreatorCentral ={letterInsert.CreatorCentral}, @OwnerCentral ={letterInsert.OwnerCentral} ";
 
-
-
-             
             
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -1360,19 +1386,13 @@ namespace webapikits.Controllers
 
 
 
-        }
+            }
 
 
 
 
 
-
-
-
-
-
-
-        [HttpPost]
+            [HttpPost]
             [Route("AutLetterRowInsert")]
             public async Task<IActionResult> AutLetterRowInsert([FromBody] AutLetterRowInsert autLetterRowInsert)
             {
@@ -1383,13 +1403,10 @@ namespace webapikits.Controllers
                 $", @CreatorCentral = {autLetterRowInsert.CreatorCentral}, @ExecuterCentral = {autLetterRowInsert.ExecuterCentral}";
 
 
-
-             
-            
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -1413,7 +1430,8 @@ namespace webapikits.Controllers
 
                 string UserId = _configuration.GetConnectionString("Support_UserId");
 
-            string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}',@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.isShopFactor}";
+            string query = $"spWeb_Factor_Insert  @ClassName ='{factorwebDto.ClassName}',@StackRef ={factorwebDto.StackRef},@UserId ={UserId},@Date ='{factorwebDto.FactorDate}'," +
+                $"@Customer ={factorwebDto.CustomerCode},@Explain ='{factorwebDto.Explain}',@BrokerRef  = {factorwebDto.BrokerRef},@IsShopFactor  = {factorwebDto.isShopFactor}";
              
              
             try
@@ -1435,15 +1453,16 @@ namespace webapikits.Controllers
 
 
 
-        [HttpPost]
+            [HttpPost]
             [Route("WebFactorInsertRow")]
             public async Task<IActionResult> WebFactorInsertRow([FromBody] FactorRow factorRow)
             {
 
 
-                string UserId = _configuration.GetConnectionString("Support_UserId");
+            string UserId = _configuration.GetConnectionString("Support_UserId");
 
-            string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount},@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
+            string query = $"spWeb_Factor_InsertRow  @ClassName ='{factorRow.ClassName}', @FactorCode={factorRow.FactorRef}, @GoodRef ={factorRow.GoodRef},@Amount ={factorRow.Amount}," +
+                $"@Price ={factorRow.Price},@UserId ={UserId},@MustHasAmount ={factorRow.MustHasAmount}, @MergeFlag ={factorRow.MergeFlag} ";
 
              
 
@@ -1503,7 +1522,8 @@ namespace webapikits.Controllers
         {
 
 
-            string query = $"Exec [dbo].[spWeb_LeaveRequest_Insert] {leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}',{leaveRequestDto.TotalDay},{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
+            string query = $"Exec [dbo].[spWeb_LeaveRequest_Insert] {leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}',{leaveRequestDto.TotalDay}," +
+                $"{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
 
 
              
@@ -1528,7 +1548,9 @@ namespace webapikits.Controllers
         {
 
 
-            string query = $"Exec [dbo].[spWeb_LeaveRequest_Update] {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}',{leaveRequestDto.TotalDay},{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}','{leaveRequestDto.LeaveRequestExplain}' ";
+            string query = $"Exec [dbo].[spWeb_LeaveRequest_Update] {leaveRequestDto.LeaveRequestCode},{leaveRequestDto.UserRef},'{leaveRequestDto.LeaveRequestType}','{leaveRequestDto.LeaveStartDate}'," +
+                $"{leaveRequestDto.TotalDay},{leaveRequestDto.WorkDay},{leaveRequestDto.OffDay},'{leaveRequestDto.LeaveEndDate}','{leaveRequestDto.LeaveStartTime}','{leaveRequestDto.LeaveEndTime}'," +
+                $"'{leaveRequestDto.LeaveRequestExplain}' ";
 
 
              

@@ -108,7 +108,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -426,8 +426,8 @@ namespace webapikits.Controllers
 
 
         [HttpPost]
-        [Route("GetLetterList")]
-        public async Task<IActionResult> GetLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
+        [Route("GetAutLetterList")]
+        public async Task<IActionResult> GetAutLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
         {
 
 
@@ -463,13 +463,14 @@ namespace webapikits.Controllers
 
             if (!string.IsNullOrEmpty(searchTargetLetterDto.StartTime))
             {
+                string Where_Time = $" (( HeaderLetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') Or ( HeaderLetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'')) ";
                 if (!string.IsNullOrEmpty(Where))
                 {
-                    Where += $" And (LetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') ";
+                    Where += $" And " + Where_Time;
                 }
                 else
                 {
-                    Where = $" ( LetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') ";
+                    Where = Where_Time;
                 }
             }
 
@@ -482,13 +483,14 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
 
                 return Content(json, "application/json");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetLetterList));
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutLetterList));
                 return StatusCode(500, "Internal server error.");
             }
 
@@ -496,6 +498,60 @@ namespace webapikits.Controllers
 
 
         }
+
+
+
+        [HttpPost]
+        [Route("GetAutLetterListByPerson")]
+        public async Task<IActionResult> GetAutLetterListByPerson([FromBody] SearchTargetLetterDto searchTargetLetterDto)
+        {
+
+
+            string Where = "";
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.SearchTarget))
+            {
+                Where = $"(LetterTitle like ''%{searchTargetLetterDto.SearchTarget}%'' or LetterDescription like ''%{searchTargetLetterDto.SearchTarget}%'' or ds.RowExecutorName like ''%{searchTargetLetterDto.SearchTarget}%'')";
+            }
+
+            if (!string.IsNullOrEmpty(searchTargetLetterDto.StartTime))
+            {
+                string Where_Time = $" (( HeaderLetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'') Or ( HeaderLetterDate between ''{searchTargetLetterDto.StartTime}'' And ''{searchTargetLetterDto.EndTime}'')) ";
+                if (!string.IsNullOrEmpty(Where))
+                {
+                    Where += $" And " + Where_Time;
+                }
+                else
+                {
+                    Where = Where_Time;
+                }
+            }
+
+
+
+
+            string query = $"spWeb_AutLetterListByPerson '{Where}','{searchTargetLetterDto.PersonInfoCode}' ,'{searchTargetLetterDto.Flag}'";
+
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutLetterListByPerson));
+                return StatusCode(500, "Internal server error.");
+            }
+
+        }
+
+
 
 
 
@@ -517,8 +573,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
-
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -544,8 +599,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
-
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -570,8 +624,8 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
-                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+
+                string json = jsonClass.JsonResult_Str(dataTable, "Centrals", "");
 
                 return Content(json, "application/json");
             }
@@ -601,8 +655,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
-
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetterRows", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -629,8 +682,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
-
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -643,6 +695,30 @@ namespace webapikits.Controllers
 
 
 
+        [HttpGet]
+        [Route("GetWebLog")]
+        public async Task<IActionResult> GetWebLog()
+        {
+
+            string query = $"ShowWebLog";
+
+
+
+
+
+            try
+            {
+                DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "WebLogs", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetWebLog));
+                return StatusCode(500, "Internal server error.");
+            }
+
+        }
 
         [HttpGet]
         [Route("GetAutConversation")]
@@ -658,9 +734,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
-                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
-
+                string json = jsonClass.JsonResult_Str(dataTable, "Conversations", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -668,6 +742,8 @@ namespace webapikits.Controllers
                 _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutConversation));
                 return StatusCode(500, "Internal server error.");
             }
+
+
 
         }
 
@@ -685,7 +761,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
 
                 return Content(json, "application/json");
             }
@@ -716,7 +792,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
 
                 return Content(json, "application/json");
             }
@@ -759,7 +835,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
 
                 return Content(json, "application/json");
             }
@@ -791,7 +867,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
 
                 return Content(json, "application/json");
             }
@@ -803,56 +879,6 @@ namespace webapikits.Controllers
 
         }
 
-
-
-        [HttpPost]
-        [Route("GetAutLetterListByPerson")]
-        public async Task<IActionResult> GetAutLetterListByPerson([FromBody] SearchTargetLetterDto searchTargetLetterDto)
-        {
-
-
-            string Where = "";
-
-            if (!string.IsNullOrEmpty(searchTargetLetterDto.SearchTarget))
-            {
-                Where = $"(LetterTitle like ''%{searchTargetLetterDto.SearchTarget}%'' or LetterDescription like ''%{searchTargetLetterDto.SearchTarget}%'' or ds.RowExecutorName like ''%{searchTargetLetterDto.SearchTarget}%'')";
-            }
-
-
-            if (!string.IsNullOrEmpty(searchTargetLetterDto.CreationDate))
-            {
-                if (!string.IsNullOrEmpty(Where))
-                {
-                    Where += $" And LetterDate>=''{searchTargetLetterDto.CreationDate}''";
-                }
-                else
-                {
-                    Where = $"LetterDate>=''{searchTargetLetterDto.CreationDate}''";
-                }
-            }
-
-
-
-            string query = $"spWeb_AutLetterListByPerson '{Where}','{searchTargetLetterDto.PersonInfoCode}' ,'{searchTargetLetterDto.Flag}'";
-
-
-
-
-            try
-            {
-                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
-                //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
-
-                return Content(json, "application/json");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetAutLetterListByPerson));
-                return StatusCode(500, "Internal server error.");
-            }
-
-        }
 
 
 
@@ -1180,7 +1206,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
 
                 return Content(json, "application/json");
             }
@@ -1208,7 +1234,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
 
                 return Content(json, "application/json");
             }
@@ -1241,7 +1267,7 @@ namespace webapikits.Controllers
                 {
                     DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                     //string json = jsonClass.JsonResult_Str(dataTable, "AutLetters", "");
-                    string json = jsonClass.JsonResultWithout_Str(dataTable);
+                    string json = jsonClass.JsonResult_Str(dataTable, "AttachedFiles", "");
 
                     return Content(json, "application/json");
                 }
@@ -1418,6 +1444,50 @@ namespace webapikits.Controllers
 
 
         }
+
+        [HttpGet]
+        [Route("GetAttachFileNew")]
+        public async Task<IActionResult> GetAttachFileNew(string AttachedFileCode, string ClassName, string ObjectRef)
+        {
+            try
+            {
+                // 1️⃣ پیدا کردن دیتابیس
+                string queryDb = ClassName switch
+                {
+                    "AutLetter" => $"SELECT db_name() + 'Ocr' + REPLACE(FromDate, '/', '') dbname FROM FiscalPeriod p JOIN AutLetter aut ON PeriodId = PeriodRef WHERE LetterCode = {ObjectRef}",
+                    "Factor" => $"SELECT db_name() + 'Ocr' + REPLACE(FromDate, '/', '') dbname FROM FiscalPeriod p JOIN Factor f ON PeriodId = PeriodRef WHERE FactorCode = {ObjectRef}",
+                    _ => $"SELECT db_name() + 'Ocr' dbname"
+                };
+
+                DataTable dbResult = await db.Support_ExecQuery(HttpContext, queryDb);
+                string dbname = dbResult.Rows[0]["dbname"].ToString();
+
+                // 2️⃣ دریافت فایل
+                string query = $"spWeb_GetAttachFile '{AttachedFileCode}', '{dbname}'";
+                DataTable dt = await db.Support_ExecQuery(HttpContext, query);
+
+                if (dt.Rows.Count == 0)
+                    return NotFound(new { Success = false, Message = "فایل یافت نشد" });
+
+                string base64 = dt.Rows[0]["SourceFile"].ToString() ?? "";
+                string fileName = dt.Rows[0]["FileName"].ToString() ?? "file";
+                string fileType = dt.Rows[0]["Type"].ToString().ToLower();
+
+                return Ok(new
+                {
+                    Success = true,
+                    FileName = fileName,
+                    FileType = fileType,
+                    Base64 = base64
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Success = false, Message = ex.Message });
+            }
+        }
+
+
 
 
 
@@ -2178,6 +2248,8 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
         }
+
+
 
 
 

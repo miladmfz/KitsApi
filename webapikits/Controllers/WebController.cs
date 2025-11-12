@@ -64,7 +64,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Text", "TodeyFromServer");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -90,7 +90,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "XUsers", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -119,7 +119,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "XUsers", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -171,7 +171,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Web_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "WebLogs", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)

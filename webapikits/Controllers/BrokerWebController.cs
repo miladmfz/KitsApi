@@ -123,6 +123,7 @@ namespace webapikits.Controllers
             {
                 DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
                 string json = jsonClass.JsonResultWithout_Str(dataTable);
+                    ;
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -149,7 +150,8 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Brokers", "");
+
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -221,7 +223,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Brokers", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -305,7 +307,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Brokers", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -358,7 +360,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Broker_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResultWithout_Str(dataTable);
+                string json = jsonClass.JsonResult_Str(dataTable, "Brokers", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
