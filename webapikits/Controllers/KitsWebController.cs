@@ -8,20 +8,6 @@ namespace webapikits.Controllers
     [ApiController]
     public class KitsWebController : ControllerBase
     {
-        //public readonly IConfiguration _configuration;
-        //DataBaseClass db;
-        //DataTable DataTable = new DataTable();
-        //string Query = "";
-        //Response response = new();
-        //JsonClass jsonClass = new JsonClass();
-        //Dictionary<string, string> jsonDict = new Dictionary<string, string>();
-
-        //public KitsWebController(IConfiguration configuration)
-        //{
-        //    _configuration = configuration;
-        //    db = new DataBaseClass(_configuration);
-
-        //}
 
 
         private readonly IDbService db;

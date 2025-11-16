@@ -39,6 +39,9 @@ public class DbService : IDbService
     public async Task<DataTable> Kits_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null)
         => await ExecuteQueryAsync(context, "Kits_Connection", query, parameters);
 
+    public async Task<DataTable> Auth_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null)
+        => await ExecuteQueryAsync(context, "KowsarIdentityDb", query, parameters);
+
     public async Task<DataTable> Support_ImageExecQuery(HttpContext? context,string query, Dictionary<string, object>? parameters = null)
     => await ExecuteQueryAsync(context, "Support_ImageConnection", query, parameters);
 

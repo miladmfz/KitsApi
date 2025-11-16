@@ -783,7 +783,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult> Conversation_Insert([FromBody] LetterDto letterdto)
         {
 
-            string query = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={letterdto.LetterRef}, @CentralRef={letterdto.CentralRef}, @ConversationText='{letterdto.ConversationText}'";
+            string query = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={letterdto.LetterRef}, @CentralRef={letterdto.CentralRef}, @ConversationText='{letterdto.ConversationText}', @ClassName='Text'";
 
 
 
@@ -893,7 +893,7 @@ namespace webapikits.Controllers
         {
 
 
-            string query2 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='{data.Title}'";
+            string query2 = $"Exec spWeb_AutLetterConversation_Insert @LetterRef={data.LetterRef}, @CentralRef={data.CentralRef}, @ConversationText='{data.Title}', @ClassName='File'";
 
             DataTable dataTable2 = await db.Support_ExecQuery(HttpContext, query2);
             string Conversationref = dataTable2.Rows[0]["ConversationCode"] + "";

@@ -1,28 +1,22 @@
-﻿
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
+using webapikits.Service;
 
 internal class Program
 {
     private static void Main(string[] args)
     {
-
         Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Debug() // سطح لاگ
-                    .WriteTo.Console()    // نمایش در کنسول
-                    .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day) // لاگ به فایل (هر روز یک فایل جدید)
-                    .CreateLogger();
+            .MinimumLevel.Debug()
+            .WriteTo.Console()
+            .WriteTo.File("Logs/log-.txt", rollingInterval: RollingInterval.Day)
+            .CreateLogger();
 
         try
         {
             Log.Information("Starting web host");
-
-
-
 
             var builder = WebApplication.CreateBuilder(args);
             builder.Host.UseSerilog();
@@ -30,59 +24,93 @@ internal class Program
             builder.Host.UseWindowsService();
             builder.Services.AddWindowsService();
 
-            // Add services to the container.
+            // -----------------------------
+            //   Controller & Swagger
+            // -----------------------------
             builder.Services.AddControllers();
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen();
 
-            //builder.Services.AddHttpClient();
-
+            // -----------------------------
+            //  Core Services
+            // -----------------------------
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<IDbService, DbService>();
             builder.Services.AddScoped<IJsonFormatter, JsonFormatter>();
 
+            // -----------------------------
+            //  Auth Services
+            // -----------------------------
+            builder.Services.AddScoped<PasswordHasher>();
+            builder.Services.AddScoped<JwtMaker>();
 
+            // -----------------------------
+            //  JWT Authentication
+            // -----------------------------
+            var jwtKey = builder.Configuration["Jwt:Key"];
+            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            var jwtAudience = builder.Configuration["Jwt:Audience"];
+
+            builder.Services.AddAuthentication(options =>
+            {
+                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            })
+            .AddJwtBearer(options =>
+            {
+                options.RequireHttpsMetadata = false;
+                options.SaveToken = true;
+
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = true,
+                    ValidateIssuerSigningKey = true,
+
+                    ValidIssuer = jwtIssuer,
+                    ValidAudience = jwtAudience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+                };
+            });
+
+            // -----------------------------
+            //    CORS
+            // -----------------------------
             builder.Services.AddCors(options =>
             {
-                options.AddDefaultPolicy(builder =>
+                options.AddDefaultPolicy(policy =>
                 {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyHeader()
-                           .AllowAnyMethod()
-            .WithExposedHeaders("PersonInfoRef", "Content-Disposition");
-
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod()
+                          .WithExposedHeaders("PersonInfoRef", "Content-Disposition");
                 });
             });
 
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
 
-
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // -----------------------------
+            //  Middleware Pipeline
+            // -----------------------------
             if (app.Environment.IsDevelopment())
             {
                 app.UseSwagger();
                 app.UseSwaggerUI();
             }
 
-
-
-
             app.UseRouting();
             app.UseCors();
+
+            app.UseAuthentication();   // 🔥 مهم
             app.UseAuthorization();
 
-
-
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.MapControllers();
 
             app.Run();
-
         }
         catch (Exception ex)
         {
@@ -94,6 +122,3 @@ internal class Program
         }
     }
 }
-
-
-
