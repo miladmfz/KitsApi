@@ -1688,7 +1688,7 @@ namespace webapikits.Controllers
         public async Task<IActionResult> EditCustomerProperty([FromBody] CustomerWebDto customerWebDto)
         {
 
-            string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.Delegacy}',{customerWebDto.ObjectRef}";
+            string query = $"spWeb_EditCustomerProperty '{customerWebDto.AppNumber}','{customerWebDto.DatabaseNumber}','{customerWebDto.Delegacy}','{customerWebDto.Explain}',{customerWebDto.ObjectRef}";
 
 
             try
@@ -2812,6 +2812,48 @@ namespace webapikits.Controllers
             return Content(json, "application/json");
 
 
+        }
+
+
+        [HttpPost]
+        [Route("GetCity")]
+        public async Task<IActionResult> GetCity([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+
+            string query = $"Select CityCode,Name from City ";
+
+            DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+            string json = jsonClass.JsonResult_Str(dataTable, "Citys", "");
+            return Content(json, "application/json");
+
+
+        }
+
+
+
+        [HttpGet]
+        [Route("GetCustomerByCode")]
+        public async Task<IActionResult> GetCustomerByCode(string CustomerCode)
+        {
+
+            string query = $"select CustomerCode, FName, Name, CityCode, CityName, Address, Phone, Mobile, Email, Explain, ZipCode from vwcustomer Where CustomerCode= {CustomerCode} ";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Customers", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetCustomerByCode));
+                return StatusCode(500, "Internal server error.");
+            }
         }
 
 
