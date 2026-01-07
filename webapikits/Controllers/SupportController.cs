@@ -2858,6 +2858,236 @@ namespace webapikits.Controllers
 
 
 
+
+
+
+
+
+
+
+
+        [HttpPost]
+        [Route("InUp_MonthSummary")]
+        public async Task<IActionResult> InUp_MonthSummary([FromBody] MonthSummaryDto monthSummaryDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spweb_InUp_MonthSummary {monthSummaryDto.Sal},{monthSummaryDto.Mah},{monthSummaryDto.TotalDays},{monthSummaryDto.HolidayDays}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "MonthSummarys", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(InUp_MonthSummary));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+        [HttpPost]
+        [Route("InUp_Employee")]
+        public async Task<IActionResult> InUp_Employee([FromBody] EmployeDto employeDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spweb_InUp_Employee {employeDto.EmployeCode},'{employeDto.FirstName}','{employeDto.LastName}','{employeDto.CodeMeli}','{employeDto.JobTitle}' , {employeDto.Rozkarkard}, {employeDto.HoghoghRozane}, {employeDto.SanavatRozane}, {employeDto.HaghMaskanRozane}, {employeDto.HaghKharobarRozane}, {employeDto.EzafekarSaati}, {employeDto.SaatNaharNamaz}, '{employeDto.VaziyatTaahol}', {employeDto.TedadOlad}, {employeDto.HaghOlad}, {employeDto.HaghTaahol}, {employeDto.WorkingHoursMinistry}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Employes", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(InUp_Employee));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+        [HttpPost]
+        [Route("AddSalaryForAllEmployees")]
+        public async Task<IActionResult> AddSalaryForAllEmployees([FromBody] MonthSummaryDto monthSummaryDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spweb_AddSalaryComparisonForAllEmployees {monthSummaryDto.Sal},{monthSummaryDto.Mah}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "SalarySummarys", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(AddSalaryForAllEmployees));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+        [HttpPost]
+        [Route("UpdateWorkingEmployee")]
+        public async Task<IActionResult> UpdateWorkingEmployee([FromBody] SalarySummaryDto salarySummaryDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spweb_UpdateWorkingAndOvertimeForEmployee {salarySummaryDto.SalarySummaryCode},{salarySummaryDto.EmployeRef},N'{salarySummaryDto.WorkingHours}',{salarySummaryDto.LeaveHours},{salarySummaryDto.OvertimeHours},{salarySummaryDto.Bonus},{salarySummaryDto.Deduction1},{salarySummaryDto.Deduction2}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "SalarySummarys", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(UpdateWorkingEmployee));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+        [HttpPost]
+        [Route("GetSalarySummary")]
+        public async Task<IActionResult> GetSalarySummary([FromBody] SalarySummaryDto salarySummaryDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spWeb_GetSalarySummary '{salarySummaryDto.SearchTarget}',{salarySummaryDto.Sal},{salarySummaryDto.Mah},{salarySummaryDto.EmployeCode}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "SalarySummarys", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(GetSalarySummary));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+        [HttpPost]
+        [Route("GetMonthSummary")]
+        public async Task<IActionResult> GetMonthSummary([FromBody] MonthSummaryDto monthSummaryDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spWeb_GetMonthSummary {monthSummaryDto.Sal},{monthSummaryDto.Mah}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "MonthSummarys", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(GetMonthSummary));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+        [HttpPost]
+        [Route("GetEmploye")]
+        public async Task<IActionResult> GetEmploye([FromBody] EmployeDto employeDto)
+        {
+
+            try
+            {
+                // ساخت query مستقیم برای SP
+                string query = $"Exec spWeb_GetEmploye '{employeDto.SearchTarget}'";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Employes", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(GetEmploye));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+
+        [HttpGet]
+        [Route("GetEmployeByCode")]
+        public async Task<IActionResult> GetEmployeByCode(string EmployeCode)
+        {
+
+            string query = $"Select * from Employe Where EmployeCode= {EmployeCode} ";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Employes", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetEmployeByCode));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+        [HttpGet]
+        [Route("GetMonthSummaryByCode")]
+        public async Task<IActionResult> GetMonthSummaryByCode(string MonthSummaryCode)
+        {
+
+            string query = $"Select * from MonthSummary Where MonthSummaryCode= {MonthSummaryCode} ";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "MonthSummarys", "");
+
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetMonthSummaryByCode));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
+
+
+
+
+
+
         private string SanitizeInput(string input)
         {
             if (input == null)
