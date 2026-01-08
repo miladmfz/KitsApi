@@ -425,16 +425,18 @@ namespace webapikits.Model
 
             if (dataTable.Rows.Count > 0)
             {
-                response.StatusCode = "2000";
+                response.StatusCode = "200";
                 response.Errormessage = "";
-                /*
-                // Construct the custom JSON string
-                string json = "{" +
-                    "\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}," +
-                    "\"" + keyResponse + "\":";
-                */
-                string json = "{\"" + keyResponse + "\":";
-                if (textValue.Length > 0)
+
+                string json = "{";
+                json += "\"response\":{";
+                json += "\"StatusCode\":\"" + response.StatusCode + "\",";
+                json += "\"Errormessage\":\"" + response.Errormessage + "\"";
+                json += "},";
+
+                json += "\"" + keyResponse + "\":";
+
+                if (!string.IsNullOrEmpty(textValue))
                 {
                     json += "\"" + Convert.ToString(dataTable.Rows[0][textValue]) + "\"";
                 }
@@ -449,25 +451,25 @@ namespace webapikits.Model
             }
             else
             {
+                response.StatusCode = "1000";
+                response.Errormessage = "No Data Found";
 
+                // Construct the JSON string for the error case
+                string json = "{\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"},";
+
+                // Check if "Done" condition is met
                 if (textValue == "Done" && keyResponse == "Text")
                 {
-                    string json = "{\"Text\":";
-                    json += "\"Done\"";
-                    json += "}";
-
-                    return json;
-
+                    json += "\"Text\":\"Done\"";
                 }
-                else {
-                    response.StatusCode = "1000";
-                    response.Errormessage = "No Data Found";
-
-                    // Construct the custom JSON string for the error case
-                    string json = "{\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"}}";
-
-                    return json;
+                else
+                {
+                    // Return empty array if no data found
+                    json += "\"" + keyResponse + "\":[]";
                 }
+
+                json += "}";
+                return json;
 
             }
         }

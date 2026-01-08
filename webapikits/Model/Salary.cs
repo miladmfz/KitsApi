@@ -13,6 +13,7 @@
         public string? TotalDays { get; set; }
         public string? HolidayDays { get; set; }
         public string? SearchTarget { get; set; }
+        public string? Explain { get; set; }
 
 
 
@@ -35,31 +36,41 @@
         public string? SearchTarget { get; set; }
         public string? Sal { get; set; }
         public string? Mah { get; set; }
+        public string? LeaveDays { get; set; }
 
 
     }
 
 
-    public class EmployeDto
+    public class EmployeeDto
     {
-        public string? EmployeCode { get; set; }
+        public string? SearchTarget { get; set; }
+
+        public string? EmployeeCode { get; set; }
         public string? FirstName { get; set; }
         public string? LastName { get; set; }
         public string? CodeMeli { get; set; }
         public string? JobTitle { get; set; }
         public string? Rozkarkard { get; set; }
-        public string? HoghoghRozane { get; set; }
-        public string? SanavatRozane { get; set; }
-        public string? HaghMaskanRozane { get; set; }
-        public string? HaghKharobarRozane { get; set; }
-        public string? EzafekarSaati { get; set; }
+        public string? NerkhHoghogh { get; set; }
+        public string? NerkhSanavat { get; set; }
+        public string? NerkhMaskan { get; set; }
+        public string? NerkhKharobar { get; set; }
+        public string? NerkhEzafekar { get; set; }
+        public string? NerkhPadash { get; set; }
+        public string? TedadPadash { get; set; }
+        public string? NerkhExtra1 { get; set; }
+        public string? TedadExtra1 { get; set; }
+        public string? NerkhExtra2 { get; set; }
+        public string? TedadExtra2 { get; set; }
+        public string? Extra3 { get; set; }
+        public string? Extra4 { get; set; }
         public string? SaatNaharNamaz { get; set; }
         public string? VaziyatTaahol { get; set; }
         public string? TedadOlad { get; set; }
         public string? HaghOlad { get; set; }
         public string? HaghTaahol { get; set; }
-        public string? WorkingHoursMinistry { get; set; }
-        public string? SearchTarget { get; set; }
+        public string? Explain { get; set; }
 
 
 

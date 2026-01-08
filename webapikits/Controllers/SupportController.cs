@@ -2874,7 +2874,7 @@ namespace webapikits.Controllers
             try
             {
                 // ساخت query مستقیم برای SP
-                string query = $"Exec spweb_InUp_MonthSummary {monthSummaryDto.Sal},{monthSummaryDto.Mah},{monthSummaryDto.TotalDays},{monthSummaryDto.HolidayDays}";
+                string query = $"Exec spweb_InUp_MonthSummary {monthSummaryDto.Sal},{monthSummaryDto.Mah},{monthSummaryDto.TotalDays},{monthSummaryDto.HolidayDays}, '{monthSummaryDto.Explain}'";
 
 
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -2892,17 +2892,21 @@ namespace webapikits.Controllers
 
         [HttpPost]
         [Route("InUp_Employee")]
-        public async Task<IActionResult> InUp_Employee([FromBody] EmployeDto employeDto)
+        public async Task<IActionResult> InUp_Employee([FromBody] EmployeeDto employeDto)
         {
 
             try
             {
-                // ساخت query مستقیم برای SP
-                string query = $"Exec spweb_InUp_Employee {employeDto.EmployeCode},'{employeDto.FirstName}','{employeDto.LastName}','{employeDto.CodeMeli}','{employeDto.JobTitle}' , {employeDto.Rozkarkard}, {employeDto.HoghoghRozane}, {employeDto.SanavatRozane}, {employeDto.HaghMaskanRozane}, {employeDto.HaghKharobarRozane}, {employeDto.EzafekarSaati}, {employeDto.SaatNaharNamaz}, '{employeDto.VaziyatTaahol}', {employeDto.TedadOlad}, {employeDto.HaghOlad}, {employeDto.HaghTaahol}, {employeDto.WorkingHoursMinistry}";
+               
+                string query = $"Exec spweb_InUp_Employee {employeDto.EmployeeCode},'{employeDto.FirstName}','{employeDto.LastName}','{employeDto.CodeMeli}','{employeDto.JobTitle}' ," +
+                    $" {employeDto.Rozkarkard}, {employeDto.NerkhHoghogh}, {employeDto.NerkhSanavat}, {employeDto.NerkhMaskan}, {employeDto.NerkhKharobar}, {employeDto.NerkhEzafekar}," +
+                    $" {employeDto.NerkhPadash}, {employeDto.TedadPadash}, {employeDto.NerkhExtra1}, {employeDto.TedadExtra1}, {employeDto.NerkhExtra2}, {employeDto.TedadExtra2}," +
+                    $" {employeDto.Extra3}, {employeDto.Extra4}, {employeDto.SaatNaharNamaz}, '{employeDto.VaziyatTaahol}', {employeDto.TedadOlad}, {employeDto.HaghOlad}," +
+                    $" {employeDto.HaghTaahol}, '{employeDto.Explain}' ";
 
 
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResult_Str(dataTable, "Employes", "");
+                string json = jsonClass.JsonResult_Str(dataTable, "Employees", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -2922,7 +2926,7 @@ namespace webapikits.Controllers
             try
             {
                 // ساخت query مستقیم برای SP
-                string query = $"Exec spweb_AddSalaryComparisonForAllEmployees {monthSummaryDto.Sal},{monthSummaryDto.Mah}";
+                string query = $"Exec spweb_AddSalarySummaryForAllEmployees {monthSummaryDto.MonthSummaryCode}";
 
 
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -2947,7 +2951,7 @@ namespace webapikits.Controllers
             try
             {
                 // ساخت query مستقیم برای SP
-                string query = $"Exec spweb_UpdateWorkingAndOvertimeForEmployee {salarySummaryDto.SalarySummaryCode},{salarySummaryDto.EmployeRef},N'{salarySummaryDto.WorkingHours}',{salarySummaryDto.LeaveHours},{salarySummaryDto.OvertimeHours},{salarySummaryDto.Bonus},{salarySummaryDto.Deduction1},{salarySummaryDto.Deduction2}";
+                string query = $"Exec spweb_UpdateWorkingAndOvertimeForEmployee {salarySummaryDto.SalarySummaryCode},N'{salarySummaryDto.WorkingHours}',{salarySummaryDto.LeaveDays}";
 
 
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -3010,18 +3014,18 @@ namespace webapikits.Controllers
         }
 
         [HttpPost]
-        [Route("GetEmploye")]
-        public async Task<IActionResult> GetEmploye([FromBody] EmployeDto employeDto)
+        [Route("GetEmployee")]
+        public async Task<IActionResult> GetEmploye([FromBody] EmployeeDto employeDto)
         {
 
             try
             {
                 // ساخت query مستقیم برای SP
-                string query = $"Exec spWeb_GetEmploye '{employeDto.SearchTarget}'";
+                string query = $"Exec spWeb_GetEmployee '{employeDto.SearchTarget}'";
 
 
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResult_Str(dataTable, "Employes", "");
+                string json = jsonClass.JsonResult_Str(dataTable, "Employees", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)
@@ -3036,24 +3040,24 @@ namespace webapikits.Controllers
 
 
         [HttpGet]
-        [Route("GetEmployeByCode")]
-        public async Task<IActionResult> GetEmployeByCode(string EmployeCode)
+        [Route("GetEmployeeByCode")]
+        public async Task<IActionResult> GetEmployeeByCode(string EmployeeCode)
         {
 
-            string query = $"Select * from Employe Where EmployeCode= {EmployeCode} ";
+            string query = $"Select * from Employee Where EmployeeCode= {EmployeeCode} ";
 
 
 
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResult_Str(dataTable, "Employes", "");
+                string json = jsonClass.JsonResult_Str(dataTable, "Employees", "");
 
                 return Content(json, "application/json");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetEmployeByCode));
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetEmployeeByCode));
                 return StatusCode(500, "Internal server error.");
             }
         }
