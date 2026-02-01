@@ -7,6 +7,25 @@ namespace webapikits.Model
     public class Support
     {
     }
+    public class WorkItemDto
+    {
+        public string? WorkItemCode { get; set; }
+        public string? Title { get; set; }
+        public string? Explain { get; set; }
+        public string? Status { get; set; }
+        public string? Priority { get; set; }
+        public string? OriginalDate { get; set; }
+        public string? TargetDate { get; set; }
+        public string? ChangeStateDate { get; set; }
+        public string? ModuleName { get; set; }
+        public string? ClassName { get; set; }
+        public string? ObjectRef { get; set; }
+        public string? OwnerRef { get; set; }
+        public string? CreatorRef { get; set; }
+        public string? CentralRef { get; set; }
+        public string? SearchTarget { get; set; }
+
+    }
     public class KowsarTaskDto
     {
         public string? TaskCode { get; set; }
