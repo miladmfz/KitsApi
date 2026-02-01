@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
+using System.Net;
 
 public class DbService : IDbService
 {
@@ -48,9 +49,11 @@ public class DbService : IDbService
     public async Task<DataTable> Image_ExecQuery(HttpContext? context, string query, Dictionary<string, object>? parameters = null)
 => await ExecuteQueryAsync(context, "ImageConnection", query, parameters);
 
+    public async Task<DataTable> Report_ExecQuery(HttpContext? context, string query, Dictionary<string, object>? parameters = null)
+=> await ExecuteQueryAsync(context, "ReportConnection", query, parameters);
 
 
-
+    
 
 
 
@@ -142,9 +145,16 @@ public class DbService : IDbService
 
     private async Task LogQueryAsync(HttpContext context, string query, Dictionary<string, object>? parameters = null)
     {
-        var agent = context.Request.Headers["User-Agent"].ToString();
-        var personInfoRef = context.Request.Headers["PersonInfoRef"].ToString();
-        var referer = context.Request.Headers["Referer"].ToString();
+        var agent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? string.Empty;
+        var PersonInfoRef = context.Request.Headers["PIC"].FirstOrDefault() ?? string.Empty;
+
+        var UserName = WebUtility.UrlDecode(context.Request.Headers["UserName"].FirstOrDefault()) ?? string.Empty;
+
+
+
+        var SessionId = context.Request.Headers["SessionId"].FirstOrDefault() ?? string.Empty;
+        var referer = context.Request.Headers["Referer"].FirstOrDefault() ?? string.Empty;
+
         query = query.Replace("'", "''");
 
         // تبدیل پارامترها به string
@@ -165,7 +175,15 @@ public class DbService : IDbService
             @LogValue = '{query}',
             @IpAddress = '{referer}',
             @UserAgent = '{agent}',
-            @SessionId = '{personInfoRef}'";
+            @SessionId = '{SessionId}',
+            @UserName = '{UserName}',
+            @PersonInfoRef = '{PersonInfoRef}'
+"
+
+
+
+
+            ;
 
         var logConn = _configuration.GetConnectionString("Web_Connection");
 

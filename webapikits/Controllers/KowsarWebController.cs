@@ -61,7 +61,6 @@ namespace webapikits.Controllers
 
 
 
-
         [HttpGet]
         [Route("GetApplicationForMenu")]
         public async Task<IActionResult> GetApplicationForMenu()
@@ -70,8 +69,6 @@ namespace webapikits.Controllers
             string query = $"select KeyValue,Description,DataValue,KeyId from dbsetup where KeyValue in ('AppBroker_ActivationCode','AppOcr_ActivationCode','AppOrder_ActivationCode') and DataValue <> '0'";
 
 
-             
-             
 
             try
             {
@@ -398,16 +395,15 @@ namespace webapikits.Controllers
         }
 
 
-
-        [HttpGet]
+        [HttpPost]
         [Route("GetStacks")]
-        public async Task<IActionResult> GetStacks()
+        public async Task<IActionResult> GetStacks([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query = $"Select StackCode,L1,L2,L3,L4,L5,Name from Stacks";
 
-             
-             
+            string query = $" spWeb_GetStacks   N'%{searchTargetDto.SearchTarget}%'";
+
+
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -422,15 +418,15 @@ namespace webapikits.Controllers
 
         }
 
-
-        [HttpGet]
+        [HttpPost]
         [Route("GetGoodsGrp")]
-        public async Task<IActionResult> GetGoodsGrp()
+        public async Task<IActionResult> GetGoodsGrp([FromBody] SearchTargetDto searchTargetDto)
         {
 
-            string query = $"select GroupCode,L1,L2,L3,L4,L5,Name from GoodsGrp";
 
-             
+            string query = $" spWeb_GetGoodsGrp   N'%{searchTargetDto.SearchTarget}%'";
+
+
             try
             {
                 DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
@@ -444,9 +440,6 @@ namespace webapikits.Controllers
             }
 
         }
-
-
-
 
 
         [HttpPost]
@@ -1703,6 +1696,70 @@ namespace webapikits.Controllers
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+        [HttpPost]
+        [Route("GetDbSetup")]
+        public async Task<IActionResult> GetDbSetup([FromBody] SearchTargetDto searchTargetDto)
+        {
+
+
+            string query = $"Select KeyId, KeyValue, DataValue, Description, SubSystem from DbSetup Where " +
+                $" Description Like N'%{searchTargetDto.SearchTarget}%' Or KeyValue Like N'%{searchTargetDto.SearchTarget}%' Or  " +
+                $" DataValue Like N'%{searchTargetDto.SearchTarget}%'  Or SubSystem Like N'%{searchTargetDto.SearchTarget}%'  ";
+
+
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "DbSetups", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetDbSetup));
+                return StatusCode(500, "Internal server error.");
+            }
+
+        }
+
+
+
+
+
+        [HttpPost]
+        [Route("UpdateDbSetup")]
+        public async Task<IActionResult> UpdateDbSetup([FromBody] DbSetupDto dbSetupDto)
+        {
+
+
+            string query = $"Update DbSetup Set DataValue ='{dbSetupDto.DataValue}' Where KeyValue = '{dbSetupDto.KeyValue}' And KeyId ={dbSetupDto.KeyId} ";
+
+
+
+            try
+            {
+                DataTable dataTable = await db.Kowsar_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "DbSetups", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(UpdateDbSetup));
+                return StatusCode(500, "Internal server error.");
+            }
+
+        }
 
 
 

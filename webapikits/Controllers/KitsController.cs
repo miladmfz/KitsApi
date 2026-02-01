@@ -153,7 +153,7 @@ namespace webapikits.Controllers
             try
             {
                 DataTable dataTable = await db.Kits_ExecQuery(HttpContext, query);
-                string json = jsonClass.JsonResult_Str(dataTable, "Activations", "");
+                string json = jsonClass.JsonResult_Str_AppActivation(dataTable, "Activations", "");
                 return Content(json, "application/json");
             }
             catch (Exception ex)

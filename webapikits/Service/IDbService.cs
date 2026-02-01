@@ -32,5 +32,7 @@ public interface IDbService
     Task<DataTable> Auth_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
     Task<DataTable> Support_ImageExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
 
+    Task<DataTable> Report_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null);
+
     Task<byte[]?> Web_GetImageData(string query);
 }

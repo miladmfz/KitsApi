@@ -474,6 +474,59 @@ namespace webapikits.Model
             }
         }
 
+
+        public string JsonResult_Str_AppActivation(DataTable dataTable, string keyResponse, string textValue)
+        {
+            Response response = new Response();
+            JsonClass jsonClass = new JsonClass();
+
+            if (dataTable.Rows.Count > 0)
+            {
+                response.StatusCode = "200";
+                response.Errormessage = "";
+
+
+                string json = "{\"" + keyResponse + "\":";
+
+
+                if (!string.IsNullOrEmpty(textValue))
+                {
+                    json += "\"" + Convert.ToString(dataTable.Rows[0][textValue]) + "\"";
+                }
+                else
+                {
+                    json += jsonClass.ConvertDataTableToJson(dataTable);
+                }
+
+                json += "}";
+
+                return json;
+            }
+            else
+            {
+                response.StatusCode = "1000";
+                response.Errormessage = "No Data Found";
+
+                // Construct the JSON string for the error case
+                string json = "{\"response\":{\"StatusCode\":\"" + response.StatusCode + "\",\"Errormessage\":\"" + response.Errormessage + "\"},";
+
+                // Check if "Done" condition is met
+                if (textValue == "Done" && keyResponse == "Text")
+                {
+                    json += "\"Text\":\"Done\"";
+                }
+                else
+                {
+                    // Return empty array if no data found
+                    json += "\"" + keyResponse + "\":[]";
+                }
+
+                json += "}";
+                return json;
+
+            }
+        }
+
         public string JsonResult_StrRepInfo(DataTable dataTable, string keyResponse, string textValue)
         {
             Response response = new Response();

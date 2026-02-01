@@ -77,4 +77,8 @@
 		<Content Remove="C:\Users\milad\.nuget\packages\pdfium.net.sdk\4.89.2704\build\..\content\x86\pdfium.dll" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <None Remove="Logs\log-20251116.txt" />
+	</ItemGroup>
+
 </Project>

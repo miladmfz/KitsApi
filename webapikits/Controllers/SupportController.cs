@@ -26,18 +26,6 @@ namespace webapikits.Controllers
     public class SupportController : ControllerBase
     {
 
-        //public readonly IConfiguration _configuration;
-        //DataBaseClass db;
-
-
-        //public SupportController(IConfiguration configuration)
-        //{
-        //    _configuration = configuration;
-        //    db = new DataBaseClass(_configuration);
-
-
-        //}
-
 
         JsonClass jsonClass = new JsonClass();
 
@@ -57,8 +45,6 @@ namespace webapikits.Controllers
             _logger = logger;
             _configuration = configuration;
         }
-
-
 
 
 
@@ -89,7 +75,7 @@ namespace webapikits.Controllers
 
 
 
-            return result; // You may want to return an error message or handle this differently.
+            return result;
         }
 
 
@@ -98,9 +84,6 @@ namespace webapikits.Controllers
         [Route("GetTodeyFromServer")]
         public async Task<IActionResult> GetTodeyFromServer()
         {
-
-
-
 
             string query = "select dbo.fnDate_Today() TodeyFromServer ";
 
@@ -117,11 +100,7 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
 
-
-
-
         }
-
 
 
 
@@ -154,7 +133,6 @@ namespace webapikits.Controllers
         public async Task<IActionResult> GetKowsarPersonInfo(string PersonInfoCode)
         {
 
-
             string query = $"Exec [dbo].[spWeb_GetKowsarPersonInfo] {PersonInfoCode}";
 
             try
@@ -169,9 +147,6 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
         }
-
-
-
 
 
         [HttpPost]
@@ -197,6 +172,7 @@ namespace webapikits.Controllers
 
         }
 
+
         [HttpGet]
         [Route("GetObjectTypeFromDbSetup")]
         public async Task<IActionResult> GetObjectTypeFromDbSetup(string ObjectType)
@@ -216,11 +192,7 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
 
-
-
-
         }
-
 
 
         [HttpPost]
@@ -228,27 +200,17 @@ namespace webapikits.Controllers
         public async Task<IActionResult> UploadImage([FromBody] ksrImageModeldto data)
         {
 
-
-
             byte[] decodedImage = Convert.FromBase64String(data.image);
-
 
             string data_base64 = data.image;
             byte[] data_Bytes = Convert.FromBase64String(data_base64);
 
-
-
             string dataName = $"{data.ObjectCode}.jpg"; // Constructing the image name
             string dataPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName}"; // Provide the path where you want to save the image
 
-
             System.IO.File.WriteAllBytes(dataPath, data_Bytes);
 
-
-
             string connectionString = _configuration.GetConnectionString("Support_ImageConnection"); // Provide your SQL Server connection string
-
-
 
             using (SqlConnection dbConnection = new SqlConnection(connectionString))
             {
@@ -275,15 +237,9 @@ namespace webapikits.Controllers
                 }
 
 
-
-
-
                 System.IO.File.Delete(dataPath);
 
             }
-
-
-
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
 
@@ -330,9 +286,6 @@ namespace webapikits.Controllers
         }
 
 
-
-
-
         [HttpPost]
         [Route("GetKowsarCentral")]
         public async Task<IActionResult> GetKowsarCentral([FromBody] SearchTargetDto searchTargetDto)
@@ -354,11 +307,6 @@ namespace webapikits.Controllers
             }
 
         }
-
-
-
-
-
 
 
         [HttpPost("GetKowsarCustomer")]
@@ -421,19 +369,11 @@ namespace webapikits.Controllers
             }
         }
 
-
-
-
-
         [HttpPost]
         [Route("GetAutLetterList")]
         public async Task<IActionResult> GetAutLetterList([FromBody] SearchTargetLetterDto searchTargetLetterDto)
         {
-
-
             string Where = "";
-
-
 
             if (!string.IsNullOrEmpty(searchTargetLetterDto.CentralRef))
             {
@@ -477,8 +417,6 @@ namespace webapikits.Controllers
 
             string query = $"Exec spWeb_AutLetterList '{Where}',{searchTargetLetterDto.OwnCentralRef},'{searchTargetLetterDto.SearchTarget}'";
 
-
-
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -494,9 +432,6 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
 
-
-
-
         }
 
 
@@ -505,7 +440,6 @@ namespace webapikits.Controllers
         [Route("GetAutLetterListByPerson")]
         public async Task<IActionResult> GetAutLetterListByPerson([FromBody] SearchTargetLetterDto searchTargetLetterDto)
         {
-
 
             string Where = "";
 
@@ -528,12 +462,7 @@ namespace webapikits.Controllers
             }
 
 
-
-
             string query = $"spWeb_AutLetterListByPerson '{Where}','{searchTargetLetterDto.PersonInfoCode}' ,'{searchTargetLetterDto.Flag}'";
-
-
-
 
             try
             {
@@ -550,11 +479,6 @@ namespace webapikits.Controllers
             }
 
         }
-
-
-
-
-
 
 
         [HttpPost]
@@ -592,7 +516,6 @@ namespace webapikits.Controllers
         {
 
             string query = $"select  LetterRowCode,CreatorCentralRef,AutLetterRow_PropDescription1,Name RowExecutorName,LetterRef ,LetterDate RowLetterDate,LetterDescription LetterRowDescription, LetterState LetterRowState, ExecutorCentralRef RowExecutorCentralRef from vwautletterrow join central on CentralCode=ExecutorCentralRef where LetterRef = {LetterRef} order by LetterRowCode desc";
-
 
 
             try
@@ -703,9 +626,6 @@ namespace webapikits.Controllers
             string query = $"ShowWebLog";
 
 
-
-
-
             try
             {
                 DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);
@@ -773,11 +693,6 @@ namespace webapikits.Controllers
 
         }
 
-
-
-
-
-
         [HttpPost]
         [Route("Conversation_Insert")]
         public async Task<IActionResult> Conversation_Insert([FromBody] LetterDto letterdto)
@@ -804,10 +719,6 @@ namespace webapikits.Controllers
 
         }
 
-
-
-
-
         [HttpPost]
         [Route("Update_AutletterRow")]
         public async Task<IActionResult> Update_AutletterRow([FromBody] AutLetterRowInsert letterRowdto)
@@ -830,7 +741,6 @@ namespace webapikits.Controllers
             string query = $" Update AutLetterRow Set LetterState = '{letterRowdto.LetterRowState}' , LetterDescription = '{letterRowdto.LetterRowDescription}' , AlarmActive = 0 , ReformDate = GetDate() Where LetterRowCode = {letterRowdto.ObjectRef}";
 
 
-
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -848,20 +758,12 @@ namespace webapikits.Controllers
         }
 
 
-
-
-
-
-
         [HttpGet]
         [Route("GetLetterFromPersoninfo")]
         public async Task<IActionResult> GetLetterFromPersoninfo(string PersonInfoCode)
         {
 
             string query = $"spWeb_AutLetterListByPerson {PersonInfoCode}";
-
-
-
 
             try
             {
@@ -878,12 +780,6 @@ namespace webapikits.Controllers
             }
 
         }
-
-
-
-
-
-
 
 
 
@@ -965,22 +861,13 @@ namespace webapikits.Controllers
                     sqlCommand.Parameters.AddWithValue("@SourceFile", System.IO.File.ReadAllBytes(dataPath));
 
 
-
-
-
-                    // Execute the command
                     sqlCommand.ExecuteNonQuery();
                 }
-
-
-
 
 
                 System.IO.File.Delete(dataPath);
 
             }
-
-
 
 
             string query11 = "select dbo.fnDate_Today() TodeyFromServer ";
@@ -1085,11 +972,7 @@ namespace webapikits.Controllers
                     case ".csv": contentType = "text/csv"; break;
                 }
 
-
-                // ۴. کانورت به Base64
                 string base64 = Convert.ToBase64String((byte[])dataTable.Rows[0]["SourceFile"]);
-
-
 
                 var result = new
                 {
@@ -1105,12 +988,6 @@ namespace webapikits.Controllers
                 return BadRequest(new { Error = ex.Message });
             }
         }
-
-
-
-
-
-
 
 
         [HttpGet]
@@ -1277,15 +1154,9 @@ namespace webapikits.Controllers
                     return StatusCode(500, "Internal server error.");
                 }
 
-
-
-
-
             }
             else
             {
-
-
 
                 string data_base64 = attachFile.Data;
                 byte[] data_Bytes = Convert.FromBase64String(data_base64);
@@ -1300,7 +1171,6 @@ namespace webapikits.Controllers
 
                 System.IO.File.WriteAllBytes(dataPath, data_Bytes);
 
-                // Create a zip archive and add the image file to it
                 using (FileStream zipStream = new FileStream(data_zipPath, FileMode.Create))
                 {
                     using (ZipArchive archive = new ZipArchive(zipStream, ZipArchiveMode.Create))
@@ -1488,10 +1358,6 @@ namespace webapikits.Controllers
         }
 
 
-
-
-
-
         [HttpGet]
         [Route("GetAttachFile")]
         public async Task<IActionResult> GetAttachFileAsync(string AttachedFileCode, string ClassName, string ObjectRef)
@@ -1532,8 +1398,6 @@ namespace webapikits.Controllers
             string FileName = dataTable1.Rows[0]["FileName"] + "";
 
 
-
-
             string dataName_zip = $"{FileName}.zip"; // Constructing the image name
             string data_zipPath = _configuration.GetConnectionString("Ocr_imagePath") + $"{dataName_zip}";
             string contentType = $"application/{dataTable1.Rows[0]["Type"]}";
@@ -1541,9 +1405,6 @@ namespace webapikits.Controllers
 
             System.IO.File.WriteAllBytes(data_zipPath, fileBytes);
             return File(fileBytes, contentType, Path.GetFileName(data_zipPath));
-
-
-
 
 
         }
@@ -1620,7 +1481,7 @@ namespace webapikits.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred in {Function}", nameof(GetNotification));
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DeleteAttachFile));
                 return StatusCode(500, "Internal server error.");
             }
 
@@ -1636,8 +1497,10 @@ namespace webapikits.Controllers
 
         [HttpGet]
         [Route("GetNotification")]
-        public async Task<IActionResult> GetNotification(string PersonInfoCode)
+        public async Task<IActionResult> GetNotification()
         {
+            var PersonInfoCode = HttpContext.Request.Headers["PIC"].FirstOrDefault() ?? string.Empty;
+
             string query = $"spWeb_GetNotification {PersonInfoCode}";
             try
             {
@@ -1792,18 +1655,6 @@ namespace webapikits.Controllers
 
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         [HttpGet]
@@ -1996,9 +1847,6 @@ namespace webapikits.Controllers
             string query = $"Update PropertyValue Set Nvarchar15 = '{factorwebDto.starttime}'  where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
 
 
-
-
-
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -2019,10 +1867,6 @@ namespace webapikits.Controllers
         {
 
             string query = $"Update PropertyValue Set Nvarchar9 = '{factorwebDto.Endtime}', int1 = {factorwebDto.worktime} where ClassName = 'TFactor' And ObjectRef = {factorwebDto.ObjectRef} ";
-
-
-
-
 
 
             try
@@ -2051,8 +1895,6 @@ namespace webapikits.Controllers
 
 
 
-
-
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -2077,11 +1919,6 @@ namespace webapikits.Controllers
         {
 
             string query = $" Declare @S nvarchar(20)=dbo.fnDate_AddDays(dbo.fnDate_Today(),-365) select BrokerCode, BrokerName, sum(worktime)/60 worktime,cast(sum(SumAmount) as int) SumAmount,Count(*) FactorCount from vwFactor where FactorDate>@S group by BrokerName, BrokerCode ";
-
-
-
-
-
 
 
             try
@@ -2708,7 +2545,7 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
+                 
                 string query = $"spWeb_KowsarTaskDelete @TaskCode = {taskCode}";
 
 
@@ -2734,7 +2571,7 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
+                 
                 string query = $"spWeb_KowsarTaskDeleteRecursive @TaskCode = {taskCode}";
 
 
@@ -2757,7 +2594,7 @@ namespace webapikits.Controllers
             
             try
             {
-                // ساخت query مستقیم برای SP
+                 
                 string query = $"Exec spWeb_GetKowsarReport @SearchTarget = '{kowsarReportDto.SearchTarget}',@CentralRef = {kowsarReportDto.CentralRef},@LetterRowCode = {kowsarReportDto.LetterRowCode},@Flag = {kowsarReportDto.Flag},@DateTarget = '{kowsarReportDto.DateTarget}'";
 
 
@@ -2780,7 +2617,7 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
+                 
                 string query = $"Exec spWeb_GetCustomerReport @StartDateTarget = '{kowsarReportDto.StartDateTarget}',@EndDateTarget = '{kowsarReportDto.EndDateTarget}',@SearchTarget = '{kowsarReportDto.SearchTarget}',@CustomerRef = {kowsarReportDto.CustomerRef},@Flag = {kowsarReportDto.Flag}";
 
 
@@ -2858,6 +2695,28 @@ namespace webapikits.Controllers
 
 
 
+        [HttpPost]
+        [Route("CustomerCrud")]
+        public async Task<IActionResult> CustomerCrud([FromBody] CustomerCrudDto customerCrudDto)
+        {
+
+            try
+            {
+
+                string UserId = _configuration.GetConnectionString("Support_UserId");
+                string query = $"Exec spWeb_Customer_Crud  @FName ='{customerCrudDto.FName}',  @LName ='{customerCrudDto.LName}', @CityCode ={customerCrudDto.CityCode}, @Address ='{customerCrudDto.Address}', @Phone ='{customerCrudDto.Phone}', @Mobile ='{customerCrudDto.Mobile}', @CustomerCode  ={customerCrudDto.CustomerCode}, @UserId ={UserId}";
+
+
+                DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "Customers", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error in {Function}", nameof(CustomerCrud));
+                return StatusCode(500, "Internal server error.");
+            }
+        }
 
 
 
@@ -2873,7 +2732,7 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
+                 
                 string query = $"Exec spweb_InUp_MonthSummary {monthSummaryDto.Sal},{monthSummaryDto.Mah},{monthSummaryDto.TotalDays},{monthSummaryDto.HolidayDays}, '{monthSummaryDto.Explain}'";
 
 
@@ -2901,7 +2760,7 @@ namespace webapikits.Controllers
                 string query = $"Exec spweb_InUp_Employee {employeDto.EmployeeCode},'{employeDto.FirstName}','{employeDto.LastName}','{employeDto.CodeMeli}','{employeDto.JobTitle}' ," +
                     $" {employeDto.Rozkarkard}, {employeDto.NerkhHoghogh}, {employeDto.NerkhSanavat}, {employeDto.NerkhMaskan}, {employeDto.NerkhKharobar}, {employeDto.NerkhEzafekar}," +
                     $" {employeDto.NerkhPadash}, {employeDto.TedadPadash}, {employeDto.NerkhExtra1}, {employeDto.TedadExtra1}, {employeDto.NerkhExtra2}, {employeDto.TedadExtra2}," +
-                    $" {employeDto.Extra3}, {employeDto.Extra4}, {employeDto.SaatNaharNamaz}, '{employeDto.VaziyatTaahol}', {employeDto.TedadOlad}, {employeDto.HaghOlad}," +
+                    $" {employeDto.BimePaye},{employeDto.BimeTakmili},{employeDto.Extra3}, {employeDto.Extra4}, {employeDto.SaatNaharNamaz}, '{employeDto.VaziyatTaahol}', {employeDto.TedadOlad}, {employeDto.HaghOlad}," +
                     $" {employeDto.HaghTaahol}, '{employeDto.Explain}' ";
 
 
@@ -2925,7 +2784,6 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
                 string query = $"Exec spweb_AddSalarySummaryForAllEmployees {monthSummaryDto.MonthSummaryCode}";
 
 
@@ -2950,9 +2808,8 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
-                string query = $"Exec spweb_UpdateWorkingAndOvertimeForEmployee {salarySummaryDto.SalarySummaryCode},N'{salarySummaryDto.WorkingHours}',{salarySummaryDto.LeaveDays}";
 
+                string query = $"Exec spweb_UpdateWorkingAndOvertimeForEmployee {salarySummaryDto.SalarySummaryCode},N'{salarySummaryDto.WorkingHours}',{salarySummaryDto.LeaveDays}";
 
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
                 string json = jsonClass.JsonResult_Str(dataTable, "SalarySummarys", "");
@@ -2975,7 +2832,6 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
                 string query = $"Exec spWeb_GetSalarySummary '{salarySummaryDto.SearchTarget}',{salarySummaryDto.Sal},{salarySummaryDto.Mah},{salarySummaryDto.EmployeCode}";
 
 
@@ -2998,7 +2854,6 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
                 string query = $"Exec spWeb_GetMonthSummary {monthSummaryDto.Sal},{monthSummaryDto.Mah}";
 
 
@@ -3020,7 +2875,7 @@ namespace webapikits.Controllers
 
             try
             {
-                // ساخت query مستقیم برای SP
+                 
                 string query = $"Exec spWeb_GetEmployee '{employeDto.SearchTarget}'";
 
 
@@ -3034,7 +2889,7 @@ namespace webapikits.Controllers
                 return StatusCode(500, "Internal server error.");
             }
         }
-
+        
 
 
 
@@ -3045,9 +2900,6 @@ namespace webapikits.Controllers
         {
 
             string query = $"Select * from Employee Where EmployeeCode= {EmployeeCode} ";
-
-
-
             try
             {
                 DataTable dataTable = await db.Support_ExecQuery(HttpContext, query);
@@ -3097,14 +2949,12 @@ namespace webapikits.Controllers
             if (input == null)
                 return string.Empty;
 
-            // Prevent SQL Injection by replacing dangerous characters
             input = input.Replace("'", "''");  // Escape single quotes for SQL
             input = input.Replace(";", "");    // Remove semicolons
             input = input.Replace("--", "");   // Remove SQL comments
             input = input.Replace("/*", "");   // Remove SQL block comments
             input = input.Replace("*/", "");   // Remove SQL block comments
 
-            // Prevent XSS by replacing HTML-sensitive characters with their HTML-encoded equivalents
             input = input.Replace("<", "&lt;"); // < becomes &lt;
             input = input.Replace(">", "&gt;"); // > becomes &gt;
             input = input.Replace("&", "&amp;"); // & becomes &amp;
@@ -3113,7 +2963,6 @@ namespace webapikits.Controllers
             input = input.Replace("/", "&#x2F;"); // / becomes &#x2F;
             input = input.Replace("\\", "&#x5C;"); // \ becomes &#x5C;
 
-            // Remove leading/trailing whitespace
             input = input.Trim();
 
             return input;

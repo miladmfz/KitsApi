@@ -84,7 +84,7 @@ internal class Program
                     policy.AllowAnyOrigin()
                           .AllowAnyHeader()
                           .AllowAnyMethod()
-                          .WithExposedHeaders("PersonInfoRef", "Content-Disposition");
+                          .WithExposedHeaders("PIC", "Content-Disposition", "SessionId", "UserName");
                 });
             });
 

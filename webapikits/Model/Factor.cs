@@ -1,4 +1,8 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using System;
+using System.Diagnostics.Metrics;
+using System.Reflection;
+using System.Xml.Linq;
 
 namespace webapikits.Model
 {
@@ -71,6 +75,23 @@ namespace webapikits.Model
 
     }
 
+
+    public class CustomerCrudDto
+    {
+
+
+        public string FName { get; set; } = "";
+        public string LName { get; set; } = "";
+        public string CityCode { get; set; } = "";
+
+
+        public string Address { get; set; } = "";
+        public string Phone { get; set; } = "";
+
+        public string Mobile { get; set; } = "";
+        public string CustomerCode { get; set; } = "";
+
+    }
 
     public class CustomerWebDto
     {

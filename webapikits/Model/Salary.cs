@@ -63,6 +63,8 @@
         public string? TedadExtra1 { get; set; }
         public string? NerkhExtra2 { get; set; }
         public string? TedadExtra2 { get; set; }
+        public string? BimePaye { get; set; }
+        public string? BimeTakmili { get; set; }
         public string? Extra3 { get; set; }
         public string? Extra4 { get; set; }
         public string? SaatNaharNamaz { get; set; }

@@ -17,6 +17,7 @@
         public string? ServerIp { get; set; }
         public string? ServerPort { get; set; }
         public string? ServerPathApi { get; set; }
+        public string? IsActive { get; set; }
 
     }
 
