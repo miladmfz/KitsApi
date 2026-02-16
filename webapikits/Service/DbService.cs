@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using System.Data.SqlClient;
 using System.Net;
+using System.Reflection.PortableExecutable;
 
 public class DbService : IDbService
 {
@@ -153,9 +154,24 @@ public class DbService : IDbService
 
 
         var SessionId = context.Request.Headers["SessionId"].FirstOrDefault() ?? string.Empty;
+
+        if (SessionId.Length > 0)
+        {
+            await XUserSession_Insert(context, query, parameters);
+        }
+        else
+        {
+            await XUserSession_Update(context, query, parameters);
+        }
+
+
         var referer = context.Request.Headers["Referer"].FirstOrDefault() ?? string.Empty;
 
         query = query.Replace("'", "''");
+
+
+
+
 
         // تبدیل پارامترها به string
         string tagName = "";
@@ -178,12 +194,70 @@ public class DbService : IDbService
             @SessionId = '{SessionId}',
             @UserName = '{UserName}',
             @PersonInfoRef = '{PersonInfoRef}'
-"
+            "
 
 
 
 
             ;
+
+        var logConn = _configuration.GetConnectionString("Web_Connection");
+
+        using var con = new SqlConnection(logConn);
+        using var cmd = new SqlCommand(logQuery, con);
+        await con.OpenAsync();
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+
+
+    private async Task XUserSession_Insert(HttpContext context, string query, Dictionary<string, object>? parameters = null)
+    {
+
+        var UserName = WebUtility.UrlDecode(context.Request.Headers["UserName"].FirstOrDefault()) ?? string.Empty;
+        var IpAddress_referer = context.Request.Headers["Referer"].FirstOrDefault() ?? string.Empty;
+        var agent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? string.Empty;
+        var SessionId = context.Request.Headers["SessionId"].FirstOrDefault() ?? string.Empty;
+
+        query = query.Replace("'", "''");
+
+        // تبدیل پارامترها به string
+        string tagName = "";
+        if (parameters != null && parameters.Any())
+        {
+            var paramList = parameters.Select(kv => $"{kv.Key}={kv.Value?.ToString()?.Replace("'", "''")}");
+            tagName = string.Join("; ", paramList);
+        }
+
+        // escape کردن tagName
+        tagName = tagName.Replace("'", "''");
+
+        var logQuery = $@"
+        exec  spWeb_XUserSession_Insert 
+            @UserName = '{UserName}',
+            @IpAddress = '{IpAddress_referer}',
+            @UserAgent = '{agent}',
+            @SessionId = '{SessionId}'
+            "
+
+            ;
+
+        var logConn = _configuration.GetConnectionString("Web_Connection");
+
+        using var con = new SqlConnection(logConn);
+        using var cmd = new SqlCommand(logQuery, con);
+        await con.OpenAsync();
+        await cmd.ExecuteNonQueryAsync();
+    }
+
+    private async Task XUserSession_Update(HttpContext context, string query, Dictionary<string, object>? parameters = null)
+    {
+
+        var SessionId = context.Request.Headers["SessionId"].FirstOrDefault() ?? string.Empty;
+
+
+        var logQuery = $@" exec spWeb_XUserSession_UpdateActivity '{SessionId}'";
+
 
         var logConn = _configuration.GetConnectionString("Web_Connection");
 

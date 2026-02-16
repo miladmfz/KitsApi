@@ -387,6 +387,28 @@ namespace webapikits.Controllers
         }
 
 
+        [HttpGet]
+        [Route("DeleteWebSiteActivation")]
+        public async Task<IActionResult> DeleteWebSiteActivation(string WebSiteActivationCode)
+        {
+
+            string query = $"Delete From WebSiteActivation Where WebSiteActivationCode={WebSiteActivationCode}";
+
+
+            try
+            {
+                DataTable dataTable = await db.SupportApp_ExecQuery(HttpContext, query);
+                string json = jsonClass.JsonResult_Str(dataTable, "WebSites", "");
+                return Content(json, "application/json");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error occurred in {Function}", nameof(DeleteWebSiteActivation));
+                return StatusCode(500, "Internal server error.");
+            }
+
+        }
+
 
 
     }
