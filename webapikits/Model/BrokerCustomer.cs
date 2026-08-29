@@ -58,6 +58,31 @@
 
 
 
+    public class ModuleConfigs
+    {
+
+        public string? ModuleConfigCode { get; set; }
+        public string? ConfigName { get; set; }
+        public string? ConfigFCaption { get; set; }
+        public string? ClassName { get; set; }
+        public string? Explain { get; set; }
+        public string? IsActive { get; set; }
+
+
+        public string? ModuleValueCode { get; set; }
+        public string? ModuleConfigRef { get; set; }
+        public string? ValueName { get; set; }
+        public string? ValueFCaption { get; set; }
+        public string? Sort { get; set; }
+        public string? LanguageRef { get; set; }
+
+
+
+
+    }
+
+
+
 
 
 

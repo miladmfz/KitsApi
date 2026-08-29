@@ -1,10 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-
+using System.Data;
+using webapikits.Controllers.InternalWebApi;
+using webapikits.Model;
 namespace webapikits.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    [Route("api/[controller]")]
+[ApiController]
+public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {

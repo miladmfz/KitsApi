@@ -323,7 +323,7 @@ namespace webapikits.Model
                 if (header.Key == "User-Agent") {
                     agent = header.Value;
                 }
-                if (header.Key == "PersonInfoRef")
+                if (header.Key == "PIC")
                 {
                     PersonInfoRef = header.Value;
                 }

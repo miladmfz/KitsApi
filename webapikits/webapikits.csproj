@@ -81,4 +81,11 @@
 	  <None Remove="Logs\log-20251116.txt" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <Folder Include="Controllers\GozareshatWebApi\" />
+	  <Folder Include="Controllers\HoghoghDastmozdWebApi\" />
+	  <Folder Include="Controllers\TanzimatWebApi\" />
+	  <Folder Include="Controllers\TaarifPayeWebApi\" />
+	</ItemGroup>
+
 </Project>

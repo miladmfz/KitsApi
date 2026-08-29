@@ -47,36 +47,42 @@ internal class Program
             // -----------------------------
             //  JWT Authentication
             // -----------------------------
-            var jwtKey = builder.Configuration["Jwt:Key"];
-            var jwtIssuer = builder.Configuration["Jwt:Issuer"];
-            var jwtAudience = builder.Configuration["Jwt:Audience"];
+            //var jwtKey = builder.Configuration["Jwt:Key"];
+            //var jwtIssuer = builder.Configuration["Jwt:Issuer"];
+            //var jwtAudience = builder.Configuration["Jwt:Audience"];
 
-            builder.Services.AddAuthentication(options =>
-            {
-                options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-                options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-            })
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
+            //builder.Services.AddAuthentication(options =>
+            //{
+            //    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            //    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            //})
+            //.AddJwtBearer(options =>
+            //{
+            //    options.RequireHttpsMetadata = false;
+            //    options.SaveToken = true;
 
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuer = true,
-                    ValidateAudience = true,
-                    ValidateLifetime = true,
-                    ValidateIssuerSigningKey = true,
+            //    options.TokenValidationParameters = new TokenValidationParameters
+            //    {
+            //        ValidateIssuer = true,
+            //        ValidateAudience = true,
+            //        ValidateLifetime = true,
+            //        ValidateIssuerSigningKey = true,
 
-                    ValidIssuer = jwtIssuer,
-                    ValidAudience = jwtAudience,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-                };
-            });
+            //        ValidIssuer = jwtIssuer,
+            //        ValidAudience = jwtAudience,
+            //        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            //    };
+            //});
 
             // -----------------------------
             //    CORS
             // -----------------------------
+            builder.Services.Configure<PbxGatewayOptions>(
+    builder.Configuration.GetSection("PbxGateway"));
+
+            builder.Services.AddSingleton<PbxGatewayHealthService>();
+            builder.Services.AddSingleton<AsteriskWebSocketProxy>();
+
             builder.Services.AddCors(options =>
             {
                 options.AddDefaultPolicy(policy =>
@@ -104,9 +110,18 @@ internal class Program
 
             app.UseRouting();
             app.UseCors();
+            app.UseWebSockets(new WebSocketOptions
+            {
+                KeepAliveInterval = TimeSpan.FromSeconds(30)
+            });
 
-            app.UseAuthentication();   // 🔥 مهم
-            app.UseAuthorization();
+            app.Map("/asterisk-ws", async context =>
+            {
+                var proxy = context.RequestServices.GetRequiredService<AsteriskWebSocketProxy>();
+                await proxy.HandleAsync(context);
+            });
+            //app.UseAuthentication();   // 🔥 مهم
+            //app.UseAuthorization();
 
             app.MapControllers();
 

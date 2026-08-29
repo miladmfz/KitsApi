@@ -9,5 +9,10 @@
         public string PropertyType { get; set; } = "";
         public string PropertyValueMap { get; set; } = "";
 
+
+
+        public string ObjectRef { get; set; } = "";
+
+
     }
 }

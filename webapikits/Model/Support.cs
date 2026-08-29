@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System.Diagnostics.Metrics;
+using System.Net;
 using System.Reflection;
 using System.Reflection.Emit;
 
@@ -34,6 +35,35 @@ namespace webapikits.Model
         public string? Explain { get; set; }
         public string? Flag { get; set; }
     }
+
+
+    public class PatternDto
+    {
+        public string? PatternCode { get; set; }
+        public string? Title { get; set; }
+        public string? Explain { get; set; }
+        public string? GoodRef { get; set; }
+        public string? PatternRef { get; set; }
+    }
+
+
+
+    public class GoodTaskRowDto
+    {
+        public string? GoodTaskRowCode { get; set; }
+        public string? TaskDate { get; set; }
+        public string? StartTime { get; set; }
+        public string? EndTime { get; set; }
+        public string? State { get; set; }
+        public string? CompanyPerson { get; set; }
+        public string? Explain { get; set; }
+        public string? CentralRef { get; set; }
+    }
+
+
+
+
+
     public class KowsarReportDto
     {
         public string? SearchTarget { get; set; }
@@ -51,7 +81,6 @@ namespace webapikits.Model
     public class SupportDto
     {
         public string? DateTarget { get; set; }
-        public string? BrokerCode { get; set; }
         public string? Flag { get; set; }
 
     }
@@ -72,6 +101,26 @@ namespace webapikits.Model
         public string? MobileName { get; set; }
 
     }
+
+    public class RssSource
+    {
+        public string Name { get; set; }
+        public string Url { get; set; }
+        public string Category { get; set; }
+    }
+    public class RssItemDto
+    {
+        public string Title { get; set; }
+        public string Link { get; set; }
+        public string Description { get; set; }
+        public string Content { get; set; }
+        public string Image { get; set; }
+        public string PubDate { get; set; }
+        public string Author { get; set; }
+        public string Category { get; set; }
+        public string Source { get; set; }
+    }
+
 
 }
 

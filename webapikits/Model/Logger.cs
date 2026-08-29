@@ -8,7 +8,7 @@ public class Logger
     {
 
 
-        string dirfileName = configuration.GetConnectionString("log_SaveStorage");
+        string dirfileName = configuration.GetValue<string>("AppSettings:log_SaveStorage");
 
         string fileName = $"{dirfileName}/{functionName}.txt";
         string strTime = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");

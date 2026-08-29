@@ -19,10 +19,6 @@ public class DbService : IDbService
         => await ExecuteQueryAsync(context, "Kowsar_Connection", query, parameters);
 
 
-    public async Task<DataTable> Support_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null)
-    => await ExecuteQueryAsync(context, "Support_Connection", query, parameters);
-
-
     public async Task<DataTable> SupportApp_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null)
         => await ExecuteQueryAsync(context, "SupportApp_Connection", query, parameters);
 
@@ -44,20 +40,19 @@ public class DbService : IDbService
     public async Task<DataTable> Auth_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null)
         => await ExecuteQueryAsync(context, "KowsarIdentityDb", query, parameters);
 
-    public async Task<DataTable> Support_ImageExecQuery(HttpContext? context,string query, Dictionary<string, object>? parameters = null)
-    => await ExecuteQueryAsync(context, "Support_ImageConnection", query, parameters);
-
     public async Task<DataTable> Image_ExecQuery(HttpContext? context, string query, Dictionary<string, object>? parameters = null)
 => await ExecuteQueryAsync(context, "ImageConnection", query, parameters);
 
     public async Task<DataTable> Report_ExecQuery(HttpContext? context, string query, Dictionary<string, object>? parameters = null)
 => await ExecuteQueryAsync(context, "ReportConnection", query, parameters);
-
+    public async Task<DataTable> Event_ExecQuery(HttpContext? context, string query, Dictionary<string, object>? parameters = null)
+=> await ExecuteQueryAsync(context, "EventConnection", query, parameters);
 
     
 
 
-
+    public async Task<DataTable> Wedding_ExecQuery(HttpContext context, string query, Dictionary<string, object>? parameters = null)
+        => await ExecuteQueryAsync(context, "Wedding_Connection", query, parameters);
 
     public async Task<DataTable> ExecSearchQueryAsync(HttpContext context, string query, Dictionary<string, object>? parameters = null)
         => await ExecuteQueryAsync(context, "Search_Connection", query, parameters);
@@ -149,11 +144,11 @@ public class DbService : IDbService
         var agent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? string.Empty;
         var PersonInfoRef = context.Request.Headers["PIC"].FirstOrDefault() ?? string.Empty;
 
-        var UserName = WebUtility.UrlDecode(context.Request.Headers["UserName"].FirstOrDefault()) ?? string.Empty;
+        var UserName = WebUtility.UrlDecode(context.Request.Headers["UN"].FirstOrDefault()) ?? string.Empty;
 
 
 
-        var SessionId = context.Request.Headers["SessionId"].FirstOrDefault() ?? string.Empty;
+        var SessionId = context.Request.Headers["SI"].FirstOrDefault() ?? string.Empty;
 
         if (SessionId.Length > 0)
         {
@@ -214,10 +209,10 @@ public class DbService : IDbService
     private async Task XUserSession_Insert(HttpContext context, string query, Dictionary<string, object>? parameters = null)
     {
 
-        var UserName = WebUtility.UrlDecode(context.Request.Headers["UserName"].FirstOrDefault()) ?? string.Empty;
+        var UserName = WebUtility.UrlDecode(context.Request.Headers["UN"].FirstOrDefault()) ?? string.Empty;
         var IpAddress_referer = context.Request.Headers["Referer"].FirstOrDefault() ?? string.Empty;
         var agent = context.Request.Headers["User-Agent"].FirstOrDefault() ?? string.Empty;
-        var SessionId = context.Request.Headers["SessionId"].FirstOrDefault() ?? string.Empty;
+        var SessionId = context.Request.Headers["SI"].FirstOrDefault() ?? string.Empty;
 
         query = query.Replace("'", "''");
 
@@ -253,7 +248,7 @@ public class DbService : IDbService
     private async Task XUserSession_Update(HttpContext context, string query, Dictionary<string, object>? parameters = null)
     {
 
-        var SessionId = context.Request.Headers["SessionId"].FirstOrDefault() ?? string.Empty;
+        var SessionId = context.Request.Headers["SI"].FirstOrDefault() ?? string.Empty;
 
 
         var logQuery = $@" exec spWeb_XUserSession_UpdateActivity '{SessionId}'";
@@ -265,6 +260,146 @@ public class DbService : IDbService
         using var cmd = new SqlCommand(logQuery, con);
         await con.OpenAsync();
         await cmd.ExecuteNonQueryAsync();
+    }
+
+
+
+
+
+    public class RowLevelSecurityDto
+    {
+        public bool Active { get; set; } = false;
+        public string WhereCondition { get; set; } = "";
+    }
+
+    public async Task<string> GetRowLevelSecurityStringAsync(
+    HttpContext context,
+    string className
+)
+    {
+        int userIdRef = Convert.ToInt32(WebUtility.UrlDecode(context.Request.Headers["UI"].FirstOrDefault()) ?? "0");
+
+        string query = $@"
+    SELECT TOP 1
+        Active,
+        SecurityCondition
+    FROM RowLevelSecurity
+    WHERE UserIdRef = {userIdRef}
+      AND ClassName = CONVERT(VARBINARY(MAX), N'{className}')
+      AND ISNULL(Active, 0) = 1
+    ORDER BY CreationDate DESC
+";
+
+        DataTable dt = await Kowsar_ExecQuery(context, query);
+
+        if (dt.Rows.Count == 0)
+            return "";
+
+        string xml = dt.Rows[0]["SecurityCondition"]?.ToString() ?? "";
+
+        if (string.IsNullOrWhiteSpace(xml))
+            return "";
+
+        string condition = BuildConditionFromRowLevelXml(xml);
+
+        return string.IsNullOrWhiteSpace(condition) ? "" : condition;
+    }
+
+    public async Task<RowLevelSecurityDto> GetRowLevelSecurityConditionAsync(
+        HttpContext context,
+        string className
+    )
+    {
+        int userIdRef = Convert.ToInt32(WebUtility.UrlDecode(context.Request.Headers["UI"].FirstOrDefault()) ?? "0");
+
+        string query = $@"
+        SELECT TOP 1
+            Active,
+            SecurityCondition
+        FROM RowLevelSecurity
+        WHERE UserIdRef = {userIdRef}
+          AND ClassName = CONVERT(VARBINARY(MAX), N'{className}')
+          AND ISNULL(Active, 0) = 1
+        ORDER BY CreationDate DESC
+    ";
+
+        DataTable dt = await Kowsar_ExecQuery(context, query);
+
+        if (dt.Rows.Count == 0)
+            return new RowLevelSecurityDto();
+
+        string xml =
+            dt.Rows[0]["SecurityCondition"]?.ToString() ?? "";
+
+        if (string.IsNullOrWhiteSpace(xml))
+            return new RowLevelSecurityDto();
+
+        string condition =
+            BuildConditionFromRowLevelXml(xml);
+
+        if (string.IsNullOrWhiteSpace(condition))
+            return new RowLevelSecurityDto();
+
+
+
+        return new RowLevelSecurityDto
+        {
+            Active = true,
+            WhereCondition = condition
+        };
+    }
+
+    private string BuildConditionFromRowLevelXml(string xml)
+    {
+        var doc = System.Xml.Linq.XDocument.Parse(xml);
+
+        List<string> conditions = new();
+
+        foreach (var node in doc.Root.Elements())
+        {
+            string fieldName =
+                node.Element("FieldName")?.Value ?? "";
+
+            string fieldValue =
+                node.Element("FieldValue")?.Value ?? "";
+
+            string fieldType =
+                node.Element("FieldType")?.Value ?? "";
+
+            if (string.IsNullOrWhiteSpace(fieldName))
+                continue;
+
+            if (string.IsNullOrWhiteSpace(fieldValue))
+                continue;
+
+            string cleanValue = string.Join(",",
+                fieldValue
+                    .Replace("@", "")
+                    .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(x => x.Trim())
+                    .Where(x => !string.IsNullOrWhiteSpace(x))
+            );
+
+            if (string.IsNullOrWhiteSpace(cleanValue))
+                continue;
+
+            if (fieldType.Equals("Integer", StringComparison.OrdinalIgnoreCase))
+            {
+                conditions.Add($"And ({fieldName} in ({cleanValue}))");
+            }
+            else
+            {
+                string quotedValues = string.Join(",",
+                    cleanValue
+                        .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                        .Select(x => $"'{x.Trim().Replace("'", "''")}'")
+                );
+
+                conditions.Add($"And ({fieldName} in ({quotedValues}))");
+            }
+        }
+
+        return string.Join(" ", conditions);
     }
 
 

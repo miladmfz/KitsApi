@@ -20,25 +20,49 @@
 
         public string UName { get; set; } = "";
         public string UPass { get; set; } = "";
-
+        public string UNewPass { get; set; } = "";
+        public int DepartmentCode { get; set; }
     }
 
+        public class IsUserDto
+        {
 
-    public class PersonInfoDto
+            public string UName { get; set; } = "";
+            public string UPass { get; set; } = "";
+            public string UNewPass { get; set; } = "";
+
+        }
+
+        public class LoginResultDto
     {
+        public int UserId { get; set; }
 
-        public string PersonInfoCode { get; set; } = "";
-        public string PhFirstName { get; set; } = "";
-        public string PhLastName { get; set; } = "";
-        public string PhCompanyName { get; set; } = "";
-        public string PhAddress1 { get; set; } = "";
-        public string PhTel1 { get; set; } = "";
-        public string PhMobile1 { get; set; } = "";
-        public string PhEmail { get; set; } = "";
-        public string CONTACTS { get; set; } = "";
-        public string NumberPhone { get; set; } = "";
+        public int OldUserId { get; set; }
+
+        public int CentralRef { get; set; }
+
+        public string UserName { get; set; }
+
+        public string DisplayName { get; set; }
+        public string Manager { get; set; }
+        public string Delegacy { get; set; }
 
 
+        public int DepartmentCode { get; set; }
+
+        public string DepartmentName { get; set; }
+
+        public decimal UserMaxDiscount { get; set; }
+
+        public int UserIdRef { get; set; }
+        public string ActiveDate { get; set; }
+        public string Name { get; set; }
+
+        public string CentralName { get; set; }
+        public string SessionId { get; set; }
     }
+
+
+
 }
 

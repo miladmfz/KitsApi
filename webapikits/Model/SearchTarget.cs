@@ -16,6 +16,7 @@ namespace webapikits.Model
         public string? ObjectRef { get; set; } = "0";
         public string? ClassName { get; set; } = "";
         public string? BrokerRef { get; set; } = "";
+        public string? Active{ get; set; } = "";
 
 
     }
@@ -32,6 +33,8 @@ namespace webapikits.Model
         public string? StartTime { get; set; }
         public string? EndTime { get; set; }
         public string? Flag { get; set; }
+        public string? OwnerPersonInfoRef { get; set; }
+
     }
 
 

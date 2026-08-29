@@ -4,6 +4,7 @@
     {
 
         public string JsonData { get; set; } = "";
-
+        public string TableName { get; set; } = "";
+        
     }
 }

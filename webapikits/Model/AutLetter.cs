@@ -30,6 +30,7 @@
         public string OwnerCentral { get; set; } = "";
         public string CreatorCentral { get; set; } = "";
         public string OwnerPersonInfoRef { get; set; } = "";
+        public string IsPrivate { get; set; } = "";
 
     }
 
